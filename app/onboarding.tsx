@@ -119,6 +119,7 @@ export default function OnboardingScreen() {
       );
     } finally {
       setIsSubmitting(false);
+      await AsyncStorage.setItem('onboarding_complete', 'true');
       router.replace('/home');
     }
   };
