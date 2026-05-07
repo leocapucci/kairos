@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BottomNav from '../components/BottomNav';
 import ReactionButton from '../components/ui/ReactionButton';
-import { colors } from '../theme';
+import { colors, radius, spacing } from '../theme';
 import { postInteraction } from '../services/api';
 import { shareKairos } from '../services/share';
 
@@ -91,7 +91,7 @@ export default function InteractionScreen() {
       const data = (res.data ?? {}) as InteractionResponse;
       setReplyText(data.response ?? data.message ?? data.text ?? 'Sem resposta no momento.');
       replyOpacity.setValue(0);
-      Animated.timing(replyOpacity, { toValue: 1, duration: 320, useNativeDriver: true }).start();
+      Animated.timing(replyOpacity, { toValue: 1, duration: 400, useNativeDriver: false }).start();
     } catch {
       setErrorMessage('Não foi possível enviar sua reação agora.');
     } finally {
@@ -111,7 +111,7 @@ export default function InteractionScreen() {
       const res = await postInteraction('devocional', message);
       const data = (res.data ?? {}) as InteractionResponse;
       setDeepReply(stripMarkdown(data.response ?? data.message ?? data.text ?? 'Sem resposta.'));
-      Animated.timing(deepOpacity, { toValue: 1, duration: 320, useNativeDriver: true }).start();
+      Animated.timing(deepOpacity, { toValue: 1, duration: 400, useNativeDriver: false }).start();
     } catch {
       setDeepError('Não foi possível carregar a resposta.');
     } finally {
@@ -143,6 +143,7 @@ export default function InteractionScreen() {
         {!replyText ? (
           <>
             <Text style={styles.cardText}>{cardText}</Text>
+
             <View style={styles.reactionsContainer}>
               {REACTION_BUTTONS.map((btn) => (
                 <ReactionButton
@@ -155,6 +156,7 @@ export default function InteractionScreen() {
                 />
               ))}
             </View>
+
             {isSubmitting && (
               <View style={styles.loader}>
                 <ActivityIndicator color={colors.accent} />
@@ -231,62 +233,156 @@ export default function InteractionScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0b0b0b' },
-  container: { flex: 1, padding: 20 },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, height: 40 },
-  backButton: {
-    width: 32, height: 32, borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    alignItems: 'center', justifyContent: 'center', marginRight: 12,
+  safe: {
+    flex: 1,
+    backgroundColor: '#0a0a0a',
   },
-  backIcon: { color: colors.white, fontSize: 20, lineHeight: 20, marginTop: -2 },
-  typeTag: { color: colors.accent, fontSize: 10, fontWeight: '500', letterSpacing: 1.2, textTransform: 'uppercase' },
+  container: {
+    flex: 1,
+    paddingHorizontal: 28,
+    paddingTop: spacing.md,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+    height: 44,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.sm,
+  },
+  backIcon: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 28,
+    lineHeight: 28,
+  },
+  typeTag: {
+    color: colors.accent,
+    fontSize: 9,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 2.5,
+  },
+
   cardText: {
     color: colors.white,
-    fontSize: 32,
-    fontWeight: '700',
+    fontSize: 40,
     fontFamily: 'Inter_700Bold',
+    marginTop: 64,
+    lineHeight: 52,
+    letterSpacing: -0.8,
+  },
+  reactionsContainer: {
+    marginTop: 64,
+  },
+  loader: {
+    paddingVertical: spacing.lg,
+    alignItems: 'center',
+  },
+  errorText: {
+    color: colors.accent,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
     textAlign: 'center',
-    marginTop: 40,
-    lineHeight: 40,
+    marginTop: spacing.xs,
   },
-  reactionsContainer: { marginTop: 40 },
-  loader: { paddingVertical: 12, alignItems: 'center' },
-  errorText: { color: '#E07B5A', fontSize: 13, textAlign: 'center', marginTop: 8 },
-  replyContainer: { flex: 1 },
-  replyScroll: { flex: 1 },
-  replyScrollContent: { flexGrow: 1, paddingBottom: 40, gap: 12 },
-  replyText: { color: colors.white, fontSize: 16, lineHeight: 26, fontFamily: 'Inter_400Regular' },
-  shareBtn: { alignSelf: 'center', paddingVertical: 8, paddingHorizontal: 16 },
-  shareBtnText: { color: colors.gray, fontSize: 13 },
-  deepBtns: { gap: 8 },
+
+  replyContainer: {
+    flex: 1,
+  },
+  replyScroll: {
+    flex: 1,
+  },
+  replyScrollContent: {
+    flexGrow: 1,
+    paddingBottom: spacing.xl,
+    gap: spacing.md,
+  },
+  replyText: {
+    color: colors.white,
+    fontSize: 22,
+    lineHeight: 36,
+    fontFamily: 'Inter_400Regular',
+    letterSpacing: 0.05,
+    marginTop: 48,
+  },
+  shareBtn: {
+    alignSelf: 'flex-start',
+    paddingVertical: spacing.xs,
+  },
+  shareBtnText: {
+    color: 'rgba(255,255,255,0.28)',
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+  },
+  deepBtns: {
+    marginTop: spacing.xs,
+  },
   deepBtn: {
-    backgroundColor: 'rgba(255,255,255,0.07)',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingVertical: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
   },
-  deepBtnText: { color: colors.white, fontSize: 14, fontFamily: 'Inter_400Regular' },
+  deepBtnText: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+  },
   deepReplyText: {
-    color: colors.white, fontSize: 15, lineHeight: 24, fontFamily: 'Inter_400Regular',
-    borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', paddingTop: 12,
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 18,
+    lineHeight: 30,
+    fontFamily: 'Inter_400Regular',
+    paddingTop: spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
   },
-  followUpRow: { flexDirection: 'row', gap: 8 },
+  followUpRow: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
   followUpBtn: {
-    flex: 1, borderRadius: 10, borderWidth: 1,
-    borderColor: 'rgba(200,76,76,0.45)', backgroundColor: 'rgba(200,76,76,0.15)',
-    paddingVertical: 12, alignItems: 'center',
+    flex: 1,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(200,76,76,0.3)',
+    backgroundColor: 'rgba(200,76,76,0.06)',
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
   },
-  followUpText: { color: colors.accent, fontSize: 13, fontWeight: '600' },
-  followUpIgnore: { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.08)' },
-  followUpIgnoreText: { color: colors.gray },
-  followUpFeedback: { color: colors.accent, fontSize: 14, textAlign: 'center', fontWeight: '600' },
+  followUpText: {
+    color: colors.accent,
+    fontSize: 13,
+    fontFamily: 'Inter_700Bold',
+  },
+  followUpIgnore: {
+    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+  },
+  followUpIgnoreText: {
+    color: 'rgba(255,255,255,0.35)',
+  },
+  followUpFeedback: {
+    color: colors.accent,
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+  },
   resetBtn: {
-    borderRadius: 10, borderWidth: 1,
-    borderColor: 'rgba(200,76,76,0.45)', backgroundColor: 'rgba(200,76,76,0.15)',
-    paddingVertical: 12, alignItems: 'center',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    marginTop: spacing.xs,
   },
-  resetBtnText: { color: colors.accent, fontSize: 14, fontWeight: '600' },
+  resetBtnText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    letterSpacing: 0.5,
+  },
 });

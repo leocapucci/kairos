@@ -82,19 +82,23 @@ export default function VerseExperienceScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
+
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Text style={styles.backIcon}>‹</Text>
           </Pressable>
-          <Text style={styles.headerTitle}>Versículo</Text>
+          <Text style={styles.headerLabel}>VERSÍCULO</Text>
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Reference + verse */}
-          <Text style={styles.reference}>{verseRef}</Text>
-          <Text style={styles.verseText}>{verseText}</Text>
 
-          {/* 3 AI sections */}
+          {/* Verse — sacred focal point */}
+          <View style={styles.verseBlock}>
+            <Text style={styles.reference}>{verseRef}</Text>
+            <Text style={styles.verseText}>{verseText}</Text>
+          </View>
+
+          {/* AI sections */}
           {verseRef && verseText ? (
             <>
               <Section title="Meditação" versReference={verseRef} versText={verseText} type="meditacao" />
@@ -103,7 +107,7 @@ export default function VerseExperienceScreen() {
             </>
           ) : null}
 
-          {/* 4 ReactionButtons */}
+          {/* Reactions */}
           <View style={styles.reactionsContainer}>
             {REACTION_BUTTONS.map((btn) => (
               <ReactionButton
@@ -130,6 +134,7 @@ export default function VerseExperienceScreen() {
               )}
             </View>
           ) : null}
+
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -137,22 +142,100 @@ export default function VerseExperienceScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  container: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, paddingHorizontal: 20, position: 'relative' },
-  backButton: { position: 'absolute', left: 20, width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
-  backIcon: { color: colors.text, fontSize: 24, lineHeight: 24 },
-  headerTitle: { fontSize: 16, fontFamily: 'Inter_700Bold', color: colors.text },
-  content: { paddingHorizontal: spacing.md, paddingBottom: 40 },
+  safe: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.softGray,
+  },
+  backButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.sm,
+  },
+  backIcon: {
+    color: colors.text,
+    fontSize: 26,
+    lineHeight: 26,
+  },
+  headerLabel: {
+    fontSize: 9,
+    fontFamily: 'Inter_700Bold',
+    color: colors.gray,
+    letterSpacing: 2.5,
+  },
 
-  reference: { color: colors.gray, fontSize: 13, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 8 },
-  verseText: { fontSize: 22, lineHeight: 32, fontFamily: 'Inter_700Bold', color: colors.text, textAlign: 'center', marginVertical: 20 },
+  content: {
+    paddingHorizontal: 20,
+    paddingBottom: 80,
+  },
 
-  reactionsContainer: { marginTop: spacing.md },
+  verseBlock: {
+    alignItems: 'center',
+    paddingHorizontal: spacing.xs,
+    marginTop: 56,
+    marginBottom: 72,
+  },
+  reference: {
+    color: colors.gray,
+    fontSize: 10,
+    fontFamily: 'Inter_400Regular',
+    letterSpacing: 3,
+    textAlign: 'center',
+    marginBottom: 32,
+    textTransform: 'uppercase',
+  },
+  verseText: {
+    fontSize: 36,
+    lineHeight: 52,
+    fontFamily: 'Inter_700Bold',
+    color: colors.text,
+    textAlign: 'center',
+    letterSpacing: -0.5,
+  },
 
-  replyBox: { borderRadius: radius.md, backgroundColor: colors.card, padding: spacing.md, marginTop: spacing.md },
-  replyText: { color: colors.white, fontSize: 15, lineHeight: 24, fontFamily: 'Inter_400Regular' },
-  shareBtn: { alignSelf: 'center', paddingVertical: 8, paddingHorizontal: 16, marginTop: 8 },
-  shareBtnText: { color: colors.gray, fontSize: 13 },
-  thankYou: { color: colors.gray, fontSize: 13, textAlign: 'center', marginTop: 8 },
+  reactionsContainer: {
+    marginTop: 56,
+  },
+
+  replyBox: {
+    borderRadius: radius.md,
+    backgroundColor: colors.card,
+    paddingTop: 36,
+    paddingBottom: 32,
+    paddingHorizontal: 28,
+    marginTop: spacing.lg,
+  },
+  replyText: {
+    color: colors.white,
+    fontSize: 18,
+    lineHeight: 30,
+    fontFamily: 'Inter_400Regular',
+  },
+  shareBtn: {
+    alignSelf: 'flex-start',
+    paddingTop: spacing.md,
+  },
+  shareBtnText: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+  },
+  thankYou: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    marginTop: spacing.md,
+  },
 });

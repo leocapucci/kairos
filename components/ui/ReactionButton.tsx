@@ -16,7 +16,7 @@ export default function ReactionButton({ emoji, label, onPress, selected, disabl
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={[styles.button, selected && styles.selected, disabled && !selected && styles.dimmed]}
+      style={[styles.button, disabled && !selected && styles.dimmed]}
     >
       <Text style={styles.emoji}>{emoji}</Text>
       <Text style={[styles.label, selected && styles.labelSelected]}>{label}</Text>
@@ -26,26 +26,25 @@ export default function ReactionButton({ emoji, label, onPress, selected, disabl
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#222',
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    paddingVertical: 22,
+    gap: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.07)',
   },
-  selected: {
-    backgroundColor: 'rgba(200,76,76,0.2)',
-    borderWidth: 1,
-    borderColor: colors.accent,
+  dimmed: { opacity: 0.3 },
+  emoji: {
+    fontSize: 18,
+    width: 24,
+    textAlign: 'center',
   },
-  dimmed: { opacity: 0.45 },
-  emoji: { fontSize: 24, lineHeight: 28 },
   label: {
-    color: colors.white,
+    color: 'rgba(255,255,255,0.68)',
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
     flex: 1,
+    letterSpacing: 0.1,
   },
   labelSelected: {
     color: colors.accent,

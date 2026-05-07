@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 import BottomNav from '../components/BottomNav';
+import VerseCard from '../components/ui/VerseCard';
 import { colors, radius, spacing } from '../theme';
 import { getPlans, searchBible } from '../services/api';
 
@@ -71,6 +72,7 @@ export default function BibleScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+
       <View style={styles.titleBar}>
         <Text style={styles.title}>Bíblia</Text>
       </View>
@@ -90,27 +92,25 @@ export default function BibleScreen() {
         {activeTab === 'Livros' && (
           <>
             {verse && (
-              <Pressable
+              <VerseCard
+                text={verse.text}
+                reference={`${verse.book} ${verse.chapter}:${verse.verse_number}`}
                 onPress={() =>
                   router.push(`/verse-experience?book=${encodeURIComponent(verse.book)}&chapter=${verse.chapter}&verse=${verse.verse_number}&text=${encodeURIComponent(verse.text)}`)
                 }
-                style={styles.verseCard}
-              >
-                <Text style={styles.verseLabel}>VERSÍCULO DO DIA</Text>
-                <Text style={styles.verseText}>{verse.text}</Text>
-                <Text style={styles.verseRef}>{verse.book} {verse.chapter}:{verse.verse_number}</Text>
-              </Pressable>
+              />
             )}
 
             <Pressable onPress={() => router.push('/books')} style={styles.exploreBtn}>
-              <Text style={styles.exploreBtnText}>Explorar a Bíblia completa</Text>
+              <Text style={styles.exploreBtnText}>EXPLORAR A BÍBLIA COMPLETA</Text>
+              <Text style={styles.exploreBtnArrow}>→</Text>
             </Pressable>
 
             <View style={styles.searchRow}>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Ex: João 3:16, Salmos 23..."
-                placeholderTextColor={colors.gray}
+                placeholder="Buscar versículo..."
+                placeholderTextColor="rgba(0,0,0,0.28)"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 onSubmitEditing={handleSearch}
@@ -121,7 +121,7 @@ export default function BibleScreen() {
               </Pressable>
             </View>
 
-            {isSearching && <ActivityIndicator color={colors.accent} style={{ paddingVertical: 12 }} />}
+            {isSearching && <ActivityIndicator color={colors.accent} style={styles.loader} />}
             {hasSearched && !isSearching && searchResults.length === 0 && (
               <Text style={styles.emptyText}>Nenhum versículo encontrado.</Text>
             )}
@@ -144,7 +144,7 @@ export default function BibleScreen() {
         {activeTab === 'Planos' && (
           <>
             {isLoadingPlans ? (
-              <ActivityIndicator color={colors.accent} style={{ paddingVertical: 24 }} />
+              <ActivityIndicator color={colors.accent} style={styles.loader} />
             ) : (
               plans.map((plan) => (
                 <View key={plan.id} style={styles.planCard}>
@@ -180,45 +180,211 @@ export default function BibleScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  titleBar: { paddingHorizontal: spacing.md, paddingTop: spacing.md, paddingBottom: 4 },
-  title: { fontSize: 22, fontWeight: '700', fontFamily: 'Inter_700Bold', color: colors.text, marginBottom: 20 },
-  tabBar: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#E6E2DD', paddingHorizontal: spacing.md },
-  tabItem: { flex: 1, alignItems: 'center', paddingVertical: 12, position: 'relative' },
-  tabText: { fontSize: 14, fontFamily: 'Inter_400Regular', color: colors.gray },
-  tabTextActive: { color: colors.accent, fontFamily: 'Inter_700Bold' },
-  tabUnderline: { position: 'absolute', bottom: -1, left: '20%', right: '20%', height: 2, backgroundColor: colors.accent, borderRadius: 1 },
+  safe: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  titleBar: {
+    paddingHorizontal: 20,
+    paddingTop: 32,
+    paddingBottom: 4,
+  },
+  title: {
+    fontSize: 48,
+    fontFamily: 'Inter_700Bold',
+    color: colors.text,
+    letterSpacing: -1.5,
+    lineHeight: 56,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.softGray,
+    paddingHorizontal: 20,
+    marginTop: 8,
+  },
+  tabItem: {
+    marginRight: 28,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    position: 'relative',
+  },
+  tabText: {
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    color: colors.gray,
+    letterSpacing: 0.2,
+  },
+  tabTextActive: {
+    color: colors.text,
+    fontFamily: 'Inter_700Bold',
+  },
+  tabUnderline: {
+    position: 'absolute',
+    bottom: -1,
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: colors.text,
+    borderRadius: 1,
+  },
   scroll: { flex: 1 },
-  content: { padding: spacing.md, paddingBottom: 24 },
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 28,
+    paddingBottom: 64,
+  },
+  loader: {
+    paddingVertical: spacing.xl,
+  },
 
-  verseCard: { borderRadius: radius.md, backgroundColor: colors.white, borderWidth: 1, borderColor: '#E6E2DD', padding: spacing.md, marginBottom: spacing.sm },
-  verseLabel: { color: colors.gray, fontSize: 10, fontFamily: 'Inter_700Bold', letterSpacing: 1.2, marginBottom: 8 },
-  verseText: { color: colors.text, fontSize: 16, lineHeight: 24, fontFamily: 'Inter_400Regular', marginBottom: 10 },
-  verseRef: { color: colors.accent, fontSize: 12, fontFamily: 'Inter_700Bold' },
+  exploreBtn: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 20,
+    marginBottom: 28,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.softGray,
+  },
+  exploreBtnText: {
+    color: colors.text,
+    fontSize: 11,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1.2,
+  },
+  exploreBtnArrow: {
+    color: colors.gray,
+    fontSize: 16,
+  },
 
-  exploreBtn: { borderRadius: radius.md, borderWidth: 1, borderColor: colors.accent, paddingVertical: 14, alignItems: 'center', marginBottom: spacing.sm },
-  exploreBtnText: { color: colors.accent, fontSize: 15, fontFamily: 'Inter_700Bold' },
+  searchRow: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    marginBottom: spacing.md,
+  },
+  searchInput: {
+    flex: 1,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.softGray,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    color: colors.text,
+    fontSize: 14,
+    backgroundColor: colors.white,
+    fontFamily: 'Inter_400Regular',
+  },
+  searchBtn: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: 'rgba(200,76,76,0.05)',
+    justifyContent: 'center',
+  },
+  searchBtnText: {
+    color: colors.accent,
+    fontSize: 13,
+    fontFamily: 'Inter_700Bold',
+  },
+  emptyText: {
+    color: colors.gray,
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
+    paddingVertical: spacing.lg,
+  },
+  searchResult: {
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.softGray,
+  },
+  searchResultRef: {
+    color: colors.accent,
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1.2,
+    marginBottom: spacing.xs,
+  },
+  searchResultText: {
+    color: colors.text,
+    fontSize: 15,
+    lineHeight: 24,
+    fontFamily: 'Inter_400Regular',
+  },
 
-  searchRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
-  searchInput: { flex: 1, borderRadius: 10, borderWidth: 1, borderColor: '#E6E2DD', paddingHorizontal: 12, paddingVertical: 10, color: colors.text, fontSize: 14, backgroundColor: colors.white, fontFamily: 'Inter_400Regular' },
-  searchBtn: { borderRadius: 10, borderWidth: 1, borderColor: colors.accent, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: 'rgba(200,76,76,0.08)', justifyContent: 'center' },
-  searchBtnText: { color: colors.accent, fontSize: 14, fontFamily: 'Inter_700Bold' },
-  emptyText: { color: colors.gray, fontSize: 14, textAlign: 'center', paddingVertical: 12 },
-  searchResult: { borderRadius: 12, backgroundColor: colors.white, borderWidth: 1, borderColor: '#E6E2DD', paddingVertical: 12, paddingHorizontal: 14, marginBottom: 8 },
-  searchResultRef: { color: colors.accent, fontSize: 13, fontFamily: 'Inter_700Bold', marginBottom: 4 },
-  searchResultText: { color: colors.text, fontSize: 14, lineHeight: 20, fontFamily: 'Inter_400Regular' },
+  planCard: {
+    borderRadius: radius.md,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.softGray,
+    paddingTop: 36,
+    paddingBottom: 32,
+    paddingHorizontal: 28,
+    marginBottom: spacing.sm,
+  },
+  planMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  planTheme: {
+    color: colors.accent,
+    fontSize: 9,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 2.5,
+  },
+  planDays: {
+    color: colors.gray,
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+  },
+  planTitle: {
+    color: colors.text,
+    fontSize: 22,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: -0.4,
+    marginBottom: spacing.xs,
+  },
+  planDesc: {
+    color: '#6B6B6B',
+    fontSize: 15,
+    lineHeight: 24,
+    fontFamily: 'Inter_400Regular',
+    marginBottom: spacing.lg,
+  },
+  planBtn: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.softGray,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+  },
+  planBtnText: {
+    color: colors.text,
+    fontSize: 13,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.3,
+  },
 
-  planCard: { borderRadius: radius.md, backgroundColor: colors.white, borderWidth: 1, borderColor: '#E6E2DD', padding: spacing.md, marginBottom: spacing.sm, gap: 6 },
-  planMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  planTheme: { color: colors.accent, fontSize: 10, fontFamily: 'Inter_700Bold', letterSpacing: 1 },
-  planDays: { color: colors.gray, fontSize: 12, fontFamily: 'Inter_400Regular' },
-  planTitle: { color: colors.text, fontSize: 16, fontFamily: 'Inter_700Bold' },
-  planDesc: { color: colors.gray, fontSize: 13, lineHeight: 20, fontFamily: 'Inter_400Regular' },
-  planBtn: { borderRadius: 10, borderWidth: 1, borderColor: 'rgba(200,76,76,0.4)', paddingVertical: 10, alignItems: 'center', backgroundColor: 'rgba(200,76,76,0.07)', marginTop: 4 },
-  planBtnText: { color: colors.accent, fontSize: 14, fontFamily: 'Inter_700Bold' },
-
-  emptyState: { alignItems: 'center', justifyContent: 'center', paddingTop: 60, gap: 10 },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: spacing.xl * 2,
+    gap: spacing.xs,
+  },
   emptyStateIcon: { fontSize: 40 },
-  emptyStateTitle: { color: colors.text, fontSize: 16, fontFamily: 'Inter_700Bold' },
-  emptyStateDesc: { color: colors.gray, fontSize: 13, fontFamily: 'Inter_400Regular' },
+  emptyStateTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontFamily: 'Inter_700Bold',
+  },
+  emptyStateDesc: {
+    color: colors.gray,
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+  },
 });

@@ -26,7 +26,7 @@ export default function SplashScreen() {
             toValue: 0,
             duration: FADE_OUT_DURATION_MS,
             easing: Easing.out(Easing.quad),
-            useNativeDriver: true,
+            useNativeDriver: false,
           }).start(() => {
             if (!isMounted) return;
             router.replace(deviceId ? '/home' : '/onboarding');

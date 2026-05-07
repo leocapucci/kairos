@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { getProfile } from '../services/api';
-import { colors, radius, spacing } from '../theme';
+import { colors, spacing } from '../theme';
 
 function streakMessage(streak: number): string {
   if (streak === 0) return 'Comece hoje.';
@@ -38,20 +38,18 @@ export default function StreakBar() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#EFEBDE',
-    borderRadius: radius.md,
-    padding: spacing.sm,
-    marginTop: 8,
-    marginBottom: spacing.sm,
+    paddingVertical: spacing.md,
+    paddingHorizontal: 0,
   },
   text: {
-    color: '#6B6B6B',
-    fontSize: 13,
+    color: colors.gray,
+    fontSize: 12,
     lineHeight: 18,
     fontFamily: 'Inter_400Regular',
   },
   count: {
     color: colors.text,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Inter_700Bold',
+    fontSize: 12,
   },
 });

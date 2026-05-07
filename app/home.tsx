@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, ScrollView, StyleSheet, Text } from 'react-native';
+import { Animated, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BottomNav from '../components/BottomNav';
@@ -8,7 +8,7 @@ import Header from '../components/Header';
 import StreakBar from '../components/StreakBar';
 import DarkCard from '../components/ui/DarkCard';
 import PrimaryButton from '../components/ui/PrimaryButton';
-import { colors, spacing } from '../theme';
+import { colors, radius, spacing } from '../theme';
 import { getDaily } from '../services/api';
 
 type CardType = 'conforto' | 'confronto' | 'crescimento';
@@ -51,8 +51,8 @@ export default function HomeScreen() {
   useEffect(() => {
     const anim = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 0.7, duration: 700, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0.3, duration: 700, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.55, duration: 1000, useNativeDriver: false }),
+        Animated.timing(pulse, { toValue: 0.15, duration: 1000, useNativeDriver: false }),
       ])
     );
     if (isLoading) anim.start();
@@ -87,27 +87,55 @@ export default function HomeScreen() {
         onBellPress={() => {}}
       />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <Text style={styles.caption}>Hoje pra você:</Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
+        {/* Hero */}
+        <View style={styles.hero}>
+          <Text style={styles.caption}>Hoje pra você</Text>
+          {headline ? (
+            <Text style={styles.headline}>{headline}</Text>
+          ) : null}
+        </View>
 
-        {headline ? <Text style={styles.headline}>{headline}</Text> : null}
-
+        {/* Cards */}
         {isLoading ? (
-          [0, 1, 2].map((i) => (
-            <Animated.View key={i} style={[styles.skeleton, { opacity: pulse }]} />
-          ))
+          <View style={styles.skeletonGroup}>
+            <Animated.View style={[styles.skeletonHero, { opacity: pulse }]} />
+            <View style={styles.skeletonRow}>
+              <Animated.View style={[styles.skeletonSecondary, { opacity: pulse }]} />
+              <Animated.View style={[styles.skeletonSecondary, { opacity: pulse }]} />
+            </View>
+          </View>
         ) : (
           <>
-            {cards.map((card) => (
+            <View style={styles.cardsGroup}>
               <DarkCard
-                key={card.type}
-                text={card.text}
-                label={LABELS[card.type]}
-                onPress={() => openCard(card.type, card.text)}
+                key={cards[0].type}
+                text={cards[0].text}
+                label={LABELS[cards[0].type]}
+                onPress={() => openCard(cards[0].type, cards[0].text)}
+                hero
               />
-            ))}
+              {cards.slice(1).map((card) => (
+                <DarkCard
+                  key={card.type}
+                  text={card.text}
+                  label={LABELS[card.type]}
+                  onPress={() => openCard(card.type, card.text)}
+                />
+              ))}
+            </View>
+
             <StreakBar />
-            <PrimaryButton title="Abrir Bíblia" onPress={() => router.push('/bible')} />
+
+            <View style={styles.ctaWrapper}>
+              <PrimaryButton
+                title="Abrir Bíblia"
+                onPress={() => router.push('/bible')}
+              />
+            </View>
           </>
         )}
       </ScrollView>
@@ -118,27 +146,59 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md, paddingBottom: 24 },
+  safe: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 28,
+    paddingBottom: 64,
+  },
+
+  hero: {
+    marginBottom: 56,
+  },
   caption: {
     color: colors.gray,
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: 'Inter_400Regular',
+    letterSpacing: 2,
     marginBottom: spacing.sm,
-    letterSpacing: 0.3,
+    textTransform: 'uppercase',
   },
   headline: {
     color: colors.text,
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 44,
     fontFamily: 'Inter_700Bold',
-    marginBottom: spacing.md,
-    lineHeight: 34,
+    lineHeight: 52,
+    letterSpacing: -1,
   },
-  skeleton: {
-    backgroundColor: '#E6E2DD',
-    borderRadius: 16,
-    height: 160,
-    marginBottom: 12,
+
+  cardsGroup: {
+    marginBottom: 4,
+  },
+  skeletonGroup: {
+    gap: 8,
+  },
+  skeletonHero: {
+    backgroundColor: colors.softGray,
+    borderRadius: radius.md,
+    height: 200,
+    marginBottom: 8,
+  },
+  skeletonRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  skeletonSecondary: {
+    flex: 1,
+    backgroundColor: colors.softGray,
+    borderRadius: radius.md,
+    height: 140,
+  },
+
+  ctaWrapper: {
+    marginTop: 52,
   },
 });

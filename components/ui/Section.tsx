@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { postInteraction } from '../../services/api';
-import { colors } from '../../theme';
+import { colors, spacing } from '../../theme';
 
 export type SectionType = 'meditacao' | 'confronto' | 'oracao';
 
@@ -49,7 +49,7 @@ export default function Section({ title, versReference, versText, type }: Sectio
     <View style={styles.container}>
       <Pressable onPress={handleToggle} style={styles.header}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.chevron}>{isOpen ? '▼' : '▶'}</Text>
+        <Text style={styles.toggle}>{isOpen ? '−' : '+'}</Text>
       </Pressable>
       {isOpen && (
         <View style={styles.body}>
@@ -65,26 +65,38 @@ export default function Section({ title, versReference, versText, type }: Sectio
 }
 
 const styles = StyleSheet.create({
-  container: { marginTop: 20 },
+  container: {
+    marginTop: 40,
+    paddingTop: 28,
+    borderTopWidth: 1,
+    borderTopColor: colors.softGray,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingBottom: spacing.sm,
   },
   title: {
     color: colors.text,
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 20,
     fontFamily: 'Inter_700Bold',
-    marginBottom: 6,
+    letterSpacing: -0.3,
   },
-  chevron: { color: colors.gray, fontSize: 12 },
-  body: { paddingTop: 4, paddingBottom: 12 },
-  content: {
+  toggle: {
     color: colors.gray,
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 20,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 24,
+  },
+  body: {
+    paddingTop: spacing.md,
+    paddingBottom: spacing.lg,
+  },
+  content: {
+    color: '#6B6B6B',
+    fontSize: 17,
+    lineHeight: 30,
     fontFamily: 'Inter_400Regular',
   },
 });

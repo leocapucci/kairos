@@ -8,7 +8,10 @@
       "Bash(npx vercel *)",
       "PowerShell(Get-ChildItem C:\\\\Users\\\\SAMSUNG\\\\kairos-backend | Where-Object { $_.Name -ne 'node_modules' } | Select-Object Name)",
       "Bash(node *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(git remote *)",
+      "Bash(git fetch *)",
+      "Bash(git pack-refs *)"
     ]
   }
 }

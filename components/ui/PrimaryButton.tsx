@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 
-import { colors } from '../../theme';
+import { colors, radius } from '../../theme';
 
 type PrimaryButtonProps = {
   title: string;
@@ -29,16 +29,15 @@ export default function PrimaryButton({ title, onPress, loading, disabled }: Pri
 const styles = StyleSheet.create({
   button: {
     backgroundColor: colors.accent,
-    padding: 16,
-    borderRadius: 16,
+    paddingVertical: 22,
+    borderRadius: radius.md,
     alignItems: 'center',
-    marginTop: 10,
   },
   disabled: { opacity: 0.5 },
   text: {
     color: colors.white,
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 14,
     fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.8,
   },
 });
