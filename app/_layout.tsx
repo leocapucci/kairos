@@ -1,12 +1,13 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Inter_400Regular,
   Inter_600SemiBold,
   Inter_700Bold,
   useFonts,
 } from '@expo-google-fonts/inter';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { colors } from '../theme';
 
@@ -16,6 +17,22 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!fontsLoaded) return;
+    AsyncStorage.getItem('onboarding_complete')
+      .then((val) => {
+        if (val) {
+          router.replace('/home');
+        } else {
+          router.replace('/splash-screen');
+        }
+      })
+      .catch(() => {
+        router.replace('/splash-screen');
+      });
+  }, [fontsLoaded, router]);
 
   if (!fontsLoaded) return null;
 
