@@ -124,6 +124,7 @@ export default function VerseExperienceScreen() {
           {/* AI reply */}
           {replyText ? (
             <View style={styles.replyBox}>
+              <Text style={styles.replyLabel}>KAIROS</Text>
               <Text style={styles.replyText}>{replyText}</Text>
               {!feedbackSent ? (
                 <Pressable onPress={() => { setFeedbackSent(true); shareKairos(replyText); }} style={styles.shareBtn}>
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: colors.softGray,
+    borderBottomColor: colors.borderSoft,
   },
   backButton: {
     width: 32,
@@ -165,14 +166,14 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
   },
   backIcon: {
-    color: colors.text,
+    color: colors.blackSoft,
     fontSize: 26,
     lineHeight: 26,
   },
   headerLabel: {
     fontSize: 9,
     fontFamily: 'Inter_700Bold',
-    color: colors.gray,
+    color: colors.grayOrganic,
     letterSpacing: 2.5,
   },
 
@@ -184,43 +185,50 @@ const styles = StyleSheet.create({
   verseBlock: {
     alignItems: 'center',
     paddingHorizontal: spacing.xs,
-    marginTop: 56,
-    marginBottom: 72,
+    marginTop: 52,
+    marginBottom: 64,
   },
   reference: {
-    color: colors.gray,
+    color: colors.grayOrganic,
     fontSize: 10,
     fontFamily: 'Inter_400Regular',
     letterSpacing: 3,
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 28,
     textTransform: 'uppercase',
   },
   verseText: {
-    fontSize: 36,
-    lineHeight: 52,
+    fontSize: 32,
+    lineHeight: 48,
     fontFamily: 'Inter_700Bold',
-    color: colors.text,
+    color: colors.blackSoft,
     textAlign: 'center',
     letterSpacing: -0.5,
   },
 
   reactionsContainer: {
-    marginTop: 56,
+    marginTop: 48,
   },
 
   replyBox: {
     borderRadius: radius.md,
-    backgroundColor: colors.card,
-    paddingTop: 36,
-    paddingBottom: 32,
-    paddingHorizontal: 28,
+    backgroundColor: colors.beige,
+    paddingTop: 32,
+    paddingBottom: 28,
+    paddingHorizontal: 24,
     marginTop: spacing.lg,
   },
+  replyLabel: {
+    color: colors.sage,
+    fontSize: 9,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 2.5,
+    marginBottom: 16,
+  },
   replyText: {
-    color: colors.white,
-    fontSize: 18,
-    lineHeight: 30,
+    color: colors.blackSoft,
+    fontSize: 17,
+    lineHeight: 28,
     fontFamily: 'Inter_400Regular',
   },
   shareBtn: {
@@ -228,12 +236,12 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
   },
   shareBtnText: {
-    color: 'rgba(255,255,255,0.3)',
+    color: colors.grayOrganic,
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
   },
   thankYou: {
-    color: 'rgba(255,255,255,0.3)',
+    color: colors.grayOrganic,
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
     marginTop: spacing.md,

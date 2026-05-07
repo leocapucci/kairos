@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { getProfile } from '../services/api';
-import { colors, spacing } from '../theme';
+import { colors, radius, spacing } from '../theme';
 
 function streakMessage(streak: number): string {
   if (streak === 0) return 'Comece hoje.';
@@ -26,30 +26,42 @@ export default function StreakBar() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>
-        {'🔥 '}
+      <Text style={styles.fire}>🔥</Text>
+      <View style={styles.textGroup}>
         <Text style={styles.count}>{streak} dias seguidos</Text>
-        {' — '}
-        {streakMessage(streak)}
-      </Text>
+        <Text style={styles.message}>{streakMessage(streak)}</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.beige,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.sm,
   },
-  text: {
-    color: colors.gray,
-    fontSize: 12,
-    lineHeight: 18,
-    fontFamily: 'Inter_400Regular',
+  fire: {
+    fontSize: 18,
+  },
+  textGroup: {
+    flex: 1,
   },
   count: {
-    color: colors.text,
+    color: colors.blackSoft,
     fontFamily: 'Inter_700Bold',
-    fontSize: 12,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  message: {
+    color: colors.grayOrganic,
+    fontSize: 11,
+    lineHeight: 16,
+    fontFamily: 'Inter_400Regular',
   },
 });

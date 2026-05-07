@@ -9,24 +9,28 @@ type ReactionButtonProps = {
   onPress: () => void;
   selected?: boolean;
   disabled?: boolean;
+  dark?: boolean;
 };
 
-export default function ReactionButton({ emoji, label, onPress, selected, disabled }: ReactionButtonProps) {
+export default function ReactionButton({ emoji, label, onPress, selected, disabled, dark }: ReactionButtonProps) {
+  const buttonStyle = dark
+    ? [styles.button, styles.buttonDark, selected && styles.selectedDark, disabled && !selected && styles.dimmed]
+    : [styles.button, styles.buttonLight, selected && styles.selectedLight, disabled && !selected && styles.dimmed];
+
+  const labelStyle = dark
+    ? [styles.label, styles.labelDark, selected && styles.labelSelectedDark]
+    : [styles.label, styles.labelLight, selected && styles.labelSelectedLight];
+
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      style={[styles.button, selected && styles.selected, disabled && !selected && styles.dimmed]}
-    >
+    <Pressable onPress={onPress} disabled={disabled} style={buttonStyle}>
       <Text style={styles.emoji}>{emoji}</Text>
-      <Text style={[styles.label, selected && styles.labelSelected]}>{label}</Text>
+      <Text style={labelStyle}>{label}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.sm,
     borderRadius: radius.md,
@@ -35,21 +39,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     borderWidth: 1,
+  },
+  buttonLight: {
+    backgroundColor: colors.white,
+    borderColor: colors.borderSoft,
+  },
+  buttonDark: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
     borderColor: 'rgba(255,255,255,0.1)',
   },
-  selected: {
+  selectedLight: {
+    backgroundColor: 'rgba(122,158,126,0.08)',
+    borderColor: colors.sage,
+  },
+  selectedDark: {
     backgroundColor: 'rgba(200,76,76,0.14)',
     borderColor: colors.accent,
   },
-  dimmed: { opacity: 0.3 },
+  dimmed: { opacity: 0.35 },
   emoji: { fontSize: 18, lineHeight: 22 },
   label: {
-    color: 'rgba(255,255,255,0.8)',
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
     flex: 1,
   },
-  labelSelected: {
+  labelLight: {
+    color: colors.blackSoft,
+  },
+  labelDark: {
+    color: 'rgba(255,255,255,0.8)',
+  },
+  labelSelectedLight: {
+    color: colors.sageDeep,
+    fontFamily: 'Inter_700Bold',
+  },
+  labelSelectedDark: {
     color: colors.accent,
     fontFamily: 'Inter_700Bold',
   },

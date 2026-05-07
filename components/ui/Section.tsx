@@ -54,7 +54,7 @@ export default function Section({ title, versReference, versText, type }: Sectio
       {isOpen && (
         <View style={styles.body}>
           {isLoading ? (
-            <ActivityIndicator color={colors.accent} />
+            <ActivityIndicator color={colors.sage} />
           ) : (
             <Text style={styles.content}>{content}</Text>
           )}
@@ -66,10 +66,10 @@ export default function Section({ title, versReference, versText, type }: Sectio
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 40,
-    paddingTop: 28,
+    marginTop: 36,
+    paddingTop: 24,
     borderTopWidth: 1,
-    borderTopColor: colors.softGray,
+    borderTopColor: colors.borderSoft,
   },
   header: {
     flexDirection: 'row',
@@ -78,25 +78,25 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
   },
   title: {
-    color: colors.text,
-    fontSize: 20,
+    color: colors.blackSoft,
+    fontSize: 17,
     fontFamily: 'Inter_700Bold',
-    letterSpacing: -0.3,
+    letterSpacing: -0.2,
   },
   toggle: {
-    color: colors.gray,
-    fontSize: 20,
+    color: colors.sage,
+    fontSize: 22,
     fontFamily: 'Inter_400Regular',
-    lineHeight: 24,
+    lineHeight: 26,
   },
   body: {
     paddingTop: spacing.md,
     paddingBottom: spacing.lg,
   },
   content: {
-    color: '#6B6B6B',
-    fontSize: 17,
-    lineHeight: 30,
+    color: colors.grayOrganic,
+    fontSize: 16,
+    lineHeight: 28,
     fontFamily: 'Inter_400Regular',
   },
 });

@@ -153,6 +153,7 @@ export default function InteractionScreen() {
                     onPress={() => handleReaction(btn)}
                     selected={selectedBtn === btn.id}
                     disabled={isSubmitting}
+                    dark
                   />
                 </View>
               ))}
@@ -160,7 +161,7 @@ export default function InteractionScreen() {
 
             {isSubmitting && (
               <View style={styles.loader}>
-                <ActivityIndicator color={colors.accent} />
+                <ActivityIndicator color={colors.redAccent} />
               </View>
             )}
             {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
@@ -190,7 +191,7 @@ export default function InteractionScreen() {
               )}
               {isLoadingDeep && (
                 <View style={styles.loader}>
-                  <ActivityIndicator color={colors.accent} />
+                  <ActivityIndicator color={colors.redAccent} />
                 </View>
               )}
               {deepReply ? (
@@ -236,7 +237,7 @@ export default function InteractionScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#0b0b0b',
+    backgroundColor: '#0F0E0C',
   },
   container: {
     flex: 1,
@@ -252,32 +253,32 @@ const styles = StyleSheet.create({
   backButton: {
     width: 32,
     height: 32,
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     backgroundColor: 'rgba(255,255,255,0.07)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.sm,
   },
   backIcon: {
-    color: 'rgba(255,255,255,0.6)',
+    color: 'rgba(255,255,255,0.5)',
     fontSize: 22,
     lineHeight: 22,
     marginTop: -2,
   },
   typeTag: {
-    color: colors.accent,
+    color: colors.sage,
     fontSize: 10,
     fontFamily: 'Inter_700Bold',
     letterSpacing: 2,
   },
 
   cardText: {
-    color: colors.white,
-    fontSize: 36,
+    color: 'rgba(255,255,255,0.92)',
+    fontSize: 32,
     fontFamily: 'Inter_700Bold',
     textAlign: 'center',
     marginTop: spacing.xl + spacing.lg,
-    lineHeight: 46,
+    lineHeight: 44,
     letterSpacing: -0.5,
   },
   reactionsContainer: {
@@ -295,7 +296,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    color: colors.accent,
+    color: colors.redAccent,
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
     textAlign: 'center',
@@ -314,7 +315,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   replyText: {
-    color: colors.white,
+    color: 'rgba(255,255,255,0.88)',
     fontSize: 20,
     lineHeight: 32,
     fontFamily: 'Inter_400Regular',
@@ -327,7 +328,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   shareBtnText: {
-    color: 'rgba(255,255,255,0.35)',
+    color: 'rgba(255,255,255,0.3)',
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
   },
@@ -337,24 +338,24 @@ const styles = StyleSheet.create({
   },
   deepBtn: {
     backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.07)',
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
   },
   deepBtnText: {
-    color: 'rgba(255,255,255,0.65)',
+    color: 'rgba(255,255,255,0.55)',
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
   },
   deepReplyText: {
-    color: 'rgba(255,255,255,0.88)',
+    color: 'rgba(255,255,255,0.82)',
     fontSize: 17,
     lineHeight: 28,
     fontFamily: 'Inter_400Regular',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.07)',
+    borderTopColor: 'rgba(255,255,255,0.06)',
     paddingTop: spacing.md,
   },
   followUpRow: {
@@ -364,42 +365,42 @@ const styles = StyleSheet.create({
   },
   followUpBtn: {
     flex: 1,
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(200,76,76,0.35)',
-    backgroundColor: 'rgba(200,76,76,0.08)',
+    borderColor: 'rgba(122,158,126,0.3)',
+    backgroundColor: 'rgba(122,158,126,0.08)',
     paddingVertical: spacing.sm,
     alignItems: 'center',
   },
   followUpText: {
-    color: colors.accent,
+    color: colors.sage,
     fontSize: 13,
     fontFamily: 'Inter_700Bold',
   },
   followUpIgnore: {
-    borderColor: 'rgba(255,255,255,0.1)',
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
   },
   followUpIgnoreText: {
-    color: 'rgba(255,255,255,0.4)',
+    color: 'rgba(255,255,255,0.35)',
   },
   followUpFeedback: {
-    color: colors.accent,
+    color: colors.sage,
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
     textAlign: 'center',
   },
   resetBtn: {
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(200,76,76,0.35)',
-    backgroundColor: 'rgba(200,76,76,0.08)',
+    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.04)',
     paddingVertical: spacing.md,
     alignItems: 'center',
     marginTop: spacing.xs,
   },
   resetBtnText: {
-    color: colors.accent,
+    color: 'rgba(255,255,255,0.5)',
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
   },

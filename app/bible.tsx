@@ -102,14 +102,14 @@ export default function BibleScreen() {
             )}
 
             <Pressable onPress={() => router.push('/books')} style={styles.exploreBtn}>
-              <Text style={styles.exploreBtnText}>Explorar a Bíblia completa</Text>
+              <Text style={styles.exploreBtnText}>Explorar a Bíblia completa →</Text>
             </Pressable>
 
             <View style={styles.searchRow}>
               <TextInput
                 style={styles.searchInput}
                 placeholder="Buscar versículo..."
-                placeholderTextColor="rgba(0,0,0,0.28)"
+                placeholderTextColor={colors.grayOrganic}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 onSubmitEditing={handleSearch}
@@ -120,7 +120,7 @@ export default function BibleScreen() {
               </Pressable>
             </View>
 
-            {isSearching && <ActivityIndicator color={colors.accent} style={styles.loader} />}
+            {isSearching && <ActivityIndicator color={colors.sage} style={styles.loader} />}
             {hasSearched && !isSearching && searchResults.length === 0 && (
               <Text style={styles.emptyText}>Nenhum versículo encontrado.</Text>
             )}
@@ -143,7 +143,7 @@ export default function BibleScreen() {
         {activeTab === 'Planos' && (
           <>
             {isLoadingPlans ? (
-              <ActivityIndicator color={colors.accent} style={styles.loader} />
+              <ActivityIndicator color={colors.sage} style={styles.loader} />
             ) : (
               plans.map((plan) => (
                 <View key={plan.id} style={styles.planCard}>
@@ -154,7 +154,7 @@ export default function BibleScreen() {
                   <Text style={styles.planTitle}>{plan.title}</Text>
                   <Text style={styles.planDesc}>{plan.description}</Text>
                   <Pressable onPress={() => router.push('/plans')} style={styles.planBtn}>
-                    <Text style={styles.planBtnText}>Acessar plano</Text>
+                    <Text style={styles.planBtnText}>Acessar plano →</Text>
                   </Pressable>
                 </View>
               ))
@@ -185,20 +185,22 @@ const styles = StyleSheet.create({
   },
   titleBar: {
     paddingHorizontal: 20,
-    paddingTop: 32,
+    paddingTop: 28,
     paddingBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSoft,
   },
   title: {
-    fontSize: 48,
+    fontSize: 44,
     fontFamily: 'Inter_700Bold',
-    color: colors.text,
+    color: colors.blackSoft,
     letterSpacing: -1.5,
-    lineHeight: 56,
+    lineHeight: 52,
   },
   tabBar: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: colors.softGray,
+    borderBottomColor: colors.borderSoft,
     paddingHorizontal: 20,
     marginTop: 8,
   },
@@ -211,11 +213,11 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: colors.gray,
+    color: colors.grayOrganic,
     letterSpacing: 0.2,
   },
   tabTextActive: {
-    color: colors.text,
+    color: colors.blackSoft,
     fontFamily: 'Inter_700Bold',
   },
   tabUnderline: {
@@ -224,13 +226,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 2,
-    backgroundColor: colors.text,
+    backgroundColor: colors.sage,
     borderRadius: 1,
   },
   scroll: { flex: 1 },
   content: {
     paddingHorizontal: 20,
-    paddingTop: 28,
+    paddingTop: 24,
     paddingBottom: 64,
   },
   loader: {
@@ -239,17 +241,17 @@ const styles = StyleSheet.create({
 
   exploreBtn: {
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.softGray,
+    backgroundColor: colors.beige,
     paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
     alignItems: 'center',
     marginBottom: spacing.md,
   },
   exploreBtnText: {
-    color: colors.text,
+    color: colors.blackSoft,
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
 
   searchRow: {
@@ -261,30 +263,28 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.softGray,
+    borderColor: colors.borderSoft,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    color: colors.text,
+    color: colors.blackSoft,
     fontSize: 14,
     backgroundColor: colors.white,
     fontFamily: 'Inter_400Regular',
   },
   searchBtn: {
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.accent,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: 'rgba(200,76,76,0.05)',
+    backgroundColor: colors.sage,
     justifyContent: 'center',
   },
   searchBtnText: {
-    color: colors.accent,
+    color: colors.white,
     fontSize: 13,
     fontFamily: 'Inter_700Bold',
   },
   emptyText: {
-    color: colors.gray,
+    color: colors.grayOrganic,
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
     textAlign: 'center',
@@ -293,17 +293,17 @@ const styles = StyleSheet.create({
   searchResult: {
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.softGray,
+    borderBottomColor: colors.borderSoft,
   },
   searchResultRef: {
-    color: colors.accent,
+    color: colors.sage,
     fontSize: 10,
     fontFamily: 'Inter_700Bold',
     letterSpacing: 1.2,
     marginBottom: spacing.xs,
   },
   searchResultText: {
-    color: colors.text,
+    color: colors.blackSoft,
     fontSize: 15,
     lineHeight: 24,
     fontFamily: 'Inter_400Regular',
@@ -311,57 +311,50 @@ const styles = StyleSheet.create({
 
   planCard: {
     borderRadius: radius.md,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.softGray,
-    paddingTop: 36,
-    paddingBottom: 32,
-    paddingHorizontal: 28,
+    backgroundColor: colors.beige,
+    paddingTop: 32,
+    paddingBottom: 28,
+    paddingHorizontal: 24,
     marginBottom: spacing.sm,
   },
   planMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   planTheme: {
-    color: colors.accent,
+    color: colors.sage,
     fontSize: 9,
     fontFamily: 'Inter_700Bold',
     letterSpacing: 2.5,
   },
   planDays: {
-    color: colors.gray,
+    color: colors.grayOrganic,
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
   },
   planTitle: {
-    color: colors.text,
-    fontSize: 22,
+    color: colors.blackSoft,
+    fontSize: 20,
     fontFamily: 'Inter_700Bold',
     letterSpacing: -0.4,
     marginBottom: spacing.xs,
   },
   planDesc: {
-    color: '#6B6B6B',
-    fontSize: 15,
-    lineHeight: 24,
+    color: colors.grayOrganic,
+    fontSize: 14,
+    lineHeight: 22,
     fontFamily: 'Inter_400Regular',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   planBtn: {
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.softGray,
-    paddingVertical: spacing.sm,
-    alignItems: 'center',
+    alignSelf: 'flex-start',
   },
   planBtnText: {
-    color: colors.text,
+    color: colors.sageDeep,
     fontSize: 13,
     fontFamily: 'Inter_700Bold',
-    letterSpacing: 0.3,
   },
 
   emptyState: {
@@ -372,12 +365,12 @@ const styles = StyleSheet.create({
   },
   emptyStateIcon: { fontSize: 40 },
   emptyStateTitle: {
-    color: colors.text,
+    color: colors.blackSoft,
     fontSize: 18,
     fontFamily: 'Inter_700Bold',
   },
   emptyStateDesc: {
-    color: colors.gray,
+    color: colors.grayOrganic,
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
   },

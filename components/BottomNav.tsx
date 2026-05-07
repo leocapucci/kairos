@@ -1,10 +1,12 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { usePathname, useRouter } from 'expo-router';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-const ACTIVE = '#C84C4C';
-const INACTIVE = '#ABA4A0';
+import { colors } from '../theme';
+
+const ACTIVE = colors.redAccent;
+const INACTIVE = colors.grayOrganic;
 
 type IconProps = { color: string; size?: number };
 
@@ -44,10 +46,10 @@ function UserIcon({ color, size = 22 }: IconProps) {
 }
 
 const TABS = [
-  { name: 'Início', Icon: HomeIcon, path: '/home' },
-  { name: 'Bíblia', Icon: BookIcon, path: '/bible' },
-  { name: 'Conversas', Icon: ChatIcon, path: '/conversations' },
-  { name: 'Perfil', Icon: UserIcon, path: '/profile' },
+  { Icon: HomeIcon, path: '/home' },
+  { Icon: BookIcon, path: '/bible' },
+  { Icon: ChatIcon, path: '/conversations' },
+  { Icon: UserIcon, path: '/profile' },
 ] as const;
 
 export default function BottomNav() {
@@ -55,32 +57,56 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <View style={styles.container}>
-      {TABS.map((tab) => {
-        const isActive =
-          pathname === tab.path ||
-          (tab.path === '/conversations' && pathname === '/interaction');
-        const color = isActive ? ACTIVE : INACTIVE;
-        return (
-          <Pressable key={tab.path} onPress={() => router.push(tab.path)} style={styles.tab}>
-            <tab.Icon color={color} size={22} />
-            <Text style={[styles.label, { color }]}>{tab.name}</Text>
-          </Pressable>
-        );
-      })}
+    <View style={styles.wrapper}>
+      <View style={styles.pill}>
+        {TABS.map((tab) => {
+          const isActive =
+            pathname === tab.path ||
+            (tab.path === '/conversations' && pathname === '/interaction');
+          const color = isActive ? ACTIVE : INACTIVE;
+          return (
+            <Pressable key={tab.path} onPress={() => router.push(tab.path)} style={styles.tab}>
+              <tab.Icon color={color} size={22} />
+              {isActive && <View style={styles.dot} />}
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: '#F7F5F2',
-    borderTopWidth: 1,
-    borderTopColor: '#E6E2DD',
+  wrapper: {
+    paddingHorizontal: 16,
     paddingBottom: 12,
-    paddingTop: 10,
+    paddingTop: 4,
+    backgroundColor: colors.background,
   },
-  tab: { flex: 1, alignItems: 'center', gap: 4, paddingVertical: 2 },
-  label: { fontSize: 10, fontWeight: '500', letterSpacing: 0.2 },
+  pill: {
+    flexDirection: 'row',
+    backgroundColor: colors.white,
+    borderRadius: 28,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 4,
+    gap: 4,
+  },
+  dot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.redAccent,
+  },
 });

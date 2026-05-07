@@ -1,10 +1,9 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BottomNav from '../components/BottomNav';
-import Header from '../components/Header';
 import StreakBar from '../components/StreakBar';
 import DarkCard from '../components/ui/DarkCard';
 import { colors, radius, spacing } from '../theme';
@@ -33,6 +32,17 @@ const LABELS: Record<CardType, string> = {
 };
 
 const CARD_ORDER: CardType[] = ['conforto', 'confronto'];
+
+function getGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return 'Bom dia.';
+  if (h < 18) return 'Boa tarde.';
+  return 'Boa noite.';
+}
+
+function getFormattedDate(): string {
+  return new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -84,15 +94,24 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Header
-        onSearchPress={() => router.push('/bible')}
-        onBellPress={() => {}}
-      />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
+        {/* Greeting */}
+        <View style={styles.greetingBlock}>
+          <Text style={styles.brandMark}>KAIROS</Text>
+          <Text style={styles.greeting}>{getGreeting()}</Text>
+          <Text style={styles.dateText}>{getFormattedDate()}</Text>
+        </View>
+
+        {/* Nature image */}
+        <Image
+          source={{ uri: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80' }}
+          style={styles.heroImage}
+          resizeMode="cover"
+        />
+
         {/* Verse of Day */}
         {verse && (
           <Pressable onPress={() => router.push('/bible')} style={styles.verseCard}>
@@ -102,26 +121,31 @@ export default function HomeScreen() {
           </Pressable>
         )}
 
-        {/* Cards */}
-        {isLoading ? (
-          <View style={styles.skeletonGroup}>
-            <Animated.View style={[styles.skeleton, { opacity: pulse }]} />
-            <Animated.View style={[styles.skeleton, { opacity: pulse }]} />
-          </View>
-        ) : (
-          <>
-            {cards.map((card) => (
-              <DarkCard
-                key={card.type}
-                text={card.text}
-                label={LABELS[card.type]}
-                onPress={() => openCard(card.type, card.text)}
-              />
-            ))}
-          </>
-        )}
+        {/* Section label */}
+        <Text style={styles.sectionLabel}>Direção para hoje</Text>
 
-        <StreakBar />
+        {/* Cards */}
+        <View style={styles.cardsContainer}>
+          {isLoading ? (
+            <View style={styles.skeletonGroup}>
+              <Animated.View style={[styles.skeleton, { opacity: pulse }]} />
+              <Animated.View style={[styles.skeleton, { opacity: pulse }]} />
+            </View>
+          ) : (
+            <>
+              {cards.map((card) => (
+                <DarkCard
+                  key={card.type}
+                  text={card.text}
+                  label={LABELS[card.type]}
+                  onPress={() => openCard(card.type, card.text)}
+                />
+              ))}
+            </>
+          )}
+
+          <StreakBar />
+        </View>
       </ScrollView>
 
       <BottomNav />
@@ -135,48 +159,94 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.lg,
-    paddingBottom: 64,
+    paddingBottom: 32,
+  },
+
+  greetingBlock: {
+    paddingHorizontal: 20,
+    paddingTop: 28,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSoft,
+  },
+  brandMark: {
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    color: colors.grayOrganic,
+    letterSpacing: 4,
+    marginBottom: 12,
+  },
+  greeting: {
+    fontSize: 40,
+    fontFamily: 'Inter_700Bold',
+    color: colors.blackSoft,
+    letterSpacing: -1,
+    lineHeight: 46,
+  },
+  dateText: {
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    color: colors.grayOrganic,
+    marginTop: 4,
+    textTransform: 'capitalize',
+  },
+
+  heroImage: {
+    width: '100%',
+    height: 180,
   },
 
   verseCard: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.softGray,
+    marginHorizontal: 20,
+    marginTop: 20,
+    backgroundColor: colors.beige,
     borderRadius: radius.md,
     paddingTop: 28,
     paddingBottom: 24,
     paddingHorizontal: 24,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   verseLabel: {
-    color: colors.gray,
+    color: colors.sage,
     fontSize: 9,
     fontFamily: 'Inter_700Bold',
     letterSpacing: 2.5,
     marginBottom: 14,
   },
   verseText: {
-    color: colors.text,
+    color: colors.blackSoft,
     fontSize: 17,
     lineHeight: 27,
     fontFamily: 'Inter_400Regular',
     marginBottom: spacing.sm,
   },
   verseRef: {
-    color: colors.accent,
-    fontSize: 12,
+    color: colors.sage,
+    fontSize: 11,
     fontFamily: 'Inter_700Bold',
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
 
+  sectionLabel: {
+    color: colors.grayOrganic,
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginHorizontal: 20,
+    marginBottom: spacing.sm,
+    marginTop: spacing.xs,
+  },
+
+  cardsContainer: {
+    paddingHorizontal: 20,
+  },
   skeletonGroup: {
     gap: 8,
   },
   skeleton: {
-    backgroundColor: colors.softGray,
+    backgroundColor: colors.borderSoft,
     borderRadius: radius.md,
-    height: 160,
+    height: 140,
   },
 });

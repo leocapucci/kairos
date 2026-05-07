@@ -77,7 +77,7 @@ export default function ConversationsScreen() {
           <TextInput
             style={styles.input}
             placeholder="Faça sua pergunta para o KAIROS"
-            placeholderTextColor={colors.gray}
+            placeholderTextColor={colors.grayOrganic}
             value={query}
             onChangeText={setQuery}
             onSubmitEditing={handleSend}
@@ -109,7 +109,7 @@ export default function ConversationsScreen() {
         {/* History */}
         <Text style={[styles.sectionLabel, styles.sectionLabelSpaced]}>Perguntas recentes</Text>
         {isLoadingHistory ? (
-          <ActivityIndicator color={colors.accent} style={{ paddingVertical: spacing.md }} />
+          <ActivityIndicator color={colors.sage} style={{ paddingVertical: spacing.md }} />
         ) : history.length > 0 ? (
           history.map((item) => (
             <Pressable
@@ -148,27 +148,29 @@ const styles = StyleSheet.create({
   },
   titleBar: {
     paddingHorizontal: 20,
-    paddingTop: 32,
-    paddingBottom: 4,
+    paddingTop: 28,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSoft,
   },
   title: {
-    fontSize: 42,
+    fontSize: 40,
     fontFamily: 'Inter_700Bold',
-    color: colors.text,
+    color: colors.blackSoft,
     letterSpacing: -1,
-    lineHeight: 50,
-    marginBottom: spacing.lg,
+    lineHeight: 48,
   },
   content: {
     paddingHorizontal: 20,
+    paddingTop: 20,
     paddingBottom: 64,
   },
 
   sectionLabel: {
-    color: colors.gray,
+    color: colors.grayOrganic,
     fontSize: 10,
     fontFamily: 'Inter_700Bold',
-    letterSpacing: 1.5,
+    letterSpacing: 2,
     textTransform: 'uppercase',
     marginBottom: spacing.sm,
   },
@@ -186,19 +188,19 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.softGray,
+    borderColor: colors.borderSoft,
     backgroundColor: colors.white,
     paddingHorizontal: spacing.md,
     paddingVertical: 14,
     fontSize: 15,
-    color: colors.text,
+    color: colors.blackSoft,
     fontFamily: 'Inter_400Regular',
   },
   sendBtn: {
     width: 50,
     height: 50,
-    borderRadius: radius.md,
-    backgroundColor: colors.accent,
+    borderRadius: radius.sm,
+    backgroundColor: colors.sage,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -213,23 +215,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.white,
+    backgroundColor: colors.beige,
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.softGray,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     marginBottom: spacing.xs,
   },
   suggestionText: {
     flex: 1,
-    color: colors.text,
+    color: colors.blackSoft,
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
     lineHeight: 20,
   },
   arrow: {
-    color: colors.accent,
+    color: colors.sage,
     fontSize: 16,
     marginLeft: spacing.xs,
   },
@@ -238,13 +238,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.softGray,
+    borderColor: colors.borderSoft,
     padding: spacing.md,
     marginBottom: spacing.xs,
     gap: spacing.xs,
   },
   historyText: {
-    color: colors.text,
+    color: colors.blackSoft,
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
     lineHeight: 20,
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   historyDate: {
-    color: colors.gray,
+    color: colors.grayOrganic,
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
   },
@@ -267,12 +267,12 @@ const styles = StyleSheet.create({
   },
   emptyIcon: { fontSize: 36 },
   emptyTitle: {
-    color: colors.text,
+    color: colors.blackSoft,
     fontSize: 15,
     fontFamily: 'Inter_700Bold',
   },
   emptyDesc: {
-    color: colors.gray,
+    color: colors.grayOrganic,
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
   },

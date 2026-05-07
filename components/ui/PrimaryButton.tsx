@@ -28,16 +28,16 @@ export default function PrimaryButton({ title, onPress, loading, disabled }: Pri
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: colors.accent,
-    paddingVertical: 22,
+    backgroundColor: colors.redAccent,
+    paddingVertical: 20,
     borderRadius: radius.md,
     alignItems: 'center',
   },
-  disabled: { opacity: 0.5 },
+  disabled: { opacity: 0.45 },
   text: {
     color: colors.white,
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
-    letterSpacing: 0.8,
+    letterSpacing: 0.6,
   },
 });
