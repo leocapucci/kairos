@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
 export default function SplashScreenPage() {
   const router = useRouter();
@@ -26,7 +26,11 @@ export default function SplashScreenPage() {
           </Text>
         </View>
 
-        <View style={styles.imageContainer} />
+        <Image
+          source={{ uri: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80' }}
+          style={styles.imageContainer}
+          resizeMode="cover"
+        />
 
       </View>
     </SafeAreaView>
@@ -87,7 +91,6 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: '100%',
     height: 280,
-    backgroundColor: '#E6E2DD',
-    borderRadius: 16,
+    borderRadius: 0,
   },
 });
