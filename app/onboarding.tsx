@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Colors } from '../constants/colors';
+import { colors, radius, spacing } from '../theme';
 import { postOnboarding } from '../services/api';
 
 type Option = {
@@ -124,13 +124,26 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
+
+        {/* Brand */}
+        <View style={styles.brand}>
+          <Text style={styles.brandName}>KAIROS</Text>
+          <Text style={styles.brandTagline}>Favor sem merecimento.</Text>
+        </View>
+
+        {/* Greeting — only on first step */}
+        {step === 0 && (
+          <Text style={styles.greeting}>Olá, bom te{'\n'}ver aqui!</Text>
+        )}
+
+        {/* Progress */}
         <View style={styles.progressContainer}>
           {progress.map((item) => (
             <View
               key={item.id}
-              style={[styles.progressDot, item.active ? styles.progressDotActive : undefined]}
+              style={[styles.progressDot, item.active && styles.progressDotActive]}
             />
           ))}
         </View>
@@ -140,14 +153,13 @@ export default function OnboardingScreen() {
         <View style={styles.optionsContainer}>
           {currentQuestion.options.map((option) => {
             const isSelected = selectedValue === option.value;
-
             return (
               <Pressable
                 key={option.value}
                 onPress={() => handleSelect(option.value)}
-                style={[styles.optionButton, isSelected ? styles.optionButtonSelected : undefined]}
+                style={[styles.optionButton, isSelected && styles.optionButtonSelected]}
               >
-                <Text style={[styles.optionText, isSelected ? styles.optionTextSelected : undefined]}>
+                <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
                   {option.label}
                 </Text>
               </Pressable>
@@ -160,14 +172,14 @@ export default function OnboardingScreen() {
           disabled={!selectedValue || isSubmitting}
           style={[
             styles.continueButton,
-            !selectedValue || isSubmitting ? styles.continueButtonDisabled : undefined,
+            (!selectedValue || isSubmitting) && styles.continueButtonDisabled,
           ]}
         >
           {isSubmitting ? (
-            <ActivityIndicator color={Colors.background} />
+            <ActivityIndicator color={colors.white} />
           ) : (
             <Text style={styles.continueButtonText}>
-              {isLastStep ? 'Ver minha direção de hoje' : 'Continuar'}
+              {isLastStep ? 'Receber direção →' : 'Continuar →'}
             </Text>
           )}
         </Pressable>
@@ -178,98 +190,135 @@ export default function OnboardingScreen() {
         {submitErrorMessage ? (
           <Text style={styles.errorText}>{submitErrorMessage}</Text>
         ) : null}
+
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  safe: {
     flex: 1,
-    backgroundColor: Colors.bgLight,
+    backgroundColor: colors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.bgLight,
+    backgroundColor: colors.background,
     paddingHorizontal: 20,
     paddingTop: 24,
-    paddingBottom: 20,
+    paddingBottom: 24,
   },
+
+  brand: {
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  brandName: {
+    color: colors.text,
+    fontSize: 18,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 4,
+  },
+  brandTagline: {
+    color: colors.gray,
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
+
+  greeting: {
+    color: colors.text,
+    fontSize: 40,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: -0.8,
+    lineHeight: 48,
+    marginBottom: spacing.xl,
+  },
+
   progressContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 28,
+    gap: spacing.xs,
+    marginBottom: spacing.lg,
   },
   progressDot: {
-    width: 8,
-    height: 8,
+    width: 6,
+    height: 6,
     borderRadius: 999,
-    backgroundColor: Colors.textTertiary,
-    opacity: 0.35,
+    backgroundColor: colors.softGray,
   },
   progressDotActive: {
-    backgroundColor: Colors.gold,
-    opacity: 1,
+    backgroundColor: colors.accent,
+    width: 18,
+    borderRadius: 3,
   },
+
   questionText: {
-    color: Colors.textPrimary,
-    fontSize: 22,
-    fontWeight: '500',
-    lineHeight: 30,
-    marginBottom: 20,
+    color: colors.text,
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+    lineHeight: 28,
+    letterSpacing: -0.3,
+    marginBottom: spacing.lg,
   },
+
   optionsContainer: {
     flex: 1,
-    gap: 10,
+    gap: spacing.xs,
   },
   optionButton: {
     borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    backgroundColor: '#FFFFFF',
+    borderColor: colors.softGray,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.white,
   },
   optionButtonSelected: {
-    borderColor: Colors.gold,
+    borderColor: colors.accent,
     borderWidth: 1.5,
-    backgroundColor: 'rgba(200,76,76,0.08)',
+    backgroundColor: 'rgba(200,76,76,0.05)',
   },
   optionText: {
-    color: Colors.textPrimary,
+    color: colors.text,
     fontSize: 14,
+    fontFamily: 'Inter_400Regular',
     lineHeight: 20,
   },
   optionTextSelected: {
-    color: Colors.textPrimary,
-    fontWeight: '500',
+    fontFamily: 'Inter_700Bold',
+    color: colors.text,
   },
+
   continueButton: {
-    height: 50,
-    borderRadius: 12,
-    backgroundColor: Colors.gold,
+    borderRadius: radius.md,
+    backgroundColor: colors.accent,
+    paddingVertical: 18,
     alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: spacing.md,
   },
   continueButtonDisabled: {
-    opacity: 0.45,
+    opacity: 0.4,
   },
   continueButtonText: {
-    color: Colors.background,
+    color: colors.white,
     fontSize: 15,
-    fontWeight: '500',
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.3,
   },
+
   infoText: {
-    marginTop: 10,
-    color: Colors.textSecondary,
+    marginTop: spacing.sm,
+    color: colors.gray,
     fontSize: 13,
+    fontFamily: 'Inter_400Regular',
   },
   errorText: {
     marginTop: 4,
-    color: Colors.textSecondary,
+    color: colors.gray,
     fontSize: 13,
+    fontFamily: 'Inter_400Regular',
     fontStyle: 'italic',
   },
 });

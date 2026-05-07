@@ -1,52 +1,48 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BottomNav from '../components/BottomNav';
 import Header from '../components/Header';
 import StreakBar from '../components/StreakBar';
 import DarkCard from '../components/ui/DarkCard';
-import PrimaryButton from '../components/ui/PrimaryButton';
 import { colors, radius, spacing } from '../theme';
 import { getDaily } from '../services/api';
 
-type CardType = 'conforto' | 'confronto' | 'crescimento';
+type CardType = 'conforto' | 'confronto';
 
 type DailyResponse = {
   daily_message_id?: string;
   id?: string;
-  headline?: string;
-  title?: string;
   conforto?: string;
   confronto?: string;
-  crescimento?: string;
   cards?: Partial<Record<string, string>>;
 };
 
-const CARD_ORDER: CardType[] = ['conforto', 'confronto', 'crescimento'];
+type VerseData = { text: string; book: string; chapter: number; verse_number: number };
 
 const FALLBACK: Record<CardType, string> = {
   conforto: 'Respire fundo. Hoje há cuidado para você no ordinário.',
   confronto: 'Encare com verdade o que precisa mudar dentro de você.',
-  crescimento: 'Um passo fiel hoje vale mais que promessas para amanhã.',
 };
 
 const LABELS: Record<CardType, string> = {
   conforto: 'CONFORTO',
   confronto: 'CONFRONTO',
-  crescimento: 'CRESCIMENTO',
 };
+
+const CARD_ORDER: CardType[] = ['conforto', 'confronto'];
 
 export default function HomeScreen() {
   const router = useRouter();
   const pulse = useRef(new Animated.Value(0.3)).current;
   const [isLoading, setIsLoading] = useState(true);
   const [dailyMessageId, setDailyMessageId] = useState<string | undefined>();
-  const [headline, setHeadline] = useState('');
   const [cards, setCards] = useState<{ type: CardType; text: string }[]>(
     CARD_ORDER.map((type) => ({ type, text: FALLBACK[type] }))
   );
+  const [verse, setVerse] = useState<VerseData | null>(null);
 
   useEffect(() => {
     const anim = Animated.loop(
@@ -61,11 +57,17 @@ export default function HomeScreen() {
   }, [isLoading, pulse]);
 
   useEffect(() => {
+    fetch('https://kairos-backend-vjdp.onrender.com/bible/verse-of-day')
+      .then((r) => r.json())
+      .then(setVerse)
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     getDaily()
       .then((res) => {
         const data = (res.data ?? {}) as DailyResponse;
         setDailyMessageId(data.daily_message_id ?? data.id);
-        setHeadline(data.headline ?? data.title ?? '');
         setCards(
           CARD_ORDER.map((type) => ({
             type,
@@ -91,53 +93,35 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-        {/* Hero */}
-        <View style={styles.hero}>
-          <Text style={styles.caption}>Hoje pra você</Text>
-          {headline ? (
-            <Text style={styles.headline}>{headline}</Text>
-          ) : null}
-        </View>
+        {/* Verse of Day */}
+        {verse && (
+          <Pressable onPress={() => router.push('/bible')} style={styles.verseCard}>
+            <Text style={styles.verseLabel}>VERSÍCULO DO DIA</Text>
+            <Text style={styles.verseText}>{verse.text}</Text>
+            <Text style={styles.verseRef}>{verse.book} {verse.chapter}:{verse.verse_number}</Text>
+          </Pressable>
+        )}
 
         {/* Cards */}
         {isLoading ? (
           <View style={styles.skeletonGroup}>
-            <Animated.View style={[styles.skeletonHero, { opacity: pulse }]} />
-            <View style={styles.skeletonRow}>
-              <Animated.View style={[styles.skeletonSecondary, { opacity: pulse }]} />
-              <Animated.View style={[styles.skeletonSecondary, { opacity: pulse }]} />
-            </View>
+            <Animated.View style={[styles.skeleton, { opacity: pulse }]} />
+            <Animated.View style={[styles.skeleton, { opacity: pulse }]} />
           </View>
         ) : (
           <>
-            <View style={styles.cardsGroup}>
+            {cards.map((card) => (
               <DarkCard
-                key={cards[0].type}
-                text={cards[0].text}
-                label={LABELS[cards[0].type]}
-                onPress={() => openCard(cards[0].type, cards[0].text)}
-                hero
+                key={card.type}
+                text={card.text}
+                label={LABELS[card.type]}
+                onPress={() => openCard(card.type, card.text)}
               />
-              {cards.slice(1).map((card) => (
-                <DarkCard
-                  key={card.type}
-                  text={card.text}
-                  label={LABELS[card.type]}
-                  onPress={() => openCard(card.type, card.text)}
-                />
-              ))}
-            </View>
-
-            <StreakBar />
-
-            <View style={styles.ctaWrapper}>
-              <PrimaryButton
-                title="Abrir Bíblia"
-                onPress={() => router.push('/bible')}
-              />
-            </View>
+            ))}
           </>
         )}
+
+        <StreakBar />
       </ScrollView>
 
       <BottomNav />
@@ -151,54 +135,48 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    paddingHorizontal: 20,
-    paddingTop: 28,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.lg,
     paddingBottom: 64,
   },
 
-  hero: {
-    marginBottom: 56,
+  verseCard: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.softGray,
+    borderRadius: radius.md,
+    paddingTop: 28,
+    paddingBottom: 24,
+    paddingHorizontal: 24,
+    marginBottom: spacing.lg,
   },
-  caption: {
+  verseLabel: {
     color: colors.gray,
-    fontSize: 10,
-    fontFamily: 'Inter_400Regular',
-    letterSpacing: 2,
-    marginBottom: spacing.sm,
-    textTransform: 'uppercase',
-  },
-  headline: {
-    color: colors.text,
-    fontSize: 44,
+    fontSize: 9,
     fontFamily: 'Inter_700Bold',
-    lineHeight: 52,
-    letterSpacing: -1,
+    letterSpacing: 2.5,
+    marginBottom: 14,
+  },
+  verseText: {
+    color: colors.text,
+    fontSize: 17,
+    lineHeight: 27,
+    fontFamily: 'Inter_400Regular',
+    marginBottom: spacing.sm,
+  },
+  verseRef: {
+    color: colors.accent,
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.3,
   },
 
-  cardsGroup: {
-    marginBottom: 4,
-  },
   skeletonGroup: {
     gap: 8,
   },
-  skeletonHero: {
+  skeleton: {
     backgroundColor: colors.softGray,
     borderRadius: radius.md,
-    height: 200,
-    marginBottom: 8,
-  },
-  skeletonRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  skeletonSecondary: {
-    flex: 1,
-    backgroundColor: colors.softGray,
-    borderRadius: radius.md,
-    height: 140,
-  },
-
-  ctaWrapper: {
-    marginTop: 52,
+    height: 160,
   },
 });

@@ -60,13 +60,19 @@ export default function ConversationsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Conversas</Text>
+
+      <View style={styles.titleBar}>
+        <Text style={styles.title}>Conversas</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
 
-        {/* Input */}
+        {/* Nova conversa */}
+        <Text style={styles.sectionLabel}>Nova conversa</Text>
         <View style={styles.inputRow}>
           <TextInput
             style={styles.input}
@@ -76,8 +82,13 @@ export default function ConversationsScreen() {
             onChangeText={setQuery}
             onSubmitEditing={handleSend}
             returnKeyType="send"
+            multiline={false}
           />
-          <Pressable onPress={handleSend} disabled={!query.trim()} style={[styles.sendBtn, !query.trim() && styles.sendBtnDisabled]}>
+          <Pressable
+            onPress={handleSend}
+            disabled={!query.trim()}
+            style={[styles.sendBtn, !query.trim() && styles.sendBtnDisabled]}
+          >
             <Text style={styles.sendBtnText}>→</Text>
           </Pressable>
         </View>
@@ -96,9 +107,9 @@ export default function ConversationsScreen() {
         ))}
 
         {/* History */}
-        <Text style={styles.sectionLabel}>Perguntas recentes</Text>
+        <Text style={[styles.sectionLabel, styles.sectionLabelSpaced]}>Perguntas recentes</Text>
         {isLoadingHistory ? (
-          <ActivityIndicator color={colors.accent} style={{ paddingVertical: 16 }} />
+          <ActivityIndicator color={colors.accent} style={{ paddingVertical: spacing.md }} />
         ) : history.length > 0 ? (
           history.map((item) => (
             <Pressable
@@ -131,17 +142,51 @@ export default function ConversationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: { paddingHorizontal: spacing.md, paddingTop: spacing.md, paddingBottom: 4 },
-  headerTitle: { fontSize: 22, fontWeight: '700', fontFamily: 'Inter_700Bold', color: colors.text },
-  content: { paddingHorizontal: spacing.md, paddingTop: spacing.sm, paddingBottom: 32 },
+  safe: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  titleBar: {
+    paddingHorizontal: 20,
+    paddingTop: 32,
+    paddingBottom: 4,
+  },
+  title: {
+    fontSize: 42,
+    fontFamily: 'Inter_700Bold',
+    color: colors.text,
+    letterSpacing: -1,
+    lineHeight: 50,
+    marginBottom: spacing.lg,
+  },
+  content: {
+    paddingHorizontal: 20,
+    paddingBottom: 64,
+  },
 
-  inputRow: { flexDirection: 'row', gap: 10, marginBottom: spacing.lg, alignItems: 'center' },
+  sectionLabel: {
+    color: colors.gray,
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    marginBottom: spacing.sm,
+  },
+  sectionLabelSpaced: {
+    marginTop: spacing.lg,
+  },
+
+  inputRow: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    marginBottom: spacing.lg,
+    alignItems: 'center',
+  },
   input: {
     flex: 1,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: '#E6E2DD',
+    borderColor: colors.softGray,
     backgroundColor: colors.white,
     paddingHorizontal: spacing.md,
     paddingVertical: 14,
@@ -150,21 +195,18 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
   },
   sendBtn: {
-    width: 48, height: 48, borderRadius: 14,
+    width: 50,
+    height: 50,
+    borderRadius: radius.md,
     backgroundColor: colors.accent,
-    alignItems: 'center', justifyContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  sendBtnDisabled: { opacity: 0.45 },
-  sendBtnText: { color: colors.white, fontSize: 20, fontWeight: '700' },
-
-  sectionLabel: {
-    color: colors.gray,
-    fontSize: 11,
+  sendBtnDisabled: { opacity: 0.4 },
+  sendBtnText: {
+    color: colors.white,
+    fontSize: 20,
     fontFamily: 'Inter_700Bold',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    marginBottom: spacing.sm,
-    marginTop: 4,
   },
 
   suggestionCard: {
@@ -172,31 +214,66 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: colors.white,
-    borderRadius: 12,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: '#E6E2DD',
-    paddingVertical: 14,
+    borderColor: colors.softGray,
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
-    marginBottom: 8,
+    marginBottom: spacing.xs,
   },
-  suggestionText: { flex: 1, color: colors.text, fontSize: 14, fontFamily: 'Inter_400Regular', lineHeight: 20 },
-  arrow: { color: colors.accent, fontSize: 16, marginLeft: 8 },
+  suggestionText: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 20,
+  },
+  arrow: {
+    color: colors.accent,
+    fontSize: 16,
+    marginLeft: spacing.xs,
+  },
 
   historyItem: {
     backgroundColor: colors.white,
-    borderRadius: 12,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: '#E6E2DD',
+    borderColor: colors.softGray,
     padding: spacing.md,
-    marginBottom: 8,
-    gap: 8,
+    marginBottom: spacing.xs,
+    gap: spacing.xs,
   },
-  historyText: { color: colors.text, fontSize: 14, fontFamily: 'Inter_400Regular', lineHeight: 20 },
-  historyMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  historyDate: { color: colors.gray, fontSize: 12, fontFamily: 'Inter_400Regular' },
+  historyText: {
+    color: colors.text,
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 20,
+  },
+  historyMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  historyDate: {
+    color: colors.gray,
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+  },
 
-  emptyState: { alignItems: 'center', paddingTop: 32, gap: 8 },
+  emptyState: {
+    alignItems: 'center',
+    paddingTop: spacing.xl,
+    gap: spacing.xs,
+  },
   emptyIcon: { fontSize: 36 },
-  emptyTitle: { color: colors.text, fontSize: 15, fontFamily: 'Inter_700Bold' },
-  emptyDesc: { color: colors.gray, fontSize: 13, fontFamily: 'Inter_400Regular' },
+  emptyTitle: {
+    color: colors.text,
+    fontSize: 15,
+    fontFamily: 'Inter_700Bold',
+  },
+  emptyDesc: {
+    color: colors.gray,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+  },
 });

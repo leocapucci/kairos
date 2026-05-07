@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { colors } from '../../theme';
+import { colors, radius, spacing } from '../../theme';
 
 type ReactionButtonProps = {
   emoji: string;
@@ -16,7 +16,7 @@ export default function ReactionButton({ emoji, label, onPress, selected, disabl
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={[styles.button, disabled && !selected && styles.dimmed]}
+      style={[styles.button, selected && styles.selected, disabled && !selected && styles.dimmed]}
     >
       <Text style={styles.emoji}>{emoji}</Text>
       <Text style={[styles.label, selected && styles.labelSelected]}>{label}</Text>
@@ -26,25 +26,28 @@ export default function ReactionButton({ emoji, label, onPress, selected, disabl
 
 const styles = StyleSheet.create({
   button: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.md,
+    marginBottom: spacing.xs,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 22,
-    gap: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.07)',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  selected: {
+    backgroundColor: 'rgba(200,76,76,0.14)',
+    borderColor: colors.accent,
   },
   dimmed: { opacity: 0.3 },
-  emoji: {
-    fontSize: 18,
-    width: 24,
-    textAlign: 'center',
-  },
+  emoji: { fontSize: 18, lineHeight: 22 },
   label: {
-    color: 'rgba(255,255,255,0.68)',
-    fontSize: 15,
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 14,
     fontFamily: 'Inter_400Regular',
     flex: 1,
-    letterSpacing: 0.1,
   },
   labelSelected: {
     color: colors.accent,

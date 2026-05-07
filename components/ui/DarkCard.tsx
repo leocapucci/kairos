@@ -7,14 +7,14 @@ type DarkCardProps = {
   text: string;
   label: string;
   onPress: () => void;
-  hero?: boolean;
 };
 
-export default function DarkCard({ text, label, onPress, hero = false }: DarkCardProps) {
+export default function DarkCard({ text, label, onPress }: DarkCardProps) {
   return (
-    <Pressable onPress={onPress} style={[styles.card, hero && styles.cardHero]}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={[styles.text, hero && styles.textHero]}>{text}</Text>
+    <Pressable onPress={onPress} style={styles.card}>
+      <Text style={styles.quote}>{'“'}</Text>
+      <Text style={styles.text}>{text}</Text>
+      <Text style={styles.kairos}>KAIROS</Text>
     </Pressable>
   );
 }
@@ -22,34 +22,28 @@ export default function DarkCard({ text, label, onPress, hero = false }: DarkCar
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.card,
-    paddingTop: 40,
-    paddingBottom: 36,
-    paddingHorizontal: 24,
+    padding: 24,
     borderRadius: radius.md,
     marginBottom: 8,
   },
-  cardHero: {
-    paddingTop: 60,
-    paddingBottom: 56,
-    paddingHorizontal: 28,
-  },
-  label: {
+  quote: {
     color: colors.accent,
-    fontSize: 9,
+    fontSize: 40,
+    lineHeight: 40,
     fontFamily: 'Inter_700Bold',
-    letterSpacing: 2.5,
-    marginBottom: 24,
+    marginBottom: 4,
   },
   text: {
     color: colors.white,
     fontSize: 20,
-    lineHeight: 31,
-    fontFamily: 'Inter_400Regular',
-    letterSpacing: 0.05,
+    lineHeight: 30,
+    fontFamily: 'Inter_700Bold',
   },
-  textHero: {
-    fontSize: 26,
-    lineHeight: 40,
-    letterSpacing: -0.2,
+  kairos: {
+    color: colors.accent,
+    fontSize: 9,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 2.5,
+    marginTop: 20,
   },
 });

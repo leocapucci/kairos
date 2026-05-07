@@ -102,8 +102,7 @@ export default function BibleScreen() {
             )}
 
             <Pressable onPress={() => router.push('/books')} style={styles.exploreBtn}>
-              <Text style={styles.exploreBtnText}>EXPLORAR A BÍBLIA COMPLETA</Text>
-              <Text style={styles.exploreBtnArrow}>→</Text>
+              <Text style={styles.exploreBtnText}>Explorar a Bíblia completa</Text>
             </Pressable>
 
             <View style={styles.searchRow}>
@@ -239,23 +238,18 @@ const styles = StyleSheet.create({
   },
 
   exploreBtn: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.softGray,
+    paddingVertical: spacing.md,
     alignItems: 'center',
-    paddingVertical: 20,
-    marginBottom: 28,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.softGray,
+    marginBottom: spacing.md,
   },
   exploreBtnText: {
     color: colors.text,
-    fontSize: 11,
+    fontSize: 14,
     fontFamily: 'Inter_700Bold',
-    letterSpacing: 1.2,
-  },
-  exploreBtnArrow: {
-    color: colors.gray,
-    fontSize: 16,
+    letterSpacing: 0.3,
   },
 
   searchRow: {
