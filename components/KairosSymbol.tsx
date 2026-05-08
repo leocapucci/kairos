@@ -1,14 +1,14 @@
 import React from 'react';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-import { Colors } from '../constants/colors';
+import { colors } from '../theme';
 
 type KairosSymbolProps = {
   size?: number;
   color?: string;
 };
 
-export function KairosSymbol({ size = 80, color = Colors.textSecondary }: KairosSymbolProps) {
+export function KairosSymbol({ size = 80, color = colors.textSecondary }: KairosSymbolProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 80 80" fill="none">
       <Path
@@ -19,8 +19,8 @@ export function KairosSymbol({ size = 80, color = Colors.textSecondary }: Kairos
         strokeLinecap="round"
         strokeDasharray="195 8"
       />
-      <Circle cx="40" cy="40" r="4.5" fill={Colors.gold} />
-      <Circle cx="40" cy="40" r="2" fill={Colors.background} />
+      <Circle cx="40" cy="40" r="4.5" fill={colors.gold} />
+      <Circle cx="40" cy="40" r="2" fill={colors.background} />
     </Svg>
   );
 }

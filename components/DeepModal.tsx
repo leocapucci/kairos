@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 
-import { Colors } from '../constants/colors';
+import { colors } from '../theme';
 import { postDeep } from '../services/api';
 import { shareKairos } from '../services/share';
 
@@ -103,7 +103,7 @@ export default function DeepModal({
           <Text style={styles.answerLabel}>RESPOSTA</Text>
           {isLoading ? (
             <View style={styles.loadingWrap}>
-              <ActivityIndicator color={Colors.gold} />
+              <ActivityIndicator color={colors.gold} />
             </View>
           ) : (
             <>
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sheet: {
-    backgroundColor: Colors.surfaceDeep,
+    backgroundColor: colors.surfaceDeep,
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
     paddingHorizontal: 18,
@@ -151,57 +151,57 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   closeIcon: {
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 15,
     fontWeight: '500',
   },
   questionLabel: {
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     fontSize: 11,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 6,
   },
   questionText: {
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     fontSize: 15,
     lineHeight: 22,
     marginBottom: 14,
   },
   choiceLabel: {
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     fontSize: 11,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 6,
   },
   choiceText: {
-    color: Colors.goldLight,
+    color: colors.gold,
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 14,
   },
   answerLabel: {
-    color: Colors.textTertiary,
+    color: colors.textTertiary,
     fontSize: 11,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 6,
   },
   answerText: {
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     fontSize: 14,
     lineHeight: 22,
   },
   shareButton: { alignSelf: 'center', marginTop: 10, paddingVertical: 8, paddingHorizontal: 16 },
-  shareButtonText: { color: Colors.textSecondary, fontSize: 13 },
+  shareButtonText: { color: colors.textSecondary, fontSize: 13 },
   loadingWrap: {
     paddingVertical: 18,
     alignItems: 'flex-start',
   },
   errorText: {
     marginTop: 10,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 13,
   },
 });

@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-import { Colors } from '../constants/colors';
+import { colors } from '../theme';
 
 function normalizeBookName(name: string): string {
   const corrections: Record<string, string> = {
@@ -141,7 +141,7 @@ export default function BooksScreen() {
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar livro..."
-          placeholderTextColor={Colors.textTertiary}
+          placeholderTextColor={colors.textTertiary}
           value={search}
           onChangeText={setSearch}
         />
@@ -167,25 +167,25 @@ export default function BooksScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: Colors.surface },
+  safeArea: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1, paddingHorizontal: 20, paddingTop: 6, paddingBottom: 12 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, position: 'relative' },
   backButton: { position: 'absolute', left: 0, width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
-  backIcon: { color: Colors.textPrimary, fontSize: 24, lineHeight: 24 },
-  title: { fontSize: 18, fontWeight: '600', color: Colors.textPrimary },
+  backIcon: { color: colors.textPrimary, fontSize: 24, lineHeight: 24 },
+  title: { fontSize: 18, fontWeight: '600', color: colors.textPrimary },
   searchInput: {
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.textTertiary,
+    borderColor: colors.textTertiary,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 16,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     fontSize: 16,
   },
   scrollView: { flex: 1 },
   section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: Colors.textSecondary, marginBottom: 12 },
+  sectionTitle: { fontSize: 16, fontWeight: '600', color: colors.textSecondary, marginBottom: 12 },
   bookItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -196,6 +196,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.04)',
     marginBottom: 4,
   },
-  bookText: { fontSize: 16, color: Colors.textPrimary },
-  arrow: { fontSize: 18, color: Colors.textTertiary },
+  bookText: { fontSize: 16, color: colors.textPrimary },
+  arrow: { fontSize: 18, color: colors.textTertiary },
 });

@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-import { Colors } from '../constants/colors';
+import { colors } from '../theme';
 import {
   completePlanDay,
   getPlans,
@@ -37,7 +37,7 @@ type InteractionResponse = {
 
 const THEME_COLORS: Record<string, string> = {
   paz: '#5DCAA5',
-  clareza: Colors.gold,
+  clareza: colors.gold,
   coragem: '#E07B5A',
 };
 
@@ -167,7 +167,7 @@ export default function PlansScreen() {
 
         {isLoading ? (
           <View style={styles.loadingWrap}>
-            <ActivityIndicator color={Colors.gold} />
+            <ActivityIndicator color={colors.gold} />
           </View>
         ) : (
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -177,7 +177,7 @@ export default function PlansScreen() {
               <View style={styles.activePlanCard}>
                 <View style={styles.activePlanHeader}>
                   <Text style={styles.activePlanLabel}>PLANO ATIVO</Text>
-                  <Text style={[styles.themeTag, { color: THEME_COLORS[activePlan.theme] ?? Colors.gold }]}>
+                  <Text style={[styles.themeTag, { color: THEME_COLORS[activePlan.theme] ?? colors.gold }]}>
                     {activePlan.theme.toUpperCase()}
                   </Text>
                 </View>
@@ -201,7 +201,7 @@ export default function PlansScreen() {
                         style={styles.dayButton}
                       >
                         {isLoadingReflection ? (
-                          <ActivityIndicator color={Colors.gold} />
+                          <ActivityIndicator color={colors.gold} />
                         ) : (
                           <Text style={styles.dayButtonText}>Fazer Dia {currentDay}</Text>
                         )}
@@ -220,7 +220,7 @@ export default function PlansScreen() {
                             style={styles.completeButton}
                           >
                             {isCompletingDay ? (
-                              <ActivityIndicator color={Colors.gold} />
+                              <ActivityIndicator color={colors.gold} />
                             ) : (
                               <Text style={styles.completeButtonText}>Concluir Dia {currentDay} ✓</Text>
                             )}
@@ -255,7 +255,7 @@ export default function PlansScreen() {
               .map((plan) => (
                 <View key={plan.id} style={styles.planCard}>
                   <View style={styles.planCardHeader}>
-                    <Text style={[styles.themeTag, { color: THEME_COLORS[plan.theme] ?? Colors.gold }]}>
+                    <Text style={[styles.themeTag, { color: THEME_COLORS[plan.theme] ?? colors.gold }]}>
                       {plan.theme.toUpperCase()}
                     </Text>
                     <Text style={styles.planDays}>{plan.days} dias</Text>
@@ -268,7 +268,7 @@ export default function PlansScreen() {
                     style={styles.startButton}
                   >
                     {startingPlanId === plan.id ? (
-                      <ActivityIndicator color={Colors.gold} />
+                      <ActivityIndicator color={colors.gold} />
                     ) : (
                       <Text style={styles.startButtonText}>Iniciar Plano</Text>
                     )}
@@ -283,12 +283,12 @@ export default function PlansScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: Colors.surface },
+  safeArea: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1, paddingHorizontal: 20, paddingTop: 6, paddingBottom: 12 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, position: 'relative' },
   backButton: { position: 'absolute', left: 0, width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
-  backIcon: { color: Colors.textPrimary, fontSize: 24, lineHeight: 24 },
-  title: { fontSize: 18, fontWeight: '600', color: Colors.textPrimary },
+  backIcon: { color: colors.textPrimary, fontSize: 24, lineHeight: 24 },
+  title: { fontSize: 18, fontWeight: '600', color: colors.textPrimary },
   loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   content: { paddingBottom: 24 },
 
@@ -302,36 +302,36 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   activePlanHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  activePlanLabel: { color: Colors.textTertiary, fontSize: 11, fontWeight: '500', letterSpacing: 0.8, textTransform: 'uppercase' },
-  activePlanTitle: { color: Colors.textPrimary, fontSize: 18, fontWeight: '600' },
+  activePlanLabel: { color: colors.textTertiary, fontSize: 11, fontWeight: '500', letterSpacing: 0.8, textTransform: 'uppercase' },
+  activePlanTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '600' },
   themeTag: { fontSize: 11, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
 
   progressRow: { gap: 6 },
   progressTrack: { height: 4, borderRadius: 2, backgroundColor: 'rgba(0,0,0,0.08)', overflow: 'hidden' },
-  progressFill: { height: '100%', borderRadius: 2, backgroundColor: Colors.gold },
-  progressLabel: { color: Colors.textSecondary, fontSize: 13 },
+  progressFill: { height: '100%', borderRadius: 2, backgroundColor: colors.gold },
+  progressLabel: { color: colors.textSecondary, fontSize: 13 },
 
   dayButton: {
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: Colors.gold,
+    borderColor: colors.gold,
     paddingVertical: 12,
     alignItems: 'center',
     backgroundColor: 'rgba(200,76,76,0.1)',
     minHeight: 44,
     justifyContent: 'center',
   },
-  dayButtonText: { color: Colors.gold, fontSize: 15, fontWeight: '600' },
+  dayButtonText: { color: colors.gold, fontSize: 15, fontWeight: '600' },
 
   reflectionBox: {
     borderRadius: 12,
-    backgroundColor: Colors.surfaceDeep,
+    backgroundColor: colors.surfaceDeep,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
     paddingVertical: 12,
     paddingHorizontal: 14,
   },
-  reflectionText: { color: Colors.cream, fontSize: 15, lineHeight: 24 },
+  reflectionText: { color: colors.white, fontSize: 15, lineHeight: 24 },
 
   completeButton: {
     borderRadius: 10,
@@ -344,9 +344,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   completeButtonText: { color: '#5DCAA5', fontSize: 15, fontWeight: '600' },
-  dayDoneText: { color: Colors.textSecondary, fontSize: 14, textAlign: 'center' },
+  dayDoneText: { color: colors.textSecondary, fontSize: 14, textAlign: 'center' },
 
-  sectionTitle: { color: Colors.textSecondary, fontSize: 13, fontWeight: '600', letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 12 },
+  sectionTitle: { color: colors.textSecondary, fontSize: 13, fontWeight: '600', letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 12 },
   errorText: { color: '#E07B5A', fontSize: 13, marginBottom: 12, textAlign: 'center' },
 
   planCard: {
@@ -359,9 +359,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   planCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  planDays: { color: Colors.textTertiary, fontSize: 12 },
-  planTitle: { color: Colors.textPrimary, fontSize: 16, fontWeight: '600' },
-  planDescription: { color: Colors.textSecondary, fontSize: 14, lineHeight: 20 },
+  planDays: { color: colors.textTertiary, fontSize: 12 },
+  planTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '600' },
+  planDescription: { color: colors.textSecondary, fontSize: 14, lineHeight: 20 },
 
   startButton: {
     borderRadius: 10,
@@ -374,5 +374,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 4,
   },
-  startButtonText: { color: Colors.gold, fontSize: 14, fontWeight: '600' },
+  startButtonText: { color: colors.gold, fontSize: 14, fontWeight: '600' },
 });

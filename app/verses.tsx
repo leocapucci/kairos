@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { Colors } from '../constants/colors';
+import { colors } from '../theme';
 
 type VersesResponse = {
   verses: Array<{
@@ -99,20 +99,20 @@ export default function VersesScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: Colors.surface },
+  safeArea: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1, paddingHorizontal: 20, paddingTop: 6, paddingBottom: 12 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, position: 'relative' },
   backButton: { position: 'absolute', left: 0, width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
-  backIcon: { color: Colors.textPrimary, fontSize: 24, lineHeight: 24 },
-  title: { fontSize: 18, fontWeight: '600', color: Colors.textPrimary },
+  backIcon: { color: colors.textPrimary, fontSize: 24, lineHeight: 24 },
+  title: { fontSize: 18, fontWeight: '600', color: colors.textPrimary },
   scrollView: { flex: 1 },
-  loadingText: { textAlign: 'center', color: Colors.textSecondary, fontSize: 16, paddingTop: 40 },
+  loadingText: { textAlign: 'center', color: colors.textSecondary, fontSize: 16, paddingTop: 40 },
   emptyContainer: { padding: 20, alignItems: 'center', gap: 16 },
-  emptyText: { color: Colors.textPrimary, fontSize: 16, textAlign: 'center', lineHeight: 24 },
+  emptyText: { color: colors.textPrimary, fontSize: 16, textAlign: 'center', lineHeight: 24 },
   interactButton: {
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: Colors.gold,
+    borderColor: colors.gold,
     paddingVertical: 12,
     paddingHorizontal: 16,
     backgroundColor: 'rgba(200,76,76,0.1)',
@@ -120,12 +120,12 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   interactButtonText: {
-    color: Colors.gold,
+    color: colors.gold,
     fontSize: 14,
     fontWeight: '600',
   },
   versesContainer: { paddingTop: 16 },
   verseItem: { flexDirection: 'row', marginBottom: 16, paddingHorizontal: 8 },
-  verseNumber: { fontSize: 16, fontWeight: '600', color: Colors.gold, marginRight: 8, minWidth: 24 },
-  verseText: { flex: 1, fontSize: 16, color: Colors.textPrimary, lineHeight: 24 },
+  verseNumber: { fontSize: 16, fontWeight: '600', color: colors.gold, marginRight: 8, minWidth: 24 },
+  verseText: { flex: 1, fontSize: 16, color: colors.textPrimary, lineHeight: 24 },
 });

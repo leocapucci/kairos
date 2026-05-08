@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BottomNav from '../components/BottomNav';
 import Header from '../components/Header';
-import { Colors } from '../constants/colors';
+import { colors } from '../theme';
 import { getProfile } from '../services/api';
 
 type PatternKey = 'conforto' | 'confronto' | 'direcao' | 'duvida';
@@ -123,7 +123,7 @@ export default function ProfileScreen() {
       <View style={styles.container}>
         {isLoading ? (
           <View style={styles.loadingWrap}>
-            <ActivityIndicator color={Colors.gold} />
+            <ActivityIndicator color={colors.gold} />
           </View>
         ) : (
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -200,10 +200,10 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: colors.background },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     paddingHorizontal: 20,
     paddingTop: 4,
     paddingBottom: 10,
@@ -211,14 +211,14 @@ const styles = StyleSheet.create({
   loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { paddingBottom: 20, gap: 16 },
   diagnosticoCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 18,
     borderWidth: 1,
-    borderColor: Colors.gold,
+    borderColor: colors.gold,
   },
   diagnosticoLabel: {
-    color: Colors.gold,
+    color: colors.gold,
     fontSize: 10,
     fontWeight: '600',
     letterSpacing: 1.2,
@@ -226,20 +226,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   diagnosticoTitle: {
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 8,
     lineHeight: 26,
   },
   diagnosticoInsight: {
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 14,
     lineHeight: 22,
     marginBottom: 16,
   },
   diagnosticoEmpty: {
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 14,
     lineHeight: 22,
     fontStyle: 'italic',
@@ -247,8 +247,8 @@ const styles = StyleSheet.create({
   barsContainer: { gap: 10 },
   barRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   barEmoji: { fontSize: 14 },
-  barLabel: { width: 70, color: Colors.textSecondary, fontSize: 12 },
-  barLabelDominant: { color: Colors.textPrimary, fontWeight: '600' },
+  barLabel: { width: 70, color: colors.textSecondary, fontSize: 12 },
+  barLabelDominant: { color: colors.textPrimary, fontWeight: '600' },
   barTrack: {
     flex: 1,
     height: 6,
@@ -257,18 +257,18 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   barFill: { height: '100%', backgroundColor: 'rgba(0,0,0,0.15)', borderRadius: 3 },
-  barFillDominant: { backgroundColor: Colors.gold },
-  barPct: { width: 36, textAlign: 'right', color: Colors.textSecondary, fontSize: 11 },
+  barFillDominant: { backgroundColor: colors.gold },
+  barPct: { width: 36, textAlign: 'right', color: colors.textSecondary, fontSize: 11 },
   section: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.borderSoft,
   },
-  sectionTitle: { color: Colors.textPrimary, fontSize: 14, fontWeight: '500', marginBottom: 10 },
+  sectionTitle: { color: colors.textPrimary, fontSize: 14, fontWeight: '500', marginBottom: 10 },
   streakCard: {
-    backgroundColor: Colors.surfaceDeep,
+    backgroundColor: colors.surfaceDeep,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -276,21 +276,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
-  streakValue: { color: Colors.goldLight, fontSize: 38, fontWeight: '500', lineHeight: 42 },
-  streakLabel: { marginTop: 4, color: Colors.textSecondary, fontSize: 12 },
+  streakValue: { color: colors.gold, fontSize: 38, fontWeight: '500', lineHeight: 42 },
+  streakLabel: { marginTop: 4, color: colors.textSecondary, fontSize: 12 },
   answersList: { gap: 10 },
   answerItem: {
-    backgroundColor: Colors.surfaceDeep,
+    backgroundColor: colors.surfaceDeep,
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 10,
   },
-  answerQuestion: { color: Colors.textTertiary, fontSize: 11, marginBottom: 4 },
-  answerValue: { color: Colors.textPrimary, fontSize: 13, lineHeight: 18 },
+  answerQuestion: { color: colors.textTertiary, fontSize: 11, marginBottom: 4 },
+  answerValue: { color: colors.textPrimary, fontSize: 13, lineHeight: 18 },
   inlineErrorText: {
     marginTop: 10,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 13,
   },
-  footerVersion: { color: Colors.textTertiary, fontSize: 11, textAlign: 'center', marginTop: 6 },
+  footerVersion: { color: colors.textTertiary, fontSize: 11, textAlign: 'center', marginTop: 6 },
 });

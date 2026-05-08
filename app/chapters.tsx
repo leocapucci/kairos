@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { Colors } from '../constants/colors';
+import { colors } from '../theme';
 
 const CHAPTER_COUNTS: Record<string, number> = {
   'Gênesis': 50, 'Êxodo': 40, 'Levítico': 27, 'Números': 36, 'Deuteronômio': 34,
@@ -146,12 +146,12 @@ const { width } = Dimensions.get('window');
 const buttonSize = (width - 40 - 16) / 5; // 5 columns, padding 20 each side, 16 gap total
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: Colors.surface },
+  safeArea: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1, paddingHorizontal: 20, paddingTop: 6, paddingBottom: 12 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, position: 'relative' },
   backButton: { position: 'absolute', left: 0, width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
-  backIcon: { color: Colors.textPrimary, fontSize: 24, lineHeight: 24 },
-  title: { fontSize: 18, fontWeight: '600', color: Colors.textPrimary },
+  backIcon: { color: colors.textPrimary, fontSize: 24, lineHeight: 24 },
+  title: { fontSize: 18, fontWeight: '600', color: colors.textPrimary },
   scrollView: { flex: 1 },
   grid: {
     flexDirection: 'row',
@@ -168,5 +168,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 8,
   },
-  chapterText: { fontSize: 18, fontWeight: '600', color: Colors.gold },
+  chapterText: { fontSize: 18, fontWeight: '600', color: colors.gold },
 });
