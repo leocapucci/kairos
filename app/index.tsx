@@ -1,4 +1,11 @@
-import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  Inter_400Regular,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  useFonts,
+} from '@expo-google-fonts/inter';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +17,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 
 export default function SplashScreen() {
+  const [fontsLoaded] = useFonts({ Inter_400Regular, Inter_600SemiBold, Inter_700Bold });
+
+  useEffect(() => {
+    if (!fontsLoaded) return;
+    AsyncStorage.getItem('onboarding_complete')
+      .then((val) => { if (val) router.replace('/home'); })
+      .catch(() => {});
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) return null;
+
   return (
     <ImageBackground
       source={require('../assets/images/splash-bg.jpg')}
@@ -46,7 +64,7 @@ export default function SplashScreen() {
           <TouchableOpacity
             style={styles.button}
             activeOpacity={0.85}
-            onPress={() => router.push('/onboarding')}
+            onPress={() => router.replace('/home')}
           >
             <Text style={styles.buttonText}>Começar jornada</Text>
             <Text style={styles.arrow}>→</Text>
