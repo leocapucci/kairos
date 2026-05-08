@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ImageBackground,
   TouchableOpacity,
-  StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -17,8 +16,6 @@ export default function SplashScreen() {
       style={{ flex: 1, width: '100%', height: '100%' }}
       resizeMode="cover"
     >
-      <StatusBar barStyle="dark-content" />
-
       <LinearGradient
         colors={[
           'rgba(246,241,232,0.0)',

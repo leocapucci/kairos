@@ -25,13 +25,10 @@ export default function RootLayout() {
       .then((val) => {
         if (val) {
           router.replace('/home');
-        } else {
-          router.replace('/splash-screen');
         }
+        // else: index.tsx (splash) renders naturally as the root route
       })
-      .catch(() => {
-        router.replace('/splash-screen');
-      });
+      .catch(() => {});
   }, [fontsLoaded, router]);
 
   if (!fontsLoaded) return null;
@@ -42,7 +39,6 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: colors.background },
           animation: 'fade',
         }}
       />
