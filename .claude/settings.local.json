@@ -11,7 +11,9 @@
       "Bash(npm install *)",
       "Bash(git remote *)",
       "Bash(git fetch *)",
-      "Bash(git pack-refs *)"
+      "Bash(git pack-refs *)",
+      "Bash(Get-Content \"C:\\\\Users\\\\SAMSUNG\\\\kairos\\\\package.json\")",
+      "Bash(Select-String \"linear-gradient\")"
     ]
   }
 }
