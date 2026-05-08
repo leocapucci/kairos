@@ -27,7 +27,7 @@ export default function SplashScreenPage() {
         </View>
 
         <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80' }}
+          source={require('../assets/images/splash-bg.jpg')}
           style={styles.imageContainer}
           resizeMode="cover"
         />
