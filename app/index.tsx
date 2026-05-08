@@ -1,92 +1,208 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useRef } from 'react';
-import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import KairosSymbol from '../components/KairosSymbol';
-import { Colors } from '../constants/colors';
-
-const SPLASH_DURATION_MS = 2500;
-const FADE_OUT_DURATION_MS = 400;
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ImageBackground,
+  TouchableOpacity,
+  StatusBar,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 
 export default function SplashScreen() {
-  const router = useRouter();
-  const opacity = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const bootstrap = async () => {
-      try {
-        const deviceId = await AsyncStorage.getItem('device_id');
-
-        const delay = setTimeout(() => {
-          Animated.timing(opacity, {
-            toValue: 0,
-            duration: FADE_OUT_DURATION_MS,
-            easing: Easing.out(Easing.quad),
-            useNativeDriver: false,
-          }).start(() => {
-            if (!isMounted) return;
-            router.replace(deviceId ? '/home' : '/onboarding');
-          });
-        }, SPLASH_DURATION_MS);
-
-        return () => clearTimeout(delay);
-      } catch {
-        router.replace('/onboarding');
-      }
-    };
-
-    const cleanupPromise = bootstrap();
-
-    return () => {
-      isMounted = false;
-      cleanupPromise.then((cleanup) => cleanup?.()).catch(() => undefined);
-    };
-  }, [opacity, router]);
-
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <Animated.View style={[styles.container, { opacity }]}>
-        <View style={styles.brandBlock}>
-          <KairosSymbol size={80} color={Colors.textSecondary} />
-          <Text style={styles.logo}>KAIROS</Text>
-          <Text style={styles.tagline}>Favor sem merecimento.</Text>
+    <ImageBackground
+      source={require('../assets/images/splash-bg.jpg')}
+      style={{ flex: 1, width: '100%', height: '100%' }}
+      resizeMode="cover"
+    >
+      <StatusBar barStyle="dark-content" />
+
+      <LinearGradient
+        colors={[
+          'rgba(246,241,232,0.0)',
+          'rgba(246,241,232,0.4)',
+          'rgba(246,241,232,0.88)',
+        ]}
+        style={styles.overlay}
+      />
+
+      <View style={styles.container}>
+
+        {/* BLOCO 1 — topo */}
+        <View>
+          <Text style={styles.brandName}>KAIROS</Text>
+          <Text style={styles.brandTagline}>FAVOR SEM MERECIMENTO</Text>
+          <View style={styles.accentLine} />
         </View>
-      </Animated.View>
-    </SafeAreaView>
+
+        {/* BLOCO 2 — meio */}
+        <View>
+          <Text style={styles.headline}>
+            {'Sua direção\ndiária com '}
+            <Text style={styles.headlineGold}>Deus.</Text>
+          </Text>
+          <Text style={styles.subtext}>
+            {'Reflexões profundas, presença,\nsilêncio e clareza espiritual\npara sua caminhada.'}
+          </Text>
+          <TouchableOpacity
+            style={styles.button}
+            activeOpacity={0.85}
+            onPress={() => router.push('/onboarding')}
+          >
+            <Text style={styles.buttonText}>Começar jornada</Text>
+            <Text style={styles.arrow}>→</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.link}
+            activeOpacity={0.7}
+            onPress={() => router.push('/home')}
+          >
+            <Text style={styles.linkText}>Já tenho uma conta</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* BLOCO 3 — rodapé */}
+        <View style={styles.glassCard}>
+          <Text style={styles.glassIcon}>🌿</Text>
+          <Text style={styles.glassText}>
+            {'Antes do caos, encontre presença.\nAntes da pressa, encontre direção.'}
+          </Text>
+        </View>
+
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  background: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
+
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 28,
+    paddingTop: 72,
+    paddingBottom: 44,
   },
-  brandBlock: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logo: {
-    marginTop: 20,
-    color: Colors.textPrimary,
-    fontSize: 28,
-    fontWeight: '300',
+
+  brandName: {
+    marginTop: 0,
+    fontSize: 15,
     letterSpacing: 5,
-    textTransform: 'uppercase',
+    fontWeight: '600',
+    color: '#C8A46B',
   },
-  tagline: {
+
+  brandTagline: {
+    fontSize: 11,
+    letterSpacing: 3,
+    color: '#6E675F',
+    marginTop: 6,
+    fontWeight: '500',
+  },
+
+  accentLine: {
+    width: 36,
+    height: 2.5,
+    backgroundColor: '#C84C4C',
     marginTop: 10,
-    color: Colors.textTertiary,
-    fontSize: 12,
+  },
+
+  headline: {
+    marginTop: 48,
+    fontSize: 46,
+    fontWeight: '300',
+    color: '#2D261F',
+    lineHeight: 54,
+    letterSpacing: -0.5,
+  },
+
+  headlineGold: {
+    color: '#C8A46B',
     fontStyle: 'italic',
+    fontWeight: '300',
+  },
+
+  subtext: {
+    marginTop: 16,
+    fontSize: 15,
+    lineHeight: 24,
+    color: '#6E675F',
+    fontWeight: '400',
+    letterSpacing: 0.1,
+  },
+
+  glassCard: {
+    position: 'absolute',
+    bottom: 44,
+    left: 28,
+    right: 28,
+    backgroundColor: 'rgba(255,255,255,0.50)',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+
+  glassIcon: {
+    fontSize: 22,
+  },
+
+  glassText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#2D261F',
+    lineHeight: 22,
+    fontWeight: '400',
+  },
+
+  button: {
+    height: 62,
+    marginTop: 32,
+    backgroundColor: '#8A9776',
+    borderRadius: 18,
+    paddingHorizontal: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '600',
+  },
+
+  arrow: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: '700',
+  },
+
+  link: {
+    marginTop: 20,
+    alignSelf: 'center',
+  },
+
+  linkText: {
+    fontSize: 15,
+    color: '#6E675F',
+    borderBottomWidth: 1,
+    borderBottomColor: '#6E675F',
   },
 });
