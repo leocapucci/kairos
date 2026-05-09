@@ -90,7 +90,7 @@ export default function ProfileScreen() {
       setIsLoading(true);
       try {
         const response = await getProfile();
-        const data = (response.data ?? {}) as ProfileResponse;
+        const data = ((response as any)?.data ?? {}) as ProfileResponse;
         setPatterns({
           conforto: data.patterns?.conforto ?? 0,
           confronto: data.patterns?.confronto ?? 0,

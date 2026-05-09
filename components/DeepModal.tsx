@@ -11,7 +11,7 @@ import {
 
 import { colors } from '../theme';
 import { postDeep } from '../services/api';
-import { shareKairos } from '../services/share';
+import { shareKairos } from '../src/services/api/share';
 
 type DeepModalProps = {
   visible: boolean;
@@ -64,7 +64,7 @@ export default function DeepModal({
       setIsLoading(true);
       try {
         const response = await postDeep(interactionId, userChoice);
-        const data = (response.data ?? {}) as DeepResponse;
+        const data = ((response as any)?.data ?? {}) as DeepResponse;
         setDeepText(data.response ?? data.message ?? data.text ?? 'Sem resposta no momento.');
         setDeepErrorMessage('');
       } catch {

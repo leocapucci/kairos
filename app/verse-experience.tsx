@@ -13,7 +13,7 @@ import ReactionButton from '../components/ui/ReactionButton';
 import Section from '../components/ui/Section';
 import { colors, radius, spacing } from '../theme';
 import { postInteraction } from '../services/api';
-import { shareKairos } from '../services/share';
+import { shareKairos } from '../src/services/api/share';
 
 const normalizeBookName = (name: string): string => {
   const corrections: Record<string, string> = {
@@ -70,7 +70,7 @@ export default function VerseExperienceScreen() {
     setIsSubmitting(true);
     try {
       const res = await postInteraction('devocional', `${btn.message} Versículo ${verseRef}: "${verseText}"`);
-      const data = (res.data ?? {}) as InteractionResponse;
+      const data = ((res as any)?.data ?? {}) as InteractionResponse;
       setReplyText(data.response ?? data.message ?? data.text ?? 'Sem resposta no momento.');
     } catch {
       setReplyText('Não foi possível enviar agora.');

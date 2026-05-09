@@ -15,7 +15,7 @@ import BottomNav from '../components/BottomNav';
 import ReactionButton from '../components/ui/ReactionButton';
 import { colors, radius, spacing } from '../theme';
 import { postInteraction } from '../services/api';
-import { shareKairos } from '../services/share';
+import { shareKairos } from '../src/services/api/share';
 
 type CardType = 'conforto' | 'confronto' | 'crescimento' | 'devocional';
 
@@ -88,7 +88,7 @@ export default function InteractionScreen() {
     setErrorMessage('');
     try {
       const res = await postInteraction(cardType, `${btn.message} Conteúdo: "${cardText}"`);
-      const data = (res.data ?? {}) as InteractionResponse;
+      const data = ((res as any)?.data ?? {}) as InteractionResponse;
       setReplyText(data.response ?? data.message ?? data.text ?? 'Sem resposta no momento.');
       replyOpacity.setValue(0);
       Animated.timing(replyOpacity, { toValue: 1, duration: 320, useNativeDriver: false }).start();
@@ -109,7 +109,7 @@ export default function InteractionScreen() {
     try {
       const message = `${btn.prompt} Contexto: "${cardText}". Resposta anterior: "${cleanReply}". Sem perguntas ao usuário.`;
       const res = await postInteraction('devocional', message);
-      const data = (res.data ?? {}) as InteractionResponse;
+      const data = ((res as any)?.data ?? {}) as InteractionResponse;
       setDeepReply(stripMarkdown(data.response ?? data.message ?? data.text ?? 'Sem resposta.'));
       Animated.timing(deepOpacity, { toValue: 1, duration: 320, useNativeDriver: false }).start();
     } catch {

@@ -76,7 +76,8 @@ export default function HomeScreen() {
   useEffect(() => {
     getDaily()
       .then((res) => {
-        const data = (res.data ?? {}) as DailyResponse;
+        const data = (res.data ?? null) as DailyResponse | null;
+        if (!data) return;
         setDailyMessageId(data.daily_message_id ?? data.id);
         setCards(
           CARD_ORDER.map((type) => ({
@@ -114,7 +115,7 @@ export default function HomeScreen() {
 
         {/* Verse of Day */}
         {verse && (
-          <Pressable onPress={() => router.push('/bible')} style={styles.verseCard}>
+          <Pressable onPress={() => router.push('/bible')} style={({ pressed }) => [styles.verseCard, pressed && { opacity: 0.85 }]}>
             <Text style={styles.verseLabel}>VERSÍCULO DO DIA</Text>
             <Text style={styles.verseText}>{verse.text}</Text>
             <Text style={styles.verseRef}>{verse.book} {verse.chapter}:{verse.verse_number}</Text>
@@ -130,6 +131,7 @@ export default function HomeScreen() {
             <View style={styles.skeletonGroup}>
               <Animated.View style={[styles.skeleton, { opacity: pulse }]} />
               <Animated.View style={[styles.skeleton, { opacity: pulse }]} />
+              <Text style={styles.loadingHint}>Preparando sua direção...</Text>
             </View>
           ) : (
             <>
@@ -248,5 +250,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.borderSoft,
     borderRadius: radius.md,
     height: 140,
+  },
+  loadingHint: {
+    marginTop: spacing.sm,
+    color: colors.grayOrganic,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
   },
 });

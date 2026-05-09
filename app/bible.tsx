@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -12,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 import BottomNav from '../components/BottomNav';
+import { EmptyState, Loading } from '../src/design-system';
 import VerseCard from '../components/ui/VerseCard';
 import { colors, radius, spacing } from '../theme';
 import { getPlans, searchBible } from '../services/api';
@@ -47,7 +47,7 @@ export default function BibleScreen() {
     if (activeTab !== 'Planos' || plans.length > 0) return;
     setIsLoadingPlans(true);
     getPlans()
-      .then((res) => setPlans(res.data as Plan[]))
+      .then((res) => setPlans(((res as any)?.data as Plan[]) ?? []))
       .catch(() => {})
       .finally(() => setIsLoadingPlans(false));
   }, [activeTab, plans.length]);
@@ -60,8 +60,8 @@ export default function BibleScreen() {
     setSearchResults([]);
     try {
       const res = await searchBible(q);
-      const data = res.data as { results: SearchResult[] };
-      setSearchResults(data.results ?? []);
+      const data = (res as any)?.data ?? res ?? {};
+      setSearchResults((data as any)?.results ?? []);
     } catch {
       setSearchResults([]);
     } finally {
@@ -101,7 +101,7 @@ export default function BibleScreen() {
               />
             )}
 
-            <Pressable onPress={() => router.push('/books')} style={styles.exploreBtn}>
+            <Pressable onPress={() => router.push('/books')} style={({ pressed }) => [styles.exploreBtn, pressed && { opacity: 0.75 }]}>
               <Text style={styles.exploreBtnText}>Explorar a Bíblia completa →</Text>
             </Pressable>
 
@@ -115,19 +115,19 @@ export default function BibleScreen() {
                 onSubmitEditing={handleSearch}
                 returnKeyType="search"
               />
-              <Pressable onPress={handleSearch} disabled={isSearching} style={styles.searchBtn}>
+              <Pressable onPress={handleSearch} disabled={isSearching} style={({ pressed }) => [styles.searchBtn, pressed && !isSearching && { opacity: 0.8 }]}>
                 <Text style={styles.searchBtnText}>Buscar</Text>
               </Pressable>
             </View>
 
-            {isSearching && <ActivityIndicator color={colors.sage} style={styles.loader} />}
+            {isSearching && <Loading />}
             {hasSearched && !isSearching && searchResults.length === 0 && (
               <Text style={styles.emptyText}>Nenhum versículo encontrado.</Text>
             )}
             {searchResults.map((item, i) => (
               <Pressable
                 key={`${item.book}-${item.chapter}-${item.verse}-${i}`}
-                style={styles.searchResult}
+                style={({ pressed }) => [styles.searchResult, pressed && { opacity: 0.7 }]}
                 onPress={() =>
                   router.push(`/verse-experience?book=${encodeURIComponent(item.book)}&chapter=${item.chapter}&verse=${item.verse}&text=${encodeURIComponent(item.text)}`)
                 }
@@ -143,7 +143,9 @@ export default function BibleScreen() {
         {activeTab === 'Planos' && (
           <>
             {isLoadingPlans ? (
-              <ActivityIndicator color={colors.sage} style={styles.loader} />
+              <Loading message="Carregando planos..." />
+            ) : plans.length === 0 ? (
+              <EmptyState icon="📖" title="Ainda não temos planos aqui" description="Novos planos chegam em breve. Volte logo." />
             ) : (
               plans.map((plan) => (
                 <View key={plan.id} style={styles.planCard}>
@@ -153,7 +155,7 @@ export default function BibleScreen() {
                   </View>
                   <Text style={styles.planTitle}>{plan.title}</Text>
                   <Text style={styles.planDesc}>{plan.description}</Text>
-                  <Pressable onPress={() => router.push('/plans')} style={styles.planBtn}>
+                  <Pressable onPress={() => router.push('/plans')} style={({ pressed }) => [styles.planBtn, pressed && { opacity: 0.7 }]}>
                     <Text style={styles.planBtnText}>Acessar plano →</Text>
                   </Pressable>
                 </View>
@@ -164,11 +166,7 @@ export default function BibleScreen() {
 
         {/* ── SALVOS ── */}
         {activeTab === 'Salvos' && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateIcon}>🔖</Text>
-            <Text style={styles.emptyStateTitle}>Nenhum versículo salvo ainda</Text>
-            <Text style={styles.emptyStateDesc}>Salve versículos que tocaram seu coração</Text>
-          </View>
+          <EmptyState icon="🔖" title="Nenhum versículo salvo ainda" description="Salve versículos que tocaram seu coração" />
         )}
 
       </ScrollView>
@@ -235,10 +233,6 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 64,
   },
-  loader: {
-    paddingVertical: spacing.xl,
-  },
-
   exploreBtn: {
     borderRadius: radius.md,
     backgroundColor: colors.beige,
@@ -357,21 +351,4 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
   },
 
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: spacing.xl * 2,
-    gap: spacing.xs,
-  },
-  emptyStateIcon: { fontSize: 40 },
-  emptyStateTitle: {
-    color: colors.blackSoft,
-    fontSize: 18,
-    fontFamily: 'Inter_700Bold',
-  },
-  emptyStateDesc: {
-    color: colors.grayOrganic,
-    fontSize: 14,
-    fontFamily: 'Inter_400Regular',
-  },
 });

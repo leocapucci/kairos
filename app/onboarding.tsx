@@ -1,11 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, radius, spacing } from '../theme';
 import { postOnboarding } from '../services/api';
+import { Button } from '../src/design-system';
 
 type Option = {
   value: string;
@@ -58,8 +58,6 @@ export default function OnboardingScreen() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [networkMessage, setNetworkMessage] = useState('');
-  const [submitErrorMessage, setSubmitErrorMessage] = useState('');
 
   const currentQuestion = QUESTIONS[step];
   const selectedValue = answers[currentQuestion.key];
@@ -87,39 +85,18 @@ export default function OnboardingScreen() {
     }
 
     setIsSubmitting(true);
-    setNetworkMessage('');
-    setSubmitErrorMessage('');
 
     try {
-      const existingDeviceId = await AsyncStorage.getItem('device_id');
-      const deviceId =
-        existingDeviceId ?? `device_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-
-      if (!existingDeviceId) {
-        await AsyncStorage.setItem('device_id', deviceId);
-      }
-
-      await AsyncStorage.setItem('onboarding_answers', JSON.stringify(answers));
-
       const payload = QUESTIONS.map((question) => ({
         question_key: question.key,
         answer: answers[question.key] ?? '',
       }));
 
-      try {
-        await postOnboarding(payload);
-      } catch {
-        setNetworkMessage(
-          'Suas respostas foram salvas neste dispositivo. Vamos sincronizar quando houver conexão.'
-        );
-      }
-    } catch {
-      setSubmitErrorMessage(
-        'Não conseguimos salvar tudo corretamente, mas você seguirá para a tela inicial.'
-      );
+      await postOnboarding(payload);
+    } catch (e) {
+      console.log(e);
     } finally {
       setIsSubmitting(false);
-      await AsyncStorage.setItem('onboarding_complete', 'true');
       router.replace('/home');
     }
   };
@@ -158,7 +135,11 @@ export default function OnboardingScreen() {
               <Pressable
                 key={option.value}
                 onPress={() => handleSelect(option.value)}
-                style={[styles.optionButton, isSelected && styles.optionButtonSelected]}
+                style={({ pressed }) => [
+                  styles.optionButton,
+                  isSelected && styles.optionButtonSelected,
+                  pressed && styles.optionButtonPressed,
+                ]}
               >
                 <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
                   {option.label}
@@ -168,29 +149,14 @@ export default function OnboardingScreen() {
           })}
         </View>
 
-        <Pressable
+        <Button
+          label={isLastStep ? 'Receber direção →' : 'Continuar →'}
           onPress={handleContinue}
-          disabled={!selectedValue || isSubmitting}
-          style={[
-            styles.continueButton,
-            (!selectedValue || isSubmitting) && styles.continueButtonDisabled,
-          ]}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color={colors.white} />
-          ) : (
-            <Text style={styles.continueButtonText}>
-              {isLastStep ? 'Receber direção →' : 'Continuar →'}
-            </Text>
-          )}
-        </Pressable>
+          disabled={!selectedValue}
+          loading={isSubmitting}
+          variant="primary"
+        />
 
-        {networkMessage ? (
-          <Text style={styles.infoText}>{networkMessage}</Text>
-        ) : null}
-        {submitErrorMessage ? (
-          <Text style={styles.errorText}>{submitErrorMessage}</Text>
-        ) : null}
 
       </View>
     </SafeAreaView>
@@ -281,6 +247,9 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     backgroundColor: 'rgba(200,76,76,0.05)',
   },
+  optionButtonPressed: {
+    opacity: 0.75,
+  },
   optionText: {
     color: colors.text,
     fontSize: 14,
@@ -292,34 +261,4 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
 
-  continueButton: {
-    borderRadius: radius.md,
-    backgroundColor: colors.accent,
-    paddingVertical: 18,
-    alignItems: 'center',
-    marginTop: spacing.md,
-  },
-  continueButtonDisabled: {
-    opacity: 0.4,
-  },
-  continueButtonText: {
-    color: colors.white,
-    fontSize: 15,
-    fontFamily: 'Inter_700Bold',
-    letterSpacing: 0.3,
-  },
-
-  infoText: {
-    marginTop: spacing.sm,
-    color: colors.gray,
-    fontSize: 13,
-    fontFamily: 'Inter_400Regular',
-  },
-  errorText: {
-    marginTop: 4,
-    color: colors.gray,
-    fontSize: 13,
-    fontFamily: 'Inter_400Regular',
-    fontStyle: 'italic',
-  },
 });

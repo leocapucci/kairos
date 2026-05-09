@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 import { colors } from '../theme';
+import { EmptyState, Loading } from '../src/design-system';
 import {
   completePlanDay,
   getPlans,
@@ -77,12 +78,12 @@ export default function PlansScreen() {
           getPlans(),
           getPlanProgress(id),
         ]);
-        setPlans(plansRes.data as Plan[]);
-        const progress = progressRes.data as { plan_id: string | null; current_day: number };
+        setPlans(((plansRes as any)?.data as Plan[]) ?? []);
+        const progress = ((progressRes as any)?.data ?? null) as { plan_id: string | null; current_day: number } | null;
         console.log('[plans] progress:', progress);
-        if (progress.plan_id) {
+        if (progress?.plan_id) {
           setActivePlanId(progress.plan_id);
-          setCurrentDay(progress.current_day);
+          setCurrentDay(progress.current_day ?? 1);
         }
       } catch (err: any) {
         console.log('[plans] load error:', err?.response?.data ?? err?.message ?? err);
@@ -126,7 +127,7 @@ export default function PlansScreen() {
     try {
       const message = `Dia ${currentDay} do plano ${activePlan.title}: gere uma reflexão de 100 palavras sobre o tema ${activePlan.theme} com um versículo bíblico e uma ação prática para hoje.`;
       const res = await postInteraction('devocional', message);
-      const data = (res.data ?? {}) as InteractionResponse;
+      const data = ((res as any)?.data ?? {}) as InteractionResponse;
       const text = data.response ?? data.message ?? data.text ?? 'Sem reflexão disponível.';
       setDayReflection(text);
       reflectionOpacity.setValue(0);
@@ -166,9 +167,7 @@ export default function PlansScreen() {
         </View>
 
         {isLoading ? (
-          <View style={styles.loadingWrap}>
-            <ActivityIndicator color={colors.gold} />
-          </View>
+          <Loading message="Carregando seus planos..." flex />
         ) : (
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
@@ -198,7 +197,7 @@ export default function PlansScreen() {
                       <Pressable
                         onPress={handleFetchDayReflection}
                         disabled={isLoadingReflection}
-                        style={styles.dayButton}
+                        style={({ pressed }) => [styles.dayButton, pressed && !isLoadingReflection && { opacity: 0.8 }]}
                       >
                         {isLoadingReflection ? (
                           <ActivityIndicator color={colors.gold} />
@@ -217,7 +216,7 @@ export default function PlansScreen() {
                           <Pressable
                             onPress={handleCompleteDay}
                             disabled={isCompletingDay}
-                            style={styles.completeButton}
+                            style={({ pressed }) => [styles.completeButton, pressed && !isCompletingDay && { opacity: 0.8 }]}
                           >
                             {isCompletingDay ? (
                               <ActivityIndicator color={colors.gold} />
@@ -250,6 +249,10 @@ export default function PlansScreen() {
               <Text style={styles.errorText}>{startError}</Text>
             ) : null}
 
+            {plans.filter((p) => p.id !== activePlanId).length === 0 && (
+              <EmptyState icon="📖" title="Nenhum plano por aqui ainda" description="Novos planos chegam em breve. Volte logo." />
+            )}
+
             {plans
               .filter((p) => p.id !== activePlanId)
               .map((plan) => (
@@ -265,7 +268,7 @@ export default function PlansScreen() {
                   <Pressable
                     onPress={() => handleStartPlan(plan.id)}
                     disabled={!!startingPlanId}
-                    style={styles.startButton}
+                    style={({ pressed }) => [styles.startButton, pressed && !startingPlanId && { opacity: 0.8 }]}
                   >
                     {startingPlanId === plan.id ? (
                       <ActivityIndicator color={colors.gold} />
@@ -288,8 +291,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, position: 'relative' },
   backButton: { position: 'absolute', left: 0, width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
   backIcon: { color: colors.textPrimary, fontSize: 24, lineHeight: 24 },
-  title: { fontSize: 18, fontWeight: '600', color: colors.textPrimary },
-  loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  title: { fontSize: 32, fontWeight: '700', color: colors.textPrimary, letterSpacing: -0.5 },
   content: { paddingBottom: 24 },
 
   activePlanCard: {
@@ -346,7 +348,7 @@ const styles = StyleSheet.create({
   completeButtonText: { color: '#5DCAA5', fontSize: 15, fontWeight: '600' },
   dayDoneText: { color: colors.textSecondary, fontSize: 14, textAlign: 'center' },
 
-  sectionTitle: { color: colors.textSecondary, fontSize: 13, fontWeight: '600', letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 12 },
+  sectionTitle: { color: colors.grayOrganic, fontSize: 10, fontWeight: '700', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 },
   errorText: { color: '#E07B5A', fontSize: 13, marginBottom: 12, textAlign: 'center' },
 
   planCard: {

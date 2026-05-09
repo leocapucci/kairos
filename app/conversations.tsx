@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -12,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BottomNav from '../components/BottomNav';
+import { EmptyState, Loading } from '../src/design-system';
 import { colors, radius, spacing } from '../theme';
 import { getInteractionsHistory } from '../services/api';
 
@@ -87,7 +87,7 @@ export default function ConversationsScreen() {
           <Pressable
             onPress={handleSend}
             disabled={!query.trim()}
-            style={[styles.sendBtn, !query.trim() && styles.sendBtnDisabled]}
+            style={({ pressed }) => [styles.sendBtn, !query.trim() && styles.sendBtnDisabled, pressed && query.trim() && { opacity: 0.82 }]}
           >
             <Text style={styles.sendBtnText}>→</Text>
           </Pressable>
@@ -99,7 +99,7 @@ export default function ConversationsScreen() {
           <Pressable
             key={s}
             onPress={() => router.push({ pathname: '/interaction', params: { type: 'devocional', text: s } })}
-            style={styles.suggestionCard}
+            style={({ pressed }) => [styles.suggestionCard, pressed && { opacity: 0.7 }]}
           >
             <Text style={styles.suggestionText}>{s}</Text>
             <Text style={styles.arrow}>→</Text>
@@ -109,13 +109,13 @@ export default function ConversationsScreen() {
         {/* History */}
         <Text style={[styles.sectionLabel, styles.sectionLabelSpaced]}>Perguntas recentes</Text>
         {isLoadingHistory ? (
-          <ActivityIndicator color={colors.sage} style={{ paddingVertical: spacing.md }} />
+          <Loading message="Buscando conversas..." />
         ) : history.length > 0 ? (
           history.map((item) => (
             <Pressable
               key={item.id}
               onPress={() => router.push({ pathname: '/interaction', params: { type: 'devocional', text: item.message ?? item.text ?? '' } })}
-              style={styles.historyItem}
+              style={({ pressed }) => [styles.historyItem, pressed && { opacity: 0.7 }]}
             >
               <Text style={styles.historyText} numberOfLines={2}>
                 {item.message ?? item.text ?? '—'}
@@ -127,11 +127,7 @@ export default function ConversationsScreen() {
             </Pressable>
           ))
         ) : (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>💬</Text>
-            <Text style={styles.emptyTitle}>Suas conversas aparecem aqui</Text>
-            <Text style={styles.emptyDesc}>Faça uma pergunta para começar</Text>
-          </View>
+          <EmptyState icon="💬" title="Suas conversas aparecem aqui" description="Faça uma pergunta para começar" />
         )}
 
       </ScrollView>
@@ -260,20 +256,4 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
   },
 
-  emptyState: {
-    alignItems: 'center',
-    paddingTop: spacing.xl,
-    gap: spacing.xs,
-  },
-  emptyIcon: { fontSize: 36 },
-  emptyTitle: {
-    color: colors.blackSoft,
-    fontSize: 15,
-    fontFamily: 'Inter_700Bold',
-  },
-  emptyDesc: {
-    color: colors.grayOrganic,
-    fontSize: 13,
-    fontFamily: 'Inter_400Regular',
-  },
 });
