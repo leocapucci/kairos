@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 import BottomNav from '../components/BottomNav';
-import { EmptyState, Loading } from '../src/design-system';
+import { Card, Button, EmptyState, Loading } from '../src/design-system';
 import VerseCard from '../components/ui/VerseCard';
 import { colors, radius, spacing } from '../theme';
 import { getPlans, searchBible } from '../services/api';
@@ -101,9 +101,11 @@ export default function BibleScreen() {
               />
             )}
 
-            <Pressable onPress={() => router.push('/books')} style={({ pressed }) => [styles.exploreBtn, pressed && { opacity: 0.75 }]}>
-              <Text style={styles.exploreBtnText}>Explorar a Bíblia completa →</Text>
-            </Pressable>
+            <Button
+              variant="ghost"
+              label="Explorar a Bíblia completa →"
+              onPress={() => router.push('/books')}
+            />
 
             <View style={styles.searchRow}>
               <TextInput
@@ -115,9 +117,14 @@ export default function BibleScreen() {
                 onSubmitEditing={handleSearch}
                 returnKeyType="search"
               />
-              <Pressable onPress={handleSearch} disabled={isSearching} style={({ pressed }) => [styles.searchBtn, pressed && !isSearching && { opacity: 0.8 }]}>
-                <Text style={styles.searchBtnText}>Buscar</Text>
-              </Pressable>
+              <Button
+                variant="sage"
+                label="Buscar"
+                onPress={handleSearch}
+                disabled={isSearching}
+                loading={isSearching}
+                fullWidth={false}
+              />
             </View>
 
             {isSearching && <Loading />}
@@ -148,17 +155,15 @@ export default function BibleScreen() {
               <EmptyState icon="📖" title="Ainda não temos planos aqui" description="Novos planos chegam em breve. Volte logo." />
             ) : (
               plans.map((plan) => (
-                <View key={plan.id} style={styles.planCard}>
+                <Card key={plan.id} variant="beige" padding="lg" style={styles.planCardWrap}>
                   <View style={styles.planMeta}>
                     <Text style={styles.planTheme}>{plan.theme.toUpperCase()}</Text>
                     <Text style={styles.planDays}>{plan.days} dias</Text>
                   </View>
                   <Text style={styles.planTitle}>{plan.title}</Text>
                   <Text style={styles.planDesc}>{plan.description}</Text>
-                  <Pressable onPress={() => router.push('/plans')} style={({ pressed }) => [styles.planBtn, pressed && { opacity: 0.7 }]}>
-                    <Text style={styles.planBtnText}>Acessar plano →</Text>
-                  </Pressable>
-                </View>
+                  <Button variant="ghost" label="Acessar plano →" onPress={() => router.push('/plans')} />
+                </Card>
               ))
             )}
           </>
@@ -233,21 +238,6 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 64,
   },
-  exploreBtn: {
-    borderRadius: radius.md,
-    backgroundColor: colors.beige,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  exploreBtnText: {
-    color: colors.blackSoft,
-    fontSize: 14,
-    fontFamily: 'Inter_700Bold',
-    letterSpacing: 0.2,
-  },
-
   searchRow: {
     flexDirection: 'row',
     gap: spacing.xs,
@@ -264,18 +254,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     backgroundColor: colors.white,
     fontFamily: 'Inter_400Regular',
-  },
-  searchBtn: {
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.sage,
-    justifyContent: 'center',
-  },
-  searchBtnText: {
-    color: colors.white,
-    fontSize: 13,
-    fontFamily: 'Inter_700Bold',
   },
   emptyText: {
     color: colors.grayOrganic,
@@ -303,12 +281,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
   },
 
-  planCard: {
-    borderRadius: radius.md,
-    backgroundColor: colors.beige,
-    paddingTop: 32,
-    paddingBottom: 28,
-    paddingHorizontal: 24,
+  planCardWrap: {
     marginBottom: spacing.sm,
   },
   planMeta: {
@@ -342,13 +315,4 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     marginBottom: spacing.md,
   },
-  planBtn: {
-    alignSelf: 'flex-start',
-  },
-  planBtnText: {
-    color: colors.sageDeep,
-    fontSize: 13,
-    fontFamily: 'Inter_700Bold',
-  },
-
 });

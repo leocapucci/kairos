@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Animated,
   Pressable,
   ScrollView,
@@ -13,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 import { colors } from '../theme';
-import { EmptyState, Loading } from '../src/design-system';
+import { Card, Button, EmptyState, Loading } from '../src/design-system';
 import {
   completePlanDay,
   getPlans,
@@ -173,7 +172,7 @@ export default function PlansScreen() {
 
             {/* Active plan */}
             {activePlan && (
-              <View style={styles.activePlanCard}>
+              <Card variant="accent" padding="md" style={styles.activePlanCardWrap}>
                 <View style={styles.activePlanHeader}>
                   <Text style={styles.activePlanLabel}>PLANO ATIVO</Text>
                   <Text style={[styles.themeTag, { color: THEME_COLORS[activePlan.theme] ?? colors.gold }]}>
@@ -194,17 +193,13 @@ export default function PlansScreen() {
                 {!planCompleted && (
                   <>
                     {!dayReflection && !dayCompleted && (
-                      <Pressable
+                      <Button
+                        variant="outline"
+                        label={`Fazer Dia ${currentDay}`}
                         onPress={handleFetchDayReflection}
                         disabled={isLoadingReflection}
-                        style={({ pressed }) => [styles.dayButton, pressed && !isLoadingReflection && { opacity: 0.8 }]}
-                      >
-                        {isLoadingReflection ? (
-                          <ActivityIndicator color={colors.gold} />
-                        ) : (
-                          <Text style={styles.dayButtonText}>Fazer Dia {currentDay}</Text>
-                        )}
-                      </Pressable>
+                        loading={isLoadingReflection}
+                      />
                     )}
 
                     {dayReflection ? (
@@ -213,17 +208,13 @@ export default function PlansScreen() {
                           <Text style={styles.reflectionText}>{dayReflection}</Text>
                         </Animated.View>
                         {!dayCompleted && (
-                          <Pressable
+                          <Button
+                            variant="sage"
+                            label={`Concluir Dia ${currentDay} ✓`}
                             onPress={handleCompleteDay}
                             disabled={isCompletingDay}
-                            style={({ pressed }) => [styles.completeButton, pressed && !isCompletingDay && { opacity: 0.8 }]}
-                          >
-                            {isCompletingDay ? (
-                              <ActivityIndicator color={colors.gold} />
-                            ) : (
-                              <Text style={styles.completeButtonText}>Concluir Dia {currentDay} ✓</Text>
-                            )}
-                          </Pressable>
+                            loading={isCompletingDay}
+                          />
                         )}
                       </>
                     ) : null}
@@ -237,7 +228,7 @@ export default function PlansScreen() {
                 {planCompleted && (
                   <Text style={styles.dayDoneText}>Você completou o plano! 🎉</Text>
                 )}
-              </View>
+              </Card>
             )}
 
             {/* Available plans */}
@@ -256,7 +247,7 @@ export default function PlansScreen() {
             {plans
               .filter((p) => p.id !== activePlanId)
               .map((plan) => (
-                <View key={plan.id} style={styles.planCard}>
+                <Card key={plan.id} variant="default" padding="md" style={styles.planCardWrap}>
                   <View style={styles.planCardHeader}>
                     <Text style={[styles.themeTag, { color: THEME_COLORS[plan.theme] ?? colors.gold }]}>
                       {plan.theme.toUpperCase()}
@@ -265,18 +256,14 @@ export default function PlansScreen() {
                   </View>
                   <Text style={styles.planTitle}>{plan.title}</Text>
                   <Text style={styles.planDescription}>{plan.description}</Text>
-                  <Pressable
+                  <Button
+                    variant="outline"
+                    label="Iniciar Plano"
                     onPress={() => handleStartPlan(plan.id)}
                     disabled={!!startingPlanId}
-                    style={({ pressed }) => [styles.startButton, pressed && !startingPlanId && { opacity: 0.8 }]}
-                  >
-                    {startingPlanId === plan.id ? (
-                      <ActivityIndicator color={colors.gold} />
-                    ) : (
-                      <Text style={styles.startButtonText}>Iniciar Plano</Text>
-                    )}
-                  </Pressable>
-                </View>
+                    loading={startingPlanId === plan.id}
+                  />
+                </Card>
               ))}
           </ScrollView>
         )}
@@ -294,14 +281,9 @@ const styles = StyleSheet.create({
   title: { fontSize: 32, fontWeight: '700', color: colors.textPrimary, letterSpacing: -0.5 },
   content: { paddingBottom: 24 },
 
-  activePlanCard: {
-    borderRadius: 14,
-    backgroundColor: 'rgba(200,76,76,0.07)',
-    borderWidth: 1,
-    borderColor: 'rgba(200,76,76,0.25)',
-    padding: 16,
-    marginBottom: 24,
+  activePlanCardWrap: {
     gap: 10,
+    marginBottom: 24,
   },
   activePlanHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   activePlanLabel: { color: colors.textTertiary, fontSize: 11, fontWeight: '500', letterSpacing: 0.8, textTransform: 'uppercase' },
@@ -313,18 +295,6 @@ const styles = StyleSheet.create({
   progressFill: { height: '100%', borderRadius: 2, backgroundColor: colors.gold },
   progressLabel: { color: colors.textSecondary, fontSize: 13 },
 
-  dayButton: {
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.gold,
-    paddingVertical: 12,
-    alignItems: 'center',
-    backgroundColor: 'rgba(200,76,76,0.1)',
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  dayButtonText: { color: colors.gold, fontSize: 15, fontWeight: '600' },
-
   reflectionBox: {
     borderRadius: 12,
     backgroundColor: colors.surfaceDeep,
@@ -335,46 +305,18 @@ const styles = StyleSheet.create({
   },
   reflectionText: { color: colors.white, fontSize: 15, lineHeight: 24 },
 
-  completeButton: {
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#5DCAA5',
-    paddingVertical: 12,
-    alignItems: 'center',
-    backgroundColor: 'rgba(93,202,165,0.12)',
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  completeButtonText: { color: '#5DCAA5', fontSize: 15, fontWeight: '600' },
   dayDoneText: { color: colors.textSecondary, fontSize: 14, textAlign: 'center' },
 
   sectionTitle: { color: colors.grayOrganic, fontSize: 10, fontWeight: '700', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 },
   errorText: { color: '#E07B5A', fontSize: 13, marginBottom: 12, textAlign: 'center' },
 
-  planCard: {
-    borderRadius: 14,
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.08)',
-    padding: 16,
-    marginBottom: 12,
+  planCardWrap: {
     gap: 8,
+    marginBottom: 12,
   },
   planCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   planDays: { color: colors.textTertiary, fontSize: 12 },
   planTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '600' },
   planDescription: { color: colors.textSecondary, fontSize: 14, lineHeight: 20 },
 
-  startButton: {
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(200,76,76,0.45)',
-    paddingVertical: 10,
-    alignItems: 'center',
-    backgroundColor: 'rgba(200,76,76,0.08)',
-    minHeight: 40,
-    justifyContent: 'center',
-    marginTop: 4,
-  },
-  startButtonText: { color: colors.gold, fontSize: 14, fontWeight: '600' },
 });

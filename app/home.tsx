@@ -1,13 +1,14 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BottomNav from '../components/BottomNav';
 import StreakBar from '../components/StreakBar';
 import DarkCard from '../components/ui/DarkCard';
-import { colors, radius, spacing } from '../theme';
+import { colors, spacing } from '../theme';
 import { getDaily } from '../services/api';
+import { Card, Loading } from '../src/design-system';
 
 type CardType = 'conforto' | 'confronto';
 
@@ -46,25 +47,12 @@ function getFormattedDate(): string {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const pulse = useRef(new Animated.Value(0.3)).current;
   const [isLoading, setIsLoading] = useState(true);
   const [dailyMessageId, setDailyMessageId] = useState<string | undefined>();
   const [cards, setCards] = useState<{ type: CardType; text: string }[]>(
     CARD_ORDER.map((type) => ({ type, text: FALLBACK[type] }))
   );
   const [verse, setVerse] = useState<VerseData | null>(null);
-
-  useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 0.55, duration: 1000, useNativeDriver: false }),
-        Animated.timing(pulse, { toValue: 0.15, duration: 1000, useNativeDriver: false }),
-      ])
-    );
-    if (isLoading) anim.start();
-    else { pulse.stopAnimation(); pulse.setValue(0.3); anim.stop(); }
-    return () => anim.stop();
-  }, [isLoading, pulse]);
 
   useEffect(() => {
     fetch('https://kairos-backend-vjdp.onrender.com/bible/verse-of-day')
@@ -115,10 +103,12 @@ export default function HomeScreen() {
 
         {/* Verse of Day */}
         {verse && (
-          <Pressable onPress={() => router.push('/bible')} style={({ pressed }) => [styles.verseCard, pressed && { opacity: 0.85 }]}>
-            <Text style={styles.verseLabel}>VERSÍCULO DO DIA</Text>
-            <Text style={styles.verseText}>{verse.text}</Text>
-            <Text style={styles.verseRef}>{verse.book} {verse.chapter}:{verse.verse_number}</Text>
+          <Pressable onPress={() => router.push('/bible')} style={({ pressed }) => [styles.verseCardWrap, pressed && { opacity: 0.85 }]}>
+            <Card variant="beige" padding="lg">
+              <Text style={styles.verseLabel}>VERSÍCULO DO DIA</Text>
+              <Text style={styles.verseText}>{verse.text}</Text>
+              <Text style={styles.verseRef}>{verse.book} {verse.chapter}:{verse.verse_number}</Text>
+            </Card>
           </Pressable>
         )}
 
@@ -128,11 +118,7 @@ export default function HomeScreen() {
         {/* Cards */}
         <View style={styles.cardsContainer}>
           {isLoading ? (
-            <View style={styles.skeletonGroup}>
-              <Animated.View style={[styles.skeleton, { opacity: pulse }]} />
-              <Animated.View style={[styles.skeleton, { opacity: pulse }]} />
-              <Text style={styles.loadingHint}>Preparando sua direção...</Text>
-            </View>
+            <Loading message="Preparando sua direção..." />
           ) : (
             <>
               {cards.map((card) => (
@@ -198,14 +184,9 @@ const styles = StyleSheet.create({
     height: 180,
   },
 
-  verseCard: {
+  verseCardWrap: {
     marginHorizontal: 20,
     marginTop: 20,
-    backgroundColor: colors.beige,
-    borderRadius: radius.md,
-    paddingTop: 28,
-    paddingBottom: 24,
-    paddingHorizontal: 24,
     marginBottom: spacing.md,
   },
   verseLabel: {
@@ -242,20 +223,5 @@ const styles = StyleSheet.create({
 
   cardsContainer: {
     paddingHorizontal: 20,
-  },
-  skeletonGroup: {
-    gap: 8,
-  },
-  skeleton: {
-    backgroundColor: colors.borderSoft,
-    borderRadius: radius.md,
-    height: 140,
-  },
-  loadingHint: {
-    marginTop: spacing.sm,
-    color: colors.grayOrganic,
-    fontSize: 13,
-    fontFamily: 'Inter_400Regular',
-    textAlign: 'center',
   },
 });

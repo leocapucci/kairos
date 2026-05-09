@@ -1,6 +1,8 @@
-import { ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ImageBackground, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import { colors } from '../theme';
+import { Card, Button } from '../src/design-system';
 
 export default function Index() {
   return (
@@ -31,28 +33,29 @@ export default function Index() {
             {'Reflexões profundas, presença e clareza\nespiritual para sua caminhada.'}
           </Text>
 
-          <Pressable
-            style={({ pressed }) => [styles.btn, pressed && { opacity: 0.85 }]}
-            onPress={() => router.push('/onboarding')}
-          >
-            <Text style={styles.btnText}>Começar jornada</Text>
-            <Text style={styles.btnArrow}>→</Text>
-          </Pressable>
+          <View style={styles.btnWrap}>
+            <Button
+              variant="sage"
+              label="Começar jornada →"
+              onPress={() => router.push('/onboarding')}
+            />
+          </View>
 
-          <Pressable
-            style={({ pressed }) => [styles.link, pressed && { opacity: 0.5 }]}
-            onPress={() => router.push('/home')}
-          >
-            <Text style={styles.linkText}>Já tenho uma conta</Text>
-          </Pressable>
+          <View style={styles.linkWrap}>
+            <Button
+              variant="ghost"
+              label="Já tenho uma conta"
+              onPress={() => router.push('/home')}
+            />
+          </View>
         </View>
 
-        <View style={styles.card}>
+        <Card variant="default" style={styles.card}>
           <Text style={styles.cardIcon}>🌿</Text>
           <Text style={styles.cardText}>
             {'Antes do caos, encontre presença.\nAntes da pressa, encontre direção.'}
           </Text>
-        </View>
+        </Card>
 
       </View>
     </ImageBackground>
@@ -74,19 +77,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     letterSpacing: 5,
     fontWeight: '600',
-    color: '#C8A46B',
+    color: colors.gold,
   },
   tagline: {
     fontSize: 11,
     letterSpacing: 3,
-    color: '#6E675F',
+    color: colors.grayOrganic,
     marginTop: 6,
     fontWeight: '500',
   },
   accentLine: {
     width: 36,
     height: 2.5,
-    backgroundColor: '#C84C4C',
+    backgroundColor: colors.accent,
     marginTop: 10,
   },
 
@@ -94,12 +97,12 @@ const styles = StyleSheet.create({
   headline: {
     fontSize: 46,
     fontWeight: '300',
-    color: '#2D261F',
+    color: colors.blackSoft,
     lineHeight: 54,
     letterSpacing: -0.5,
   },
   headlineGold: {
-    color: '#C8A46B',
+    color: colors.gold,
     fontStyle: 'italic',
     fontWeight: '300',
   },
@@ -107,46 +110,15 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 15,
     lineHeight: 24,
-    color: '#6E675F',
+    color: colors.grayOrganic,
     letterSpacing: 0.1,
   },
 
-  btn: {
-    height: 62,
+  btnWrap: {
     marginTop: 32,
-    backgroundColor: '#7A9E7E',
-    borderRadius: 18,
-    paddingHorizontal: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
-    elevation: 8,
   },
-  btnText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  btnArrow: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '700',
-  },
-
-  link: {
-    marginTop: 20,
-    alignSelf: 'center',
-    paddingVertical: 8,
-  },
-  linkText: {
-    fontSize: 15,
-    color: '#6E675F',
-    borderBottomWidth: 1,
-    borderBottomColor: '#6E675F',
+  linkWrap: {
+    marginTop: 12,
   },
 
   card: {
@@ -163,7 +135,7 @@ const styles = StyleSheet.create({
   cardText: {
     flex: 1,
     fontSize: 14,
-    color: '#2D261F',
+    color: colors.blackSoft,
     lineHeight: 22,
   },
 });
