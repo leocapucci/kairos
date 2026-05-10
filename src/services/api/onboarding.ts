@@ -1,8 +1,13 @@
-const BASE = 'https://kairos-backend-vjdp.onrender.com';
+import { BASE_URL, post } from './http';
+import { logger } from '../../utils/logger';
 
-export const postOnboardingAnswers = (answers: { question_key: string; answer: string }[]) =>
-  fetch(`${BASE}/onboarding`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ answers }),
-  });
+export type OnboardingAnswer = { question_key: string; answer: string };
+
+export const postOnboardingAnswers = async (answers: OnboardingAnswer[]): Promise<void> => {
+  try {
+    await post(`${BASE_URL}/onboarding`, { answers });
+  } catch (err) {
+    logger.error('postOnboardingAnswers failed', err);
+    // swallow — onboarding failure must not block navigation to home
+  }
+};
