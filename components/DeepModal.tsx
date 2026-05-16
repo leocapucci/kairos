@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 
-import { colors } from '../theme';
+import { animation, colors, dark, radius, spacing } from '../theme';
 import { postDeep } from '../services/api';
 import { shareKairos } from '../src/services/api/share';
 
@@ -44,43 +44,50 @@ export default function DeepModal({
     [userChoice]
   );
 
+  // Slide animation
   useEffect(() => {
     if (!visible) {
       setDeepText('');
+      setDeepErrorMessage('');
       return;
     }
-
     Animated.timing(slide, {
       toValue: 0,
-      duration: 260,
+      duration: animation.modalIn,
       useNativeDriver: true,
     }).start();
   }, [slide, visible]);
 
+  // Data fetch with AbortController to prevent race conditions
   useEffect(() => {
     if (!visible || !interactionId || !userChoice) return;
 
-    const loadDeep = async () => {
-      setIsLoading(true);
-      try {
-        const response = await postDeep(interactionId, userChoice);
-        const data = ((response as any)?.data ?? {}) as DeepResponse;
-        setDeepText(data.response ?? data.message ?? data.text ?? 'Sem resposta no momento.');
-        setDeepErrorMessage('');
-      } catch {
-        setDeepErrorMessage('Não foi possível carregar a resposta aprofundada.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    const ctrl = new AbortController();
+    setIsLoading(true);
+    setDeepText('');
+    setDeepErrorMessage('');
 
-    loadDeep();
+    postDeep(interactionId, userChoice, ctrl.signal)
+      .then((response) => {
+        if (ctrl.signal.aborted) return;
+        const data = response.data as DeepResponse;
+        setDeepText(data.response ?? data.message ?? data.text ?? 'Sem resposta no momento.');
+      })
+      .catch(() => {
+        if (ctrl.signal.aborted) return;
+        setDeepErrorMessage('Não foi possível carregar a resposta aprofundada.');
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setIsLoading(false);
+      });
+
+    return () => ctrl.abort();
   }, [interactionId, userChoice, visible]);
 
   const handleClose = () => {
     Animated.timing(slide, {
       toValue: 320,
-      duration: 220,
+      duration: animation.modalOut,
       useNativeDriver: true,
     }).start(onClose);
   };
@@ -90,17 +97,17 @@ export default function DeepModal({
       <View style={styles.backdrop}>
         <Pressable style={styles.backdropTouch} onPress={handleClose} />
         <Animated.View style={[styles.sheet, { transform: [{ translateY: slide }] }]}>
-          <Pressable onPress={handleClose} style={styles.closeButton}>
-            <Text style={styles.closeIcon}>X</Text>
+          <Pressable onPress={handleClose} style={styles.closeButton} hitSlop={8}>
+            <Text style={styles.closeIcon}>✕</Text>
           </Pressable>
 
-          <Text style={styles.questionLabel}>PERGUNTA</Text>
+          <Text style={styles.sectionLabel}>PERGUNTA</Text>
           <Text style={styles.questionText}>{question}</Text>
 
-          <Text style={styles.choiceLabel}>ESCOLHA</Text>
+          <Text style={styles.sectionLabel}>ESCOLHA</Text>
           <Text style={styles.choiceText}>{choiceLabel}</Text>
 
-          <Text style={styles.answerLabel}>RESPOSTA</Text>
+          <Text style={styles.sectionLabel}>RESPOSTA</Text>
           {isLoading ? (
             <View style={styles.loadingWrap}>
               <ActivityIndicator color={colors.gold} />
@@ -109,8 +116,12 @@ export default function DeepModal({
             <>
               <Text style={styles.answerText}>{deepText}</Text>
               {deepText ? (
-                <Pressable onPress={() => shareKairos(deepText)} style={styles.shareButton}>
-                  <Text style={styles.shareButtonText}>Compartilhar 🔗</Text>
+                <Pressable
+                  onPress={() => shareKairos(deepText)}
+                  style={styles.shareButton}
+                  hitSlop={4}
+                >
+                  <Text style={styles.shareButtonText}>Compartilhar</Text>
                 </Pressable>
               ) : null}
             </>
@@ -128,19 +139,17 @@ export default function DeepModal({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: dark.backdrop,
     justifyContent: 'flex-end',
   },
-  backdropTouch: {
-    flex: 1,
-  },
+  backdropTouch: { flex: 1 },
   sheet: {
     backgroundColor: colors.surfaceDeep,
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
-    paddingHorizontal: 18,
-    paddingTop: 16,
-    paddingBottom: 26,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    paddingHorizontal: spacing.md + 2,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.lg + 2,
     minHeight: 330,
   },
   closeButton: {
@@ -153,55 +162,54 @@ const styles = StyleSheet.create({
   closeIcon: {
     color: colors.textSecondary,
     fontSize: 15,
-    fontWeight: '500',
+    fontFamily: 'Inter_400Regular',
   },
-  questionLabel: {
+  sectionLabel: {
     color: colors.textTertiary,
-    fontSize: 11,
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
     textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 6,
+    letterSpacing: 1.5,
+    marginBottom: spacing.xs + 2,
   },
   questionText: {
     color: colors.textPrimary,
     fontSize: 15,
+    fontFamily: 'Inter_400Regular',
     lineHeight: 22,
-    marginBottom: 14,
-  },
-  choiceLabel: {
-    color: colors.textTertiary,
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 6,
+    marginBottom: spacing.md,
   },
   choiceText: {
     color: colors.gold,
     fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 14,
-  },
-  answerLabel: {
-    color: colors.textTertiary,
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 6,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: spacing.md,
   },
   answerText: {
     color: colors.textPrimary,
     fontSize: 14,
+    fontFamily: 'Inter_400Regular',
     lineHeight: 22,
   },
-  shareButton: { alignSelf: 'center', marginTop: 10, paddingVertical: 8, paddingHorizontal: 16 },
-  shareButtonText: { color: colors.textSecondary, fontSize: 13 },
+  shareButton: {
+    alignSelf: 'center',
+    marginTop: spacing.sm + 2,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  shareButtonText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+  },
   loadingWrap: {
     paddingVertical: 18,
     alignItems: 'flex-start',
   },
   errorText: {
-    marginTop: 10,
+    marginTop: spacing.sm + 2,
     color: colors.textSecondary,
     fontSize: 13,
+    fontFamily: 'Inter_400Regular',
   },
 });

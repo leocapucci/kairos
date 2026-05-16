@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -8,71 +10,52 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 
 import BottomNav from '../components/BottomNav';
-import { Card, Button, EmptyState, Loading } from '../src/design-system';
 import VerseCard from '../components/ui/VerseCard';
+import { Button, Card, EmptyState, Loading } from '../src/design-system';
+import { useVerseOfDay } from '../src/query/hooks/useVerse';
+import { usePlansData } from '../src/query/hooks/usePlans';
+import { searchBible } from '../services/api';
 import { colors, radius, spacing } from '../theme';
-import { getPlans, searchBible } from '../services/api';
 
 type SearchResult = { book: string; chapter: number; verse: number; text: string };
 type Plan = { id: string; title: string; description: string; days: number; theme: string };
-type VerseData = { text: string; book: string; chapter: number; verse_number: number };
 
 const TABS = ['Livros', 'Planos', 'Salvos'] as const;
-type Tab = typeof TABS[number];
+type Tab = (typeof TABS)[number];
 
 export default function BibleScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('Livros');
-
-  const [verse, setVerse] = useState<VerseData | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
 
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [isLoadingPlans, setIsLoadingPlans] = useState(false);
+  // Verse of the day — shared cache with home.tsx (same queryKey)
+  const { data: verse } = useVerseOfDay();
 
-  useEffect(() => {
-    fetch('https://kairos-backend-vjdp.onrender.com/bible/verse-of-day')
-      .then((r) => r.json())
-      .then(setVerse)
-      .catch(() => {});
-  }, []);
+  // Plans — loaded only when Planos tab is active (lazy loading)
+  const { plans, isLoading: isLoadingPlans } = usePlansData({ enabled: activeTab === 'Planos' });
 
-  useEffect(() => {
-    if (activeTab !== 'Planos' || plans.length > 0) return;
-    setIsLoadingPlans(true);
-    getPlans()
-      .then((res) => setPlans(((res as any)?.data as Plan[]) ?? []))
-      .catch(() => {})
-      .finally(() => setIsLoadingPlans(false));
-  }, [activeTab, plans.length]);
+  // Bible search — mutation (user-triggered, not auto-fetched)
+  const searchMutation = useMutation({
+    mutationFn: async (q: string) => {
+      const res = await searchBible(q);
+      return res.data.results as SearchResult[];
+    },
+  });
 
-  const handleSearch = async () => {
+  const handleSearch = () => {
     const q = searchQuery.trim();
     if (!q) return;
-    setIsSearching(true);
-    setHasSearched(false);
-    setSearchResults([]);
-    try {
-      const res = await searchBible(q);
-      const data = (res as any)?.data ?? res ?? {};
-      setSearchResults((data as any)?.results ?? []);
-    } catch {
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-      setHasSearched(true);
-    }
+    searchMutation.mutate(q);
   };
+
+  const searchResults = searchMutation.data ?? [];
+  const isSearching = searchMutation.isPending;
+  const hasSearched = searchMutation.isSuccess || searchMutation.isError;
 
   return (
     <SafeAreaView style={styles.safe}>
-
       <View style={styles.titleBar}>
         <Text style={styles.title}>Bíblia</Text>
       </View>
@@ -80,14 +63,19 @@ export default function BibleScreen() {
       <View style={styles.tabBar}>
         {TABS.map((tab) => (
           <Pressable key={tab} onPress={() => setActiveTab(tab)} style={styles.tabItem}>
-            <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>{tab}</Text>
+            <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
+              {tab}
+            </Text>
             {activeTab === tab && <View style={styles.tabUnderline} />}
           </Pressable>
         ))}
       </View>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         {/* ── LIVROS ── */}
         {activeTab === 'Livros' && (
           <>
@@ -96,7 +84,9 @@ export default function BibleScreen() {
                 text={verse.text}
                 reference={`${verse.book} ${verse.chapter}:${verse.verse_number}`}
                 onPress={() =>
-                  router.push(`/verse-experience?book=${encodeURIComponent(verse.book)}&chapter=${verse.chapter}&verse=${verse.verse_number}&text=${encodeURIComponent(verse.text)}`)
+                  router.push(
+                    `/verse-experience?book=${encodeURIComponent(verse.book)}&chapter=${verse.chapter}&verse=${verse.verse_number}&text=${encodeURIComponent(verse.text)}`,
+                  )
                 }
               />
             )}
@@ -134,13 +124,22 @@ export default function BibleScreen() {
             {searchResults.map((item, i) => (
               <Pressable
                 key={`${item.book}-${item.chapter}-${item.verse}-${i}`}
-                style={({ pressed }) => [styles.searchResult, pressed && { opacity: 0.7 }]}
+                style={({ pressed }) => [
+                  styles.searchResult,
+                  pressed && { opacity: 0.7 },
+                ]}
                 onPress={() =>
-                  router.push(`/verse-experience?book=${encodeURIComponent(item.book)}&chapter=${item.chapter}&verse=${item.verse}&text=${encodeURIComponent(item.text)}`)
+                  router.push(
+                    `/verse-experience?book=${encodeURIComponent(item.book)}&chapter=${item.chapter}&verse=${item.verse}&text=${encodeURIComponent(item.text)}`,
+                  )
                 }
               >
-                <Text style={styles.searchResultRef}>{item.book} {item.chapter}:{item.verse}</Text>
-                <Text style={styles.searchResultText} numberOfLines={3}>{item.text}</Text>
+                <Text style={styles.searchResultRef}>
+                  {item.book} {item.chapter}:{item.verse}
+                </Text>
+                <Text style={styles.searchResultText} numberOfLines={3}>
+                  {item.text}
+                </Text>
               </Pressable>
             ))}
           </>
@@ -152,9 +151,13 @@ export default function BibleScreen() {
             {isLoadingPlans ? (
               <Loading message="Carregando planos..." />
             ) : plans.length === 0 ? (
-              <EmptyState icon="📖" title="Ainda não temos planos aqui" description="Novos planos chegam em breve. Volte logo." />
+              <EmptyState
+                icon="📖"
+                title="Ainda não temos planos aqui"
+                description="Novos planos chegam em breve. Volte logo."
+              />
             ) : (
-              plans.map((plan) => (
+              (plans as Plan[]).map((plan) => (
                 <Card key={plan.id} variant="beige" padding="lg" style={styles.planCardWrap}>
                   <View style={styles.planMeta}>
                     <Text style={styles.planTheme}>{plan.theme.toUpperCase()}</Text>
@@ -162,7 +165,11 @@ export default function BibleScreen() {
                   </View>
                   <Text style={styles.planTitle}>{plan.title}</Text>
                   <Text style={styles.planDesc}>{plan.description}</Text>
-                  <Button variant="ghost" label="Acessar plano →" onPress={() => router.push('/plans')} />
+                  <Button
+                    variant="ghost"
+                    label="Acessar plano →"
+                    onPress={() => router.push('/plans')}
+                  />
                 </Card>
               ))
             )}
@@ -171,9 +178,12 @@ export default function BibleScreen() {
 
         {/* ── SALVOS ── */}
         {activeTab === 'Salvos' && (
-          <EmptyState icon="🔖" title="Nenhum versículo salvo ainda" description="Salve versículos que tocaram seu coração" />
+          <EmptyState
+            icon="🔖"
+            title="Nenhum versículo salvo ainda"
+            description="Salve versículos que tocaram seu coração"
+          />
         )}
-
       </ScrollView>
 
       <BottomNav />
@@ -280,10 +290,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     fontFamily: 'Inter_400Regular',
   },
-
-  planCardWrap: {
-    marginBottom: spacing.sm,
-  },
+  planCardWrap: { marginBottom: spacing.sm },
   planMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',

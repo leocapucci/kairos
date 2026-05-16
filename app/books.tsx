@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,78 +10,33 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-import { colors } from '../theme';
+import { colors, radius, spacing } from '../theme';
+import { getBooks } from '../src/services/api/bible';
 
 function normalizeBookName(name: string): string {
   const corrections: Record<string, string> = {
-    'Genesis': 'Gênesis',
-    'Exodus': 'Êxodo',
-    'Leviticus': 'Levítico',
-    'Numbers': 'Números',
-    'Deuteronomy': 'Deuteronômio',
-    'Joshua': 'Josué',
-    'Judges': 'Juízes',
-    'Ruth': 'Rute',
-    '1 Samuel': '1 Samuel',
-    '2 Samuel': '2 Samuel',
-    '1 Kings': '1 Reis',
-    '2 Kings': '2 Reis',
-    '1 Chronicles': '1 Crônicas',
-    '2 Chronicles': '2 Crônicas',
-    'Ezra': 'Esdras',
-    'Nehemiah': 'Neemias',
-    'Esther': 'Ester',
-    'Job': 'Jó',
-    'Psalms': 'Salmos',
-    'Proverbs': 'Provérbios',
-    'Ecclesiastes': 'Eclesiastes',
-    'Song of Solomon': 'Cânticos',
-    'Song of Songs': 'Cânticos',
-    'Canticles': 'Cânticos',
-    'Isaiah': 'Isaías',
-    'Jeremiah': 'Jeremias',
-    'Lamentations': 'Lamentações',
-    'Ezekiel': 'Ezequiel',
-    'Daniel': 'Daniel',
-    'Hosea': 'Oséias',
-    'Joel': 'Joel',
-    'Amos': 'Amós',
-    'Obadiah': 'Obadias',
-    'Jonah': 'Jonas',
-    'Micah': 'Miquéias',
-    'Nahum': 'Naum',
-    'Habakkuk': 'Habacuque',
-    'Zephaniah': 'Sofonias',
-    'Haggai': 'Ageu',
-    'Zechariah': 'Zacarias',
-    'Malachi': 'Malaquias',
-    'Matthew': 'Mateus',
-    'Mark': 'Marcos',
-    'Luke': 'Lucas',
-    'John': 'João',
-    'Acts': 'Atos',
-    'Romans': 'Romanos',
-    '1 Corinthians': '1 Coríntios',
-    '2 Corinthians': '2 Coríntios',
-    'Galatians': 'Gálatas',
-    'Ephesians': 'Efésios',
-    'Philippians': 'Filipenses',
-    'Colossians': 'Colossenses',
-    '1 Thessalonians': '1 Tessalonicenses',
-    '2 Thessalonians': '2 Tessalonicenses',
-    '1 Timothy': '1 Timóteo',
-    '2 Timothy': '2 Timóteo',
-    'Titus': 'Tito',
-    'Philemon': 'Filemom',
-    'Hebrews': 'Hebreus',
-    'James': 'Tiago',
-    '1 Peter': '1 Pedro',
-    '2 Peter': '2 Pedro',
-    '1 John': '1 João',
-    '2 John': '2 João',
-    '3 John': '3 João',
-    'Jude': 'Judas',
-    'Revelation': 'Apocalipse',
+    Genesis: 'Gênesis', Exodus: 'Êxodo', Leviticus: 'Levítico', Numbers: 'Números',
+    Deuteronomy: 'Deuteronômio', Joshua: 'Josué', Judges: 'Juízes', Ruth: 'Rute',
+    '1 Samuel': '1 Samuel', '2 Samuel': '2 Samuel',
+    '1 Kings': '1 Reis', '2 Kings': '2 Reis',
+    '1 Chronicles': '1 Crônicas', '2 Chronicles': '2 Crônicas',
+    Ezra: 'Esdras', Nehemiah: 'Neemias', Esther: 'Ester',
+    Job: 'Jó', Psalms: 'Salmos', Proverbs: 'Provérbios', Ecclesiastes: 'Eclesiastes',
+    'Song of Solomon': 'Cânticos', 'Song of Songs': 'Cânticos', Canticles: 'Cânticos',
+    Isaiah: 'Isaías', Jeremiah: 'Jeremias', Lamentations: 'Lamentações',
+    Ezekiel: 'Ezequiel', Daniel: 'Daniel', Hosea: 'Oséias', Joel: 'Joel',
+    Amos: 'Amós', Obadiah: 'Obadias', Jonah: 'Jonas', Micah: 'Miquéias',
+    Nahum: 'Naum', Habakkuk: 'Habacuque', Zephaniah: 'Sofonias', Haggai: 'Ageu',
+    Zechariah: 'Zacarias', Malachi: 'Malaquias', Matthew: 'Mateus', Mark: 'Marcos',
+    Luke: 'Lucas', John: 'João', Acts: 'Atos', Romans: 'Romanos',
+    '1 Corinthians': '1 Coríntios', '2 Corinthians': '2 Coríntios',
+    Galatians: 'Gálatas', Ephesians: 'Efésios', Philippians: 'Filipenses',
+    Colossians: 'Colossenses', '1 Thessalonians': '1 Tessalonicenses',
+    '2 Thessalonians': '2 Tessalonicenses', '1 Timothy': '1 Timóteo',
+    '2 Timothy': '2 Timóteo', Titus: 'Tito', Philemon: 'Filemom',
+    Hebrews: 'Hebreus', James: 'Tiago', '1 Peter': '1 Pedro', '2 Peter': '2 Pedro',
+    '1 John': '1 João', '2 John': '2 João', '3 John': '3 João',
+    Jude: 'Judas', Revelation: 'Apocalipse',
   };
   return corrections[name] || name;
 }
@@ -95,33 +49,25 @@ export default function BooksScreen() {
   const filteredBooks = useMemo(() => {
     return books
       .map(normalizeBookName)
-      .filter(book => book.toLowerCase().includes(search.toLowerCase()));
+      .filter((book) => book.toLowerCase().includes(search.toLowerCase()));
   }, [books, search]);
 
-  // Divisão AT/NT: índices 0-38 (39 livros) = AT, índices 39-65 (27 livros) = NT
   const oldTestament = filteredBooks.slice(0, 39);
   const newTestament = filteredBooks.slice(39);
 
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await fetch('https://kairos-backend-vjdp.onrender.com/bible/books');
-        const data = await response.json();
-        const normalizedBooks = (data.books || []).map(normalizeBookName);
-        setBooks(normalizedBooks);
-      } catch (error) {
-        console.error('Erro ao buscar livros:', error);
-      }
-    };
-
-    fetchBooks();
+    let isMounted = true;
+    getBooks()
+      .then((list) => { if (isMounted) setBooks(list); })
+      .catch(() => {});
+    return () => { isMounted = false; };
   }, []);
 
   const renderBookItem = (book: string) => (
     <Pressable
       key={book}
       onPress={() => router.push(`/chapters?book=${encodeURIComponent(book)}`)}
-      style={styles.bookItem}
+      style={({ pressed }) => [styles.bookItem, pressed && { opacity: 0.7 }]}
     >
       <Text style={styles.bookText}>{book}</Text>
       <Text style={styles.arrow}>›</Text>
@@ -132,7 +78,7 @@ export default function BooksScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Pressable onPress={() => router.back()} style={styles.backButton} hitSlop={8}>
             <Text style={styles.backIcon}>‹</Text>
           </Pressable>
           <Text style={styles.title}>BÍBLIA</Text>
@@ -168,34 +114,64 @@ export default function BooksScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.background },
-  container: { flex: 1, paddingHorizontal: 20, paddingTop: 6, paddingBottom: 12 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, position: 'relative' },
-  backButton: { position: 'absolute', left: 0, width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
-  backIcon: { color: colors.textPrimary, fontSize: 24, lineHeight: 24 },
-  title: { fontSize: 18, fontWeight: '600', color: colors.textPrimary },
+  container: {
+    flex: 1,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.sm,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.md,
+    position: 'relative',
+  },
+  backButton: {
+    position: 'absolute',
+    left: 0,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backIcon: { color: colors.textPrimary, fontSize: 24, lineHeight: 24, fontFamily: 'Inter_400Regular' },
+  title: { fontSize: 18, fontFamily: 'Inter_700Bold', color: colors.textPrimary, letterSpacing: 2 },
+
   searchInput: {
-    borderRadius: 8,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.textTertiary,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 16,
+    borderColor: colors.borderSoft,
+    paddingHorizontal: spacing.sm + 4,
+    paddingVertical: spacing.sm + 2,
+    marginBottom: spacing.md,
     color: colors.textPrimary,
     fontSize: 16,
+    fontFamily: 'Inter_400Regular',
+    backgroundColor: colors.surface,
   },
   scrollView: { flex: 1 },
-  section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: colors.textSecondary, marginBottom: 12 },
+  section: { marginBottom: spacing.lg },
+  sectionTitle: {
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    color: colors.textTertiary,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginBottom: spacing.sm,
+  },
   bookItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    marginBottom: 4,
+    paddingVertical: spacing.sm + 4,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.sm,
+    backgroundColor: colors.surface,
+    marginBottom: spacing.xs,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderSoft,
   },
-  bookText: { fontSize: 16, color: colors.textPrimary },
-  arrow: { fontSize: 18, color: colors.textTertiary },
+  bookText: { fontSize: 15, fontFamily: 'Inter_400Regular', color: colors.textPrimary },
+  arrow: { fontSize: 18, fontFamily: 'Inter_400Regular', color: colors.textTertiary },
 });

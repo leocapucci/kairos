@@ -1,22 +1,18 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, radius, spacing } from '../theme';
 import { postOnboarding } from '../services/api';
 import { Button } from '../src/design-system';
+import { E, track } from '../src/analytics';
 
-type Option = {
-  value: string;
-  label: string;
-};
+export const ONBOARDING_ANSWERS_KEY = 'kairos_onboarding_v1';
 
-type OnboardingQuestion = {
-  key: string;
-  question: string;
-  options: Option[];
-};
+type Option = { value: string; label: string };
+type OnboardingQuestion = { key: string; question: string; options: Option[] };
 
 const QUESTIONS: OnboardingQuestion[] = [
   {
@@ -53,22 +49,33 @@ const QUESTIONS: OnboardingQuestion[] = [
   },
 ];
 
+type Phase = 'intro' | 'questions' | 'transitioning';
+
 export default function OnboardingScreen() {
   const router = useRouter();
+  const [phase, setPhase] = useState<Phase>('intro');
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
+
+  useEffect(() => {
+    track(E.ONBOARDING_STARTED);
+  }, []);
+
+  // Navigate to home after transition delay
+  useEffect(() => {
+    if (phase !== 'transitioning') return;
+    const timer = setTimeout(() => { router.replace('/home'); }, 2000);
+    return () => clearTimeout(timer);
+  }, [phase, router]);
 
   const currentQuestion = QUESTIONS[step];
-  const selectedValue = answers[currentQuestion.key];
+  const selectedValue = answers[currentQuestion?.key ?? ''];
   const isLastStep = step === QUESTIONS.length - 1;
 
   const progress = useMemo(
-    () =>
-      QUESTIONS.map((_, index) => ({
-        id: `dot_${index}`,
-        active: index <= step,
-      })),
+    () => QUESTIONS.map((_, i) => ({ id: `dot_${i}`, active: i <= step })),
     [step]
   );
 
@@ -79,44 +86,100 @@ export default function OnboardingScreen() {
   const handleContinue = async () => {
     if (!selectedValue || isSubmitting) return;
 
+    track(E.ONBOARDING_STEP_COMPLETED, {
+      step,
+      question_key: currentQuestion.key,
+      answer: selectedValue,
+    });
+
     if (!isLastStep) {
       setStep((prev) => prev + 1);
       return;
     }
 
     setIsSubmitting(true);
+    setSubmitError(false);
 
     try {
-      const payload = QUESTIONS.map((question) => ({
-        question_key: question.key,
-        answer: answers[question.key] ?? '',
-      }));
-
+      const payload = QUESTIONS.map((q) => ({ question_key: q.key, answer: answers[q.key] ?? '' }));
       await postOnboarding(payload);
+      // Save locally — used by home screen for context display + interaction personalization
+      await AsyncStorage.setItem(ONBOARDING_ANSWERS_KEY, JSON.stringify(answers)).catch(() => {});
+      track(E.ONBOARDING_COMPLETED, { answers });
+      setPhase('transitioning');
     } catch (e) {
-      console.log(e);
-    } finally {
       setIsSubmitting(false);
-      router.replace('/home');
+      setSubmitError(true);
+      track(E.ONBOARDING_FAILED, { error: e instanceof Error ? e.message : String(e) });
     }
   };
+
+  const handleSkip = () => {
+    track(E.ONBOARDING_SKIPPED, { step });
+    router.replace('/home');
+  };
+
+  // ─── Intro ───────────────────────────────────────────────────────────────────
+
+  if (phase === 'intro') {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.container}>
+          <View style={styles.brand}>
+            <Text style={styles.brandName}>KAIROS</Text>
+            <Text style={styles.brandTagline}>Favor sem merecimento.</Text>
+          </View>
+
+          <View style={styles.introContent}>
+            <Text style={styles.introHeading}>
+              O Kairos vai te entregar uma direção espiritual todos os dias.
+            </Text>
+            <View style={styles.introAccent} />
+            <Text style={styles.introBody}>
+              Ela será moldada pelo que você está vivendo agora.
+            </Text>
+            <Text style={styles.introMinute}>Menos de 1 minuto.</Text>
+          </View>
+
+          <Button
+            label="Começar →"
+            onPress={() => setPhase('questions')}
+            variant="primary"
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // ─── Transition ──────────────────────────────────────────────────────────────
+
+  if (phase === 'transitioning') {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.transitionContainer}>
+          <Text style={styles.brandName}>KAIROS</Text>
+          <Text style={styles.transitionText}>Sua direção está sendo preparada.</Text>
+          <ActivityIndicator color={colors.accent} size="small" style={styles.transitionLoader} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // ─── Questions ───────────────────────────────────────────────────────────────
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
 
-        {/* Brand */}
         <View style={styles.brand}>
           <Text style={styles.brandName}>KAIROS</Text>
           <Text style={styles.brandTagline}>Favor sem merecimento.</Text>
         </View>
 
-        {/* Greeting — only on first step */}
         {step === 0 && (
           <Text style={styles.greeting}>Olá, bom te{'\n'}ver aqui!</Text>
         )}
 
-        {/* Progress */}
         <View style={styles.progressContainer}>
           {progress.map((item) => (
             <View
@@ -149,14 +212,24 @@ export default function OnboardingScreen() {
           })}
         </View>
 
+        {submitError && (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>
+              Não foi possível salvar suas respostas. Tente novamente ou continue sem salvar.
+            </Text>
+            <Pressable onPress={handleSkip} style={styles.skipLink}>
+              <Text style={styles.skipLinkText}>Continuar mesmo assim</Text>
+            </Pressable>
+          </View>
+        )}
+
         <Button
-          label={isLastStep ? 'Receber direção →' : 'Continuar →'}
+          label={isLastStep ? (submitError ? 'Tentar novamente' : 'Receber direção →') : 'Continuar →'}
           onPress={handleContinue}
           disabled={!selectedValue}
           loading={isSubmitting}
           variant="primary"
         />
-
 
       </View>
     </SafeAreaView>
@@ -194,6 +267,67 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 
+  // ── Intro
+  introContent: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    gap: 0,
+  },
+  introHeading: {
+    color: colors.text,
+    fontSize: 28,
+    fontFamily: 'Inter_700Bold',
+    lineHeight: 38,
+    letterSpacing: -0.5,
+    marginBottom: spacing.lg,
+  },
+  introAccent: {
+    width: 30,
+    height: 2,
+    backgroundColor: colors.accent,
+    borderRadius: 1,
+    marginBottom: spacing.lg,
+  },
+  introBody: {
+    color: colors.text,
+    fontSize: 18,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 28,
+    letterSpacing: 0.1,
+    marginBottom: spacing.md,
+    opacity: 0.82,
+  },
+  introMinute: {
+    color: colors.gray,
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    fontStyle: 'italic',
+    letterSpacing: 0.2,
+  },
+
+  // ── Transition
+  transitionContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.lg,
+    paddingHorizontal: 40,
+  },
+  transitionText: {
+    color: colors.text,
+    fontSize: 20,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
+    lineHeight: 30,
+    letterSpacing: 0.1,
+    opacity: 0.85,
+  },
+  transitionLoader: {
+    marginTop: spacing.sm,
+  },
+
+  // ── Questions
   greeting: {
     color: colors.text,
     fontSize: 40,
@@ -261,4 +395,29 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
 
+  errorBox: {
+    backgroundColor: 'rgba(200,76,76,0.07)',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(200,76,76,0.20)',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginBottom: spacing.sm,
+    gap: 8,
+  },
+  errorText: {
+    color: colors.text,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 19,
+  },
+  skipLink: {
+    alignSelf: 'flex-start',
+  },
+  skipLinkText: {
+    color: colors.accent,
+    fontSize: 13,
+    fontFamily: 'Inter_700Bold',
+    textDecorationLine: 'underline',
+  },
 });

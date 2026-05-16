@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -10,35 +10,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import ReactionButton from '../components/ui/ReactionButton';
+import SaveVerseButton from '../components/ui/SaveVerseButton';
 import Section from '../components/ui/Section';
 import { colors, radius, spacing } from '../theme';
 import { postInteraction } from '../services/api';
+import { saveVerseAction } from '../src/services/api/action';
 import { shareKairos } from '../src/services/api/share';
-
-const normalizeBookName = (name: string): string => {
-  const corrections: Record<string, string> = {
-    Genesis: 'Gênesis', Exodus: 'Êxodo', Leviticus: 'Levítico', Numbers: 'Números',
-    Deuteronomy: 'Deuteronômio', Joshua: 'Josué', Judges: 'Juízes', Ruth: 'Rute',
-    '1 Kings': '1 Reis', '2 Kings': '2 Reis', '1 Chronicles': '1 Crônicas',
-    '2 Chronicles': '2 Crônicas', Ezra: 'Esdras', Nehemiah: 'Neemias', Esther: 'Ester',
-    Job: 'Jó', Psalms: 'Salmos', Proverbs: 'Provérbios', Ecclesiastes: 'Eclesiastes',
-    'Song of Solomon': 'Cânticos', 'Song of Songs': 'Cânticos', Isaiah: 'Isaías',
-    Jeremiah: 'Jeremias', Lamentations: 'Lamentações', Ezekiel: 'Ezequiel',
-    Hosea: 'Oséias', Amos: 'Amós', Obadiah: 'Obadias', Jonah: 'Jonas',
-    Micah: 'Miquéias', Nahum: 'Naum', Habakkuk: 'Habacuque', Zephaniah: 'Sofonias',
-    Haggai: 'Ageu', Zechariah: 'Zacarias', Malachi: 'Malaquias',
-    Matthew: 'Mateus', Mark: 'Marcos', Luke: 'Lucas', John: 'João', Acts: 'Atos',
-    Romans: 'Romanos', '1 Corinthians': '1 Coríntios', '2 Corinthians': '2 Coríntios',
-    Galatians: 'Gálatas', Ephesians: 'Efésios', Philippians: 'Filipenses',
-    Colossians: 'Colossenses', '1 Thessalonians': '1 Tessalonicenses',
-    '2 Thessalonians': '2 Tessalonicenses', '1 Timothy': '1 Timóteo',
-    '2 Timothy': '2 Timóteo', Titus: 'Tito', Philemon: 'Filemom', Hebrews: 'Hebreus',
-    James: 'Tiago', '1 Peter': '1 Pedro', '2 Peter': '2 Pedro',
-    '1 John': '1 João', '2 John': '2 João', '3 John': '3 João', Jude: 'Judas',
-    Revelation: 'Apocalipse',
-  };
-  return corrections[name] || name;
-};
+import { formatVerseRef } from '../src/utils/formatVerseRef';
+import { normalizeBookName } from '../src/utils/normalizeBookName';
+import { E, track } from '../src/analytics';
+import { useScreenTracking } from '../src/hooks/useScreenTracking';
 
 type InteractionResponse = { response?: string; message?: string; text?: string };
 
@@ -57,12 +38,18 @@ export default function VerseExperienceScreen() {
   const chapter = params.chapter || '';
   const verse = params.verse || '';
   const verseText = params.text || '';
-  const verseRef = useMemo(() => `${book} ${chapter}:${verse}`, [book, chapter, verse]);
+  const verseRef = useMemo(() => formatVerseRef(book, chapter, verse), [book, chapter, verse]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedBtn, setSelectedBtn] = useState('');
   const [replyText, setReplyText] = useState('');
-  const [feedbackSent, setFeedbackSent] = useState(false);
+  const isSavingVerse = useRef(false);
+
+  useScreenTracking('verse_experience');
+
+  useEffect(() => {
+    if (verseRef) track(E.VERSE_VIEWED, { reference: verseRef });
+  }, [verseRef]);
 
   const handleReaction = async (btn: typeof REACTION_BUTTONS[number]) => {
     if (isSubmitting || replyText) return;
@@ -70,12 +57,26 @@ export default function VerseExperienceScreen() {
     setIsSubmitting(true);
     try {
       const res = await postInteraction('devocional', `${btn.message} Versículo ${verseRef}: "${verseText}"`);
-      const data = ((res as any)?.data ?? {}) as InteractionResponse;
+      const data = res.data;
       setReplyText(data.response ?? data.message ?? data.text ?? 'Sem resposta no momento.');
     } catch {
       setReplyText('Não foi possível enviar agora.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveVerse = async () => {
+    if (!verseRef.trim()) return;
+    if (isSavingVerse.current) return;
+    isSavingVerse.current = true;
+    track(E.VERSE_SAVED, { reference: verseRef });
+    try {
+      await saveVerseAction('anon', verseRef, 'verse_save', 'save');
+    } catch (err) {
+      if (__DEV__) console.log('[verse-experience] save verse failed', err);
+    } finally {
+      isSavingVerse.current = false;
     }
   };
 
@@ -94,8 +95,24 @@ export default function VerseExperienceScreen() {
 
           {/* Verse — sacred focal point */}
           <View style={styles.verseBlock}>
+            {verseText ? (
+              <View style={styles.saveVerseBtn}>
+                <SaveVerseButton saved={false} onPress={handleSaveVerse} />
+              </View>
+            ) : null}
             <Text style={styles.reference}>{verseRef}</Text>
             <Text style={styles.verseText}>{verseText}</Text>
+            {verseText ? (
+              <Pressable
+                onPress={() => {
+                  track(E.VERSE_SHARED, { reference: verseRef });
+                  shareKairos(verseText);
+                }}
+                style={styles.shareBtn}
+              >
+                <Text style={styles.shareBtnText}>Compartilhar</Text>
+              </Pressable>
+            ) : null}
           </View>
 
           {/* AI sections */}
@@ -126,13 +143,12 @@ export default function VerseExperienceScreen() {
             <View style={styles.replyBox}>
               <Text style={styles.replyLabel}>KAIROS</Text>
               <Text style={styles.replyText}>{replyText}</Text>
-              {!feedbackSent ? (
-                <Pressable onPress={() => { setFeedbackSent(true); shareKairos(replyText); }} style={styles.shareBtn}>
-                  <Text style={styles.shareBtnText}>Compartilhar 🔗</Text>
-                </Pressable>
-              ) : (
-                <Text style={styles.thankYou}>Obrigado pelo feedback</Text>
-              )}
+              <Pressable
+                onPress={() => shareKairos(replyText)}
+                style={styles.shareBtn}
+              >
+                <Text style={styles.shareBtnText}>Compartilhar</Text>
+              </Pressable>
             </View>
           ) : null}
 
@@ -187,6 +203,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
     marginTop: 52,
     marginBottom: 64,
+    position: 'relative',
+  },
+  saveVerseBtn: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
   },
   reference: {
     color: colors.grayOrganic,
@@ -239,11 +261,5 @@ const styles = StyleSheet.create({
     color: colors.grayOrganic,
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-  },
-  thankYou: {
-    color: colors.grayOrganic,
-    fontSize: 13,
-    fontFamily: 'Inter_400Regular',
-    marginTop: spacing.md,
   },
 });

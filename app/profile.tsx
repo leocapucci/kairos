@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
@@ -12,18 +11,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BottomNav from '../components/BottomNav';
 import Header from '../components/Header';
-import { colors } from '../theme';
-import { getProfile } from '../services/api';
+import {
+  loadLocalOnboardingAnswers,
+  useProfileQuery,
+} from '../src/query/hooks/useProfileQuery';
+import { colors, radius, spacing } from '../theme';
+import { useScreenTracking } from '../src/hooks/useScreenTracking';
 
 type PatternKey = 'conforto' | 'confronto' | 'direcao' | 'duvida';
 type OnboardingMap = Record<string, string>;
-
-type ProfileResponse = {
-  streak_days?: number;
-  streak?: number;
-  patterns?: Partial<Record<PatternKey, number>>;
-  onboarding_answers?: OnboardingMap;
-};
 
 const QUESTION_LABELS = [
   { key: 'life_phase', label: 'Fase da vida' },
@@ -48,34 +44,49 @@ const PATTERN_CONFIG = [
 const DOMINANT_INSIGHTS: Record<PatternKey, { title: string; insight: string }> = {
   confronto: {
     title: 'Você caminha pelo confronto',
-    insight: 'Você reage mais quando é desafiado. Isso é coragem disfarçada de desconforto — continue enfrentando.',
+    insight:
+      'Você reage mais quando é desafiado. Isso é coragem disfarçada de desconforto — continue enfrentando.',
   },
   direcao: {
     title: 'Você busca direção',
-    insight: 'Mais do que conforto, você quer agir. Esse desejo de movimento é um chamado — siga-o.',
+    insight:
+      'Mais do que conforto, você quer agir. Esse desejo de movimento é um chamado — siga-o.',
   },
   conforto: {
     title: 'Você encontra paz',
-    insight: 'Você tem recebido mais conforto do que confronto. Cuide para não evitar o que precisa ser enfrentado.',
+    insight:
+      'Você tem recebido mais conforto do que confronto. Cuide para não evitar o que precisa ser enfrentado.',
   },
   duvida: {
     title: 'Você chega com dúvidas',
-    insight: 'Duvidar é honesto. Continue chegando mesmo sem certeza — a fé não exige respostas, exige presença.',
+    insight:
+      'Duvidar é honesto. Continue chegando mesmo sem certeza — a fé não exige respostas, exige presença.',
   },
 };
 
 export default function ProfileScreen() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [patterns, setPatterns] = useState<Record<PatternKey, number>>(DEFAULT_PATTERNS);
-  const [streakDays, setStreakDays] = useState(0);
+  const { data: profile, isLoading, isError } = useProfileQuery();
   const [onboardingAnswers, setOnboardingAnswers] = useState<OnboardingMap>({});
-  const [profileErrorMessage, setProfileErrorMessage] = useState('');
+
+  useScreenTracking('profile');
 
   const appVersion = useMemo(() => Constants.expoConfig?.version ?? '1.0.0', []);
 
+  const patterns: Record<PatternKey, number> = useMemo(
+    () => ({
+      conforto: profile?.patterns?.conforto ?? DEFAULT_PATTERNS.conforto,
+      confronto: profile?.patterns?.confronto ?? DEFAULT_PATTERNS.confronto,
+      direcao: profile?.patterns?.direcao ?? DEFAULT_PATTERNS.direcao,
+      duvida: profile?.patterns?.duvida ?? DEFAULT_PATTERNS.duvida,
+    }),
+    [profile],
+  );
+
+  const streakDays = profile?.streak_days ?? profile?.streak ?? 0;
+
   const total = useMemo(
     () => Object.values(patterns).reduce((a, b) => a + b, 0),
-    [patterns]
+    [patterns],
   );
 
   const dominantKey = useMemo<PatternKey | null>(() => {
@@ -85,35 +96,16 @@ export default function ProfileScreen() {
     return entry ? (entry[0] as PatternKey) : null;
   }, [patterns, total]);
 
+  // Load onboarding answers from profile API; fall back to local AsyncStorage
   useEffect(() => {
-    const loadProfile = async () => {
-      setIsLoading(true);
-      try {
-        const response = await getProfile();
-        const data = ((response as any)?.data ?? {}) as ProfileResponse;
-        setPatterns({
-          conforto: data.patterns?.conforto ?? 0,
-          confronto: data.patterns?.confronto ?? 0,
-          direcao: data.patterns?.direcao ?? 0,
-          duvida: data.patterns?.duvida ?? 0,
-        });
-        setStreakDays(data.streak_days ?? data.streak ?? 0);
-        if (data.onboarding_answers) {
-          setOnboardingAnswers(data.onboarding_answers);
-        } else {
-          const local = await AsyncStorage.getItem('onboarding_answers');
-          setOnboardingAnswers(local ? JSON.parse(local) : {});
-        }
-      } catch {
-        const local = await AsyncStorage.getItem('onboarding_answers');
-        setOnboardingAnswers(local ? JSON.parse(local) : {});
-        setProfileErrorMessage('Erro ao carregar perfil. Mostrando dados salvos localmente.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadProfile();
-  }, []);
+    if (profile?.onboarding_answers) {
+      setOnboardingAnswers(profile.onboarding_answers);
+      return;
+    }
+    if (isError || (profile !== undefined && !profile.onboarding_answers)) {
+      loadLocalOnboardingAnswers().then(setOnboardingAnswers);
+    }
+  }, [profile, isError]);
 
   const insight = dominantKey ? DOMINANT_INSIGHTS[dominantKey] : null;
 
@@ -126,13 +118,17 @@ export default function ProfileScreen() {
             <ActivityIndicator color={colors.gold} />
           </View>
         ) : (
-          <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-
+          <ScrollView
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+          >
             <View style={styles.diagnosticoCard}>
               <Text style={styles.diagnosticoLabel}>DIAGNÓSTICO ESPIRITUAL</Text>
               {insight ? (
                 <>
-                  <Text style={styles.diagnosticoTitle} numberOfLines={undefined}>{insight.title}</Text>
+                  <Text style={styles.diagnosticoTitle} numberOfLines={undefined}>
+                    {insight.title}
+                  </Text>
                   <Text style={styles.diagnosticoInsight}>{insight.insight}</Text>
                 </>
               ) : (
@@ -149,11 +145,19 @@ export default function ProfileScreen() {
                     return (
                       <View key={p.key} style={styles.barRow}>
                         <Text style={styles.barEmoji}>{p.emoji}</Text>
-                        <Text style={[styles.barLabel, isDominant && styles.barLabelDominant]}>
+                        <Text
+                          style={[styles.barLabel, isDominant && styles.barLabelDominant]}
+                        >
                           {p.label}
                         </Text>
                         <View style={styles.barTrack}>
-                          <View style={[styles.barFill, { width: `${pct}%` }, isDominant && styles.barFillDominant]} />
+                          <View
+                            style={[
+                              styles.barFill,
+                              { width: `${pct}%` },
+                              isDominant && styles.barFillDominant,
+                            ]}
+                          />
                         </View>
                         <Text style={styles.barPct}>{pct}%</Text>
                       </View>
@@ -162,9 +166,11 @@ export default function ProfileScreen() {
                 </View>
               )}
 
-              {profileErrorMessage ? (
-                <Text style={styles.inlineErrorText}>{profileErrorMessage}</Text>
-              ) : null}
+              {isError && (
+                <Text style={styles.inlineErrorText}>
+                  Mostrando dados salvos localmente.
+                </Text>
+              )}
             </View>
 
             <View style={styles.section}>
@@ -188,7 +194,6 @@ export default function ProfileScreen() {
                 ))}
               </View>
             </View>
-
           </ScrollView>
         )}
 
@@ -204,15 +209,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingHorizontal: 20,
-    paddingTop: 4,
-    paddingBottom: 10,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.sm,
   },
   loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  content: { paddingBottom: 20, gap: 16 },
+  content: { paddingBottom: spacing.md, gap: spacing.md },
+
   diagnosticoCard: {
     backgroundColor: colors.surface,
-    borderRadius: 16,
+    borderRadius: radius.md,
     padding: 18,
     borderWidth: 1,
     borderColor: colors.gold,
@@ -220,35 +226,42 @@ const styles = StyleSheet.create({
   diagnosticoLabel: {
     color: colors.gold,
     fontSize: 10,
-    fontWeight: '600',
+    fontFamily: 'Inter_700Bold',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
-    marginBottom: 10,
+    marginBottom: spacing.sm + 2,
   },
   diagnosticoTitle: {
     color: colors.textPrimary,
     fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 8,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: spacing.sm,
     lineHeight: 26,
   },
   diagnosticoInsight: {
     color: colors.textSecondary,
     fontSize: 14,
+    fontFamily: 'Inter_400Regular',
     lineHeight: 22,
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   diagnosticoEmpty: {
     color: colors.textSecondary,
     fontSize: 14,
+    fontFamily: 'Inter_400Regular',
     lineHeight: 22,
     fontStyle: 'italic',
   },
-  barsContainer: { gap: 10 },
-  barRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  barsContainer: { gap: spacing.sm + 2 },
+  barRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   barEmoji: { fontSize: 14 },
-  barLabel: { width: 70, color: colors.textSecondary, fontSize: 12 },
-  barLabelDominant: { color: colors.textPrimary, fontWeight: '600' },
+  barLabel: {
+    width: 70,
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+  },
+  barLabelDominant: { color: colors.textPrimary, fontFamily: 'Inter_700Bold' },
   barTrack: {
     flex: 1,
     height: 6,
@@ -258,39 +271,78 @@ const styles = StyleSheet.create({
   },
   barFill: { height: '100%', backgroundColor: 'rgba(0,0,0,0.15)', borderRadius: 3 },
   barFillDominant: { backgroundColor: colors.gold },
-  barPct: { width: 36, textAlign: 'right', color: colors.textSecondary, fontSize: 11 },
+  barPct: {
+    width: 36,
+    textAlign: 'right',
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontFamily: 'Inter_400Regular',
+  },
+
   section: {
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: radius.md,
     padding: 14,
     borderWidth: 1,
     borderColor: colors.borderSoft,
   },
-  sectionTitle: { color: colors.textPrimary, fontSize: 14, fontWeight: '500', marginBottom: 10 },
+  sectionTitle: {
+    color: colors.textPrimary,
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: spacing.sm + 2,
+  },
   streakCard: {
     backgroundColor: colors.surfaceDeep,
-    borderRadius: 12,
+    borderRadius: radius.sm + 4,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
+    paddingVertical: spacing.md,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
-  streakValue: { color: colors.gold, fontSize: 38, fontWeight: '500', lineHeight: 42 },
-  streakLabel: { marginTop: 4, color: colors.textSecondary, fontSize: 12 },
-  answersList: { gap: 10 },
+  streakValue: {
+    color: colors.gold,
+    fontSize: 38,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 42,
+  },
+  streakLabel: {
+    marginTop: spacing.xs,
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+  },
+  answersList: { gap: spacing.sm + 2 },
   answerItem: {
     backgroundColor: colors.surfaceDeep,
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    borderRadius: radius.sm + 2,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.sm + 2,
   },
-  answerQuestion: { color: colors.textTertiary, fontSize: 11, marginBottom: 4 },
-  answerValue: { color: colors.textPrimary, fontSize: 13, lineHeight: 18 },
+  answerQuestion: {
+    color: colors.textTertiary,
+    fontSize: 11,
+    fontFamily: 'Inter_400Regular',
+    marginBottom: spacing.xs,
+  },
+  answerValue: {
+    color: colors.textPrimary,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 18,
+  },
   inlineErrorText: {
-    marginTop: 10,
+    marginTop: spacing.sm + 2,
     color: colors.textSecondary,
     fontSize: 13,
+    fontFamily: 'Inter_400Regular',
   },
-  footerVersion: { color: colors.textTertiary, fontSize: 11, textAlign: 'center', marginTop: 6 },
+  footerVersion: {
+    color: colors.textTertiary,
+    fontSize: 11,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
+    marginTop: spacing.xs + 2,
+  },
 });

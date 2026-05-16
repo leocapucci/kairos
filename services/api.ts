@@ -4,7 +4,10 @@
 export { shareKairos } from '../src/services/api/share';
 
 export { getDailyVerse as getDaily } from '../src/services/api/bible';
+export { getVerseOfDay } from '../src/services/api/bible';
 export { searchBible } from '../src/services/api/bible';
+
+export { saveVerseAction } from '../src/services/api/action';
 
 export { postOnboardingAnswers as postOnboarding } from '../src/services/api/onboarding';
 

@@ -1,5 +1,4 @@
 import { BASE_URL, request } from './http';
-import { logger } from '../../utils/logger';
 
 export type ProfileResponse = {
   streak_days?: number;
@@ -8,15 +7,10 @@ export type ProfileResponse = {
   onboarding_answers?: Record<string, string>;
 };
 
-// NOTE: endpoint path is a best guess — verify /profile against actual backend routes
-
+// Throws on error — useProfileQuery has throwOnError: false, so TanStack Query
+// catches the error and exposes isError: true without crashing the screen.
 export const getProfile = async (): Promise<{ data: ProfileResponse }> => {
-  try {
-    const res = await request<ProfileResponse | { data?: ProfileResponse }>(`${BASE_URL}/profile`);
-    const data = (res as any)?.data ?? res ?? {};
-    return { data: data as ProfileResponse };
-  } catch (err) {
-    logger.error('getProfile failed', err);
-    return { data: {} };
-  }
+  const res = await request<ProfileResponse | { data?: ProfileResponse }>(`${BASE_URL}/profile`);
+  const data = (res as { data?: ProfileResponse })?.data ?? (res as ProfileResponse) ?? {};
+  return { data: data as ProfileResponse };
 };

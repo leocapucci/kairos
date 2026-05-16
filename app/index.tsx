@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   brand: {
     fontSize: 15,
     letterSpacing: 5,
-    fontWeight: '600',
+    fontFamily: 'Inter_700Bold',
     color: colors.gold,
   },
   tagline: {
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
     color: colors.grayOrganic,
     marginTop: 6,
-    fontWeight: '500',
+    fontFamily: 'Inter_400Regular',
   },
   accentLine: {
     width: 36,
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   mid: {},
   headline: {
     fontSize: 46,
-    fontWeight: '300',
+    fontFamily: 'Inter_300Light',
     color: colors.blackSoft,
     lineHeight: 54,
     letterSpacing: -0.5,
@@ -104,22 +104,19 @@ const styles = StyleSheet.create({
   headlineGold: {
     color: colors.gold,
     fontStyle: 'italic',
-    fontWeight: '300',
+    fontFamily: 'Inter_300Light',
   },
   sub: {
     marginTop: 16,
     fontSize: 15,
+    fontFamily: 'Inter_400Regular',
     lineHeight: 24,
     color: colors.grayOrganic,
     letterSpacing: 0.1,
   },
 
-  btnWrap: {
-    marginTop: 32,
-  },
-  linkWrap: {
-    marginTop: 12,
-  },
+  btnWrap: { marginTop: 32 },
+  linkWrap: { marginTop: 12 },
 
   card: {
     backgroundColor: 'rgba(255,255,255,0.55)',
@@ -135,6 +132,7 @@ const styles = StyleSheet.create({
   cardText: {
     flex: 1,
     fontSize: 14,
+    fontFamily: 'Inter_400Regular',
     color: colors.blackSoft,
     lineHeight: 22,
   },

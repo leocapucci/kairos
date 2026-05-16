@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { postInteraction } from '../../services/api';
@@ -28,26 +28,54 @@ export default function Section({ title, versReference, versText, type }: Sectio
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const isMountedRef = useRef(true);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const handleToggle = async () => {
     if (isOpen) { setIsOpen(false); return; }
     setIsOpen(true);
     if (content) return;
+
+    // Abort any in-flight request before starting a new one
+    abortRef.current?.abort();
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
+
     setIsLoading(true);
     try {
-      const res = await postInteraction('devocional', PROMPTS[type](versReference, versText));
+      const res = await postInteraction(
+        'devocional',
+        PROMPTS[type](versReference, versText),
+        ctrl.signal,
+      );
+      if (!isMountedRef.current || ctrl.signal.aborted) return;
       const data = (res.data ?? {}) as InteractionResponse;
       setContent(data.response ?? data.message ?? data.text ?? 'Conteúdo não disponível.');
     } catch {
+      if (!isMountedRef.current || ctrl.signal.aborted) return;
       setContent('Não foi possível carregar o conteúdo.');
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current && !ctrl.signal.aborted) {
+        setIsLoading(false);
+      }
     }
   };
 
   return (
     <View style={styles.container}>
-      <Pressable onPress={handleToggle} style={styles.header}>
+      <Pressable
+        onPress={handleToggle}
+        style={styles.header}
+        hitSlop={4}
+      >
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.toggle}>{isOpen ? '−' : '+'}</Text>
       </Pressable>
@@ -67,7 +95,7 @@ export default function Section({ title, versReference, versText, type }: Sectio
 const styles = StyleSheet.create({
   container: {
     marginTop: 36,
-    paddingTop: 24,
+    paddingTop: spacing.lg,
     borderTopWidth: 1,
     borderTopColor: colors.borderSoft,
   },

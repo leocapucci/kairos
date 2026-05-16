@@ -1,0 +1,5 @@
+name: Kairos Agent
+version: 1.0.0
+schema: v1
+rules:
+  - uses: file://C:/Users/SAMSUNG/kairos/.continue/rules/kairos-agent.md
