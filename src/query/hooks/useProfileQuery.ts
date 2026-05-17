@@ -39,7 +39,7 @@ export function useProfileQuery(): UseQueryResult<ProfileResponse> {
 // when the API is unreachable.
 export async function loadLocalOnboardingAnswers(): Promise<Record<string, string>> {
   try {
-    const raw = await AsyncStorage.getItem('onboarding_answers');
+    const raw = await AsyncStorage.getItem('kairos_onboarding_v1');
     return raw ? (JSON.parse(raw) as Record<string, string>) : {};
   } catch {
     return {};

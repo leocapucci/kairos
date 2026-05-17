@@ -18,6 +18,7 @@ import { useVerseOfDay } from '../src/query/hooks/useVerse';
 import { usePlansData } from '../src/query/hooks/usePlans';
 import { searchBible } from '../services/api';
 import { colors, radius, spacing } from '../theme';
+import { useSavedVerses } from '../src/hooks/useSavedVerses';
 
 type SearchResult = { book: string; chapter: number; verse: number; text: string };
 type Plan = { id: string; title: string; description: string; days: number; theme: string };
@@ -29,6 +30,7 @@ export default function BibleScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('Livros');
   const [searchQuery, setSearchQuery] = useState('');
+  const { savedVerses, removeSavedVerse } = useSavedVerses();
 
   // Verse of the day — shared cache with home.tsx (same queryKey)
   const { data: verse } = useVerseOfDay();
@@ -75,6 +77,7 @@ export default function BibleScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* ── LIVROS ── */}
         {activeTab === 'Livros' && (
@@ -178,11 +181,29 @@ export default function BibleScreen() {
 
         {/* ── SALVOS ── */}
         {activeTab === 'Salvos' && (
-          <EmptyState
-            icon="🔖"
-            title="Nenhum versículo salvo ainda"
-            description="Salve versículos que tocaram seu coração"
-          />
+          savedVerses.length === 0 ? (
+            <EmptyState
+              icon="🔖"
+              title="Nenhum versículo salvo ainda"
+              description="Salve versículos que tocaram seu coração"
+            />
+          ) : (
+            savedVerses.map((item) => (
+              <View key={item.reference} style={styles.savedCard}>
+                <View style={styles.savedCardBody}>
+                  <Text style={styles.savedRef}>{item.reference}</Text>
+                  <Text style={styles.savedText} numberOfLines={4}>{item.text}</Text>
+                </View>
+                <Pressable
+                  onPress={() => removeSavedVerse(item.reference)}
+                  hitSlop={8}
+                  style={styles.savedRemoveBtn}
+                >
+                  <Text style={styles.savedRemoveIcon}>✕</Text>
+                </Pressable>
+              </View>
+            ))
+          )
         )}
       </ScrollView>
 
@@ -289,6 +310,42 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 24,
     fontFamily: 'Inter_400Regular',
+  },
+  savedCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    paddingVertical: spacing.md,
+    paddingLeft: spacing.md,
+    paddingRight: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  savedCardBody: {
+    flex: 1,
+    marginRight: spacing.sm,
+  },
+  savedRef: {
+    color: colors.gold,
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1.2,
+    marginBottom: 6,
+  },
+  savedText: {
+    color: colors.blackSoft,
+    fontSize: 14,
+    lineHeight: 22,
+    fontFamily: 'Inter_400Regular',
+  },
+  savedRemoveBtn: {
+    paddingTop: 2,
+    paddingLeft: 4,
+  },
+  savedRemoveIcon: {
+    fontSize: 20,
   },
   planCardWrap: { marginBottom: spacing.sm },
   planMeta: {

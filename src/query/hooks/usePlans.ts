@@ -30,7 +30,7 @@ async function resolveDeviceId(): Promise<string> {
 
 export function usePlansData({ enabled: externalEnabled = true } = {}) {
   // Device ID — loaded once from AsyncStorage, never changes during the session.
-  const { data: userId = '' } = useQuery({
+  const { data: userId = '', isPending: isDeviceIdPending } = useQuery({
     queryKey: queryKeys.device.id(),
     queryFn: resolveDeviceId,
     staleTime: Infinity,
@@ -104,7 +104,7 @@ export function usePlansData({ enabled: externalEnabled = true } = {}) {
 
   const isLoading =
     externalEnabled &&
-    (plansQuery.isPending || (userId.length > 0 && progressQuery.isPending) || userId.length === 0);
+    (isDeviceIdPending || plansQuery.isPending || (userId.length > 0 && progressQuery.isPending));
 
   return {
     userId,

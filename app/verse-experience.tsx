@@ -20,6 +20,7 @@ import { formatVerseRef } from '../src/utils/formatVerseRef';
 import { normalizeBookName } from '../src/utils/normalizeBookName';
 import { E, track } from '../src/analytics';
 import { useScreenTracking } from '../src/hooks/useScreenTracking';
+import { useSavedVerses } from '../src/hooks/useSavedVerses';
 
 const REACTION_BUTTONS = [
   { id: 'peace',      emoji: '🙏',  label: 'Isso me trouxe paz',   message: 'Isso me trouxe paz.' },
@@ -37,6 +38,8 @@ export default function VerseExperienceScreen() {
   const verse = params.verse || '';
   const verseText = params.text || '';
   const verseRef = useMemo(() => formatVerseRef(book, chapter, verse), [book, chapter, verse]);
+
+  const { isVerseSaved, saveVerse, removeSavedVerse } = useSavedVerses();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedBtn, setSelectedBtn] = useState('');
@@ -65,14 +68,25 @@ export default function VerseExperienceScreen() {
   };
 
   const handleSaveVerse = async () => {
-    if (!verseRef.trim()) return;
-    if (isSavingVerse.current) return;
+    if (!verseRef.trim() || isSavingVerse.current) return;
     isSavingVerse.current = true;
+    const alreadySaved = isVerseSaved(verseRef);
     track(E.VERSE_SAVED, { reference: verseRef });
+    if (alreadySaved) {
+      removeSavedVerse(verseRef);
+    } else {
+      saveVerse({
+        reference: verseRef,
+        text: verseText,
+        book,
+        chapter: Number(chapter),
+        verse: Number(verse),
+      });
+    }
     try {
-      await saveVerseAction('anon', verseRef, 'verse_save', 'save');
+      await saveVerseAction('anon', verseRef, 'verse_save', alreadySaved ? 'unsave' : 'save');
     } catch {
-      // verse save failed — non-critical
+      // non-critical
     } finally {
       isSavingVerse.current = false;
     }
@@ -95,7 +109,7 @@ export default function VerseExperienceScreen() {
           <View style={styles.verseBlock}>
             {verseText ? (
               <View style={styles.saveVerseBtn}>
-                <SaveVerseButton saved={false} onPress={handleSaveVerse} />
+                <SaveVerseButton saved={isVerseSaved(verseRef)} onPress={handleSaveVerse} />
               </View>
             ) : null}
             <Text style={styles.reference}>{verseRef}</Text>

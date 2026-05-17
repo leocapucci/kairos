@@ -1,22 +1,62 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
 import { logger } from '../utils/logger';
 
-const STORAGE_KEY = 'kairos:saved_verses';
+const STORAGE_KEY = 'saved_verses';
+const OLD_STORAGE_KEY = 'kairos:saved_verses';
+
+async function migrateOldVerses(): Promise<SavedVerse[]> {
+  try {
+    const raw = await AsyncStorage.getItem(OLD_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown[];
+    if (!Array.isArray(parsed)) return [];
+    const migrated: SavedVerse[] = (parsed as unknown[])
+      .filter((item): item is string => typeof item === 'string')
+      .map((ref) => {
+        const match = ref.match(/^(.+)\s+(\d+):(\d+)$/);
+        return {
+          reference: ref,
+          text: '',
+          book: match?.[1] ?? ref,
+          chapter: match ? parseInt(match[2], 10) : 0,
+          verse: match ? parseInt(match[3], 10) : 0,
+        };
+      });
+    await AsyncStorage.removeItem(OLD_STORAGE_KEY);
+    return migrated;
+  } catch {
+    return [];
+  }
+}
+
+export type SavedVerse = {
+  reference: string;
+  text: string;
+  book: string;
+  chapter: number;
+  verse: number;
+};
 
 export function useSavedVerses() {
-  const [savedVerses, setSavedVerses] = useState<string[]>([]);
+  const [savedVerses, setSavedVerses] = useState<SavedVerse[]>([]);
 
-  // Tracks whether the first AsyncStorage load has completed.
-  // Without this guard, the useEffect below would fire immediately on mount
-  // with savedVerses=[] and overwrite the stored data before it's read.
+  // Guard: prevents the persist useEffect from overwriting storage before the
+  // initial load completes (avoids wipe-on-mount race condition).
   const didLoad = useRef(false);
 
   const loadFromStorage = useCallback(() => {
     AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => {
-        setSavedVerses(raw ? (JSON.parse(raw) as string[]) : []);
+      .then(async (raw) => {
+        if (raw !== null) {
+          setSavedVerses(JSON.parse(raw) as SavedVerse[]);
+        } else {
+          // Primeira vez com a chave nova — migrar dados da chave antiga se existirem
+          const migrated = await migrateOldVerses();
+          setSavedVerses(migrated);
+        }
         didLoad.current = true;
       })
       .catch((err) => {
@@ -25,20 +65,19 @@ export function useSavedVerses() {
       });
   }, []);
 
-  // Initial load on mount
+  // Load on mount
   useEffect(() => {
     loadFromStorage();
   }, [loadFromStorage]);
 
-  // Reload on screen focus to pick up changes made by other screens
+  // Re-load when screen gains focus — picks up saves made on other screens
   useFocusEffect(
     useCallback(() => {
       loadFromStorage();
     }, [loadFromStorage])
   );
 
-  // Persist to AsyncStorage whenever savedVerses changes.
-  // The didLoad guard ensures we never write the initial [] before reading stored data.
+  // Persist whenever the list changes (didLoad guard prevents premature writes)
   useEffect(() => {
     if (!didLoad.current) return;
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(savedVerses)).catch((err) => {
@@ -46,19 +85,22 @@ export function useSavedVerses() {
     });
   }, [savedVerses]);
 
-  const isSaved = useCallback(
-    (key: string) => savedVerses.includes(key),
+  const isVerseSaved = useCallback(
+    (reference: string) => savedVerses.some((v) => v.reference === reference),
     [savedVerses]
   );
 
-  // Pure state update — persistence is handled by the useEffect above
-  const toggleSave = useCallback((key: string) => {
+  const saveVerse = useCallback((verse: SavedVerse) => {
     setSavedVerses((prev) =>
-      prev.includes(key)
-        ? prev.filter((k) => k !== key)
-        : [...prev, key]
+      prev.some((v) => v.reference === verse.reference)
+        ? prev
+        : [verse, ...prev]
     );
   }, []);
 
-  return { isSaved, toggleSave, savedVerses };
+  const removeSavedVerse = useCallback((reference: string) => {
+    setSavedVerses((prev) => prev.filter((v) => v.reference !== reference));
+  }, []);
+
+  return { savedVerses, saveVerse, removeSavedVerse, isVerseSaved };
 }

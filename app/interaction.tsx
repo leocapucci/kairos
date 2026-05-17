@@ -32,13 +32,14 @@ import { useScreenTracking } from '../src/hooks/useScreenTracking';
 
 const LAST_FOLLOWUP_KEY = 'kairos_last_followup_v1';
 
-type CardType = 'conforto' | 'confronto' | 'crescimento' | 'devocional';
+type CardType = 'conforto' | 'confronto' | 'crescimento' | 'devocional' | 'forca';
 
 const FALLBACK_BY_TYPE: Record<CardType, string> = {
   conforto: 'Respire. Deus continua presente no seu agora.',
   confronto: 'Existe um ajuste importante que você pode escolher hoje.',
   crescimento: 'Um passo de obediência pode iniciar uma nova fase.',
   devocional: 'Pare por um instante e entregue o restante do dia a Deus.',
+  forca: 'Você tem força para o que está diante de você hoje.',
 };
 
 const DEEP_BUTTONS = [
@@ -124,7 +125,7 @@ export default function InteractionScreen() {
 
   const cardType: CardType = (() => {
     const raw = params.type ?? 'conforto';
-    return raw === 'conforto' || raw === 'confronto' || raw === 'crescimento' || raw === 'devocional'
+    return raw === 'conforto' || raw === 'confronto' || raw === 'crescimento' || raw === 'devocional' || raw === 'forca'
       ? raw : 'conforto';
   })();
 

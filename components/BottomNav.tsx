@@ -114,8 +114,8 @@ export default function BottomNav() {
 
       {/* Center action button */}
       <Pressable
-        onPress={() => router.push('/interaction')}
-        style={({ pressed }) => [styles.centerTab, pressed && { opacity: 0.72 }]}
+        onPress={() => router.push('/share')}
+        style={({ pressed }: { pressed: boolean }) => [styles.centerTab, pressed && { opacity: 0.72 }]}
       >
         <View style={styles.centerCircle}>
           <Text style={styles.centerPlus}>+</Text>

@@ -1,57 +1,62 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, Stack } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../theme';
-import { Card, Button } from '../src/design-system';
+import { Button } from '../src/design-system';
+
+const HERO_IMG = require('../assets/images/kairosbackground.jpg');
 
 export default function Index() {
   return (
     <>
-      {/* Eliminates slide-in ghost on first render — this screen appears instantly */}
       <Stack.Screen options={{ animation: 'none', headerShown: false }} />
 
-      <View style={styles.bg}>
-        {/* Layer 1: full-screen photo — explicit absolute Image, no ImageBackground wrapper */}
-        <Image
-          source={require('../assets/images/splash-bg.jpg')}
-          style={StyleSheet.absoluteFillObject}
-          resizeMode="cover"
-        />
+      <SafeAreaView style={s.safe}>
 
-        {/* Layer 2: warm gradient fade — transparent top → cream bottom */}
-        <LinearGradient
-          colors={['rgba(246,241,232,0.0)', 'rgba(246,241,232,0.5)', 'rgba(246,241,232,0.93)']}
-          style={StyleSheet.absoluteFillObject}
-          pointerEvents="none"
-        />
+        {/* Hero — imagem confinada em View com overflow:hidden, sem leakage */}
+        <View style={s.hero}>
+          <Image
+            source={HERO_IMG}
+            style={StyleSheet.absoluteFillObject}
+            resizeMode="cover"
+          />
+          {/* Gradiente fade para o background sólido abaixo — sem semitransparência no meio */}
+          <LinearGradient
+            colors={['transparent', colors.background]}
+            start={{ x: 0, y: 0.55 }}
+            end={{ x: 0, y: 1 }}
+            style={StyleSheet.absoluteFillObject}
+            pointerEvents="none"
+          />
+        </View>
 
-        {/* Layer 3: content */}
-        <View style={styles.container}>
+        {/* Conteúdo — fundo sólido, sem layers adicionais */}
+        <View style={s.content}>
 
-          <View style={styles.top}>
-            <Text style={styles.brand}>KAIROS</Text>
-            <Text style={styles.tagline}>FAVOR SEM MERECIMENTO</Text>
-            <View style={styles.accentLine} />
+          <View style={s.brandBlock}>
+            <Text style={s.brandName}>KAIROS</Text>
+            <Text style={s.brandTagline}>FAVOR SEM MERECIMENTO</Text>
+            <View style={s.accentLine} />
           </View>
 
-          <View style={styles.mid}>
-            <Text style={styles.headline}>
+          <View style={s.textBlock}>
+            <Text style={s.headline}>
               {'Sua direção\ndiária com '}
-              <Text style={styles.headlineGold}>Deus.</Text>
+              <Text style={s.headlineGold}>Deus.</Text>
             </Text>
-            <Text style={styles.sub}>
-              {'Reflexões profundas, presença e clareza\nespiritual para sua caminhada.'}
+            <Text style={s.sub}>
+              {'Reflexões profundas e clareza espiritual\npara sua caminhada.'}
             </Text>
+          </View>
 
-            <View style={styles.btnWrap}>
-              <Button
-                variant="sage"
-                label="Começar jornada →"
-                onPress={() => router.push('/onboarding')}
-              />
-            </View>
-
-            <View style={styles.linkWrap}>
+          <View style={s.ctaBlock}>
+            <Button
+              variant="sage"
+              label="Começar jornada →"
+              onPress={() => router.push('/onboarding')}
+            />
+            <View style={s.secondaryWrap}>
               <Button
                 variant="ghost"
                 label="Já tenho uma conta"
@@ -60,56 +65,60 @@ export default function Index() {
             </View>
           </View>
 
-          <Card variant="default" style={styles.card}>
-            <Text style={styles.cardIcon}>🌿</Text>
-            <Text style={styles.cardText}>
-              {'Antes do caos, encontre presença.\nAntes da pressa, encontre direção.'}
-            </Text>
-          </Card>
-
         </View>
-      </View>
+      </SafeAreaView>
     </>
   );
 }
 
-const styles = StyleSheet.create({
-  bg: { flex: 1 },
-  container: {
+const s = StyleSheet.create({
+  safe: {
     flex: 1,
+    backgroundColor: colors.background,
+  },
+  // Hero: flex:3 — confinado, imagem não vaza para fora
+  hero: {
+    flex: 3,
+    overflow: 'hidden',
+  },
+
+  // Conteúdo: flex:4 — fundo sólido, sem overlays
+  content: {
+    flex: 4,
+    backgroundColor: colors.background,
     paddingHorizontal: 28,
-    paddingTop: 72,
-    paddingBottom: 44,
+    paddingTop: 12,
+    paddingBottom: 24,
     justifyContent: 'space-between',
   },
 
-  top: {},
-  brand: {
-    fontSize: 15,
+  brandBlock: {},
+  brandName: {
+    fontSize: 14,
     letterSpacing: 5,
     fontFamily: 'Inter_700Bold',
     color: colors.gold,
   },
-  tagline: {
-    fontSize: 11,
+  brandTagline: {
+    fontSize: 10,
     letterSpacing: 3,
     color: colors.grayOrganic,
-    marginTop: 6,
+    marginTop: 4,
     fontFamily: 'Inter_400Regular',
   },
   accentLine: {
-    width: 36,
-    height: 2.5,
+    width: 32,
+    height: 2,
     backgroundColor: colors.gold,
-    marginTop: 10,
+    marginTop: 8,
   },
 
-  mid: {},
+  textBlock: {},
   headline: {
-    fontSize: 46,
+    fontSize: 36,
     fontFamily: 'Inter_300Light',
     color: colors.blackSoft,
-    lineHeight: 54,
+    lineHeight: 44,
     letterSpacing: -0.5,
   },
   headlineGold: {
@@ -118,33 +127,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_300Light',
   },
   sub: {
-    marginTop: 16,
-    fontSize: 15,
-    fontFamily: 'Inter_400Regular',
-    lineHeight: 24,
-    color: colors.grayOrganic,
-    letterSpacing: 0.1,
-  },
-
-  btnWrap: { marginTop: 32 },
-  linkWrap: { marginTop: 12 },
-
-  card: {
-    backgroundColor: 'rgba(255,255,255,0.55)',
-    borderRadius: 24,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  cardIcon: { fontSize: 22 },
-  cardText: {
-    flex: 1,
+    marginTop: 12,
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: colors.blackSoft,
     lineHeight: 22,
+    color: colors.grayOrganic,
+  },
+
+  ctaBlock: {},
+  secondaryWrap: {
+    marginTop: 8,
   },
 });

@@ -28,17 +28,24 @@ function BellIcon() {
 }
 
 export default function Header({ onSearchPress, onBellPress }: HeaderProps) {
+  const hasActions = onSearchPress !== undefined || onBellPress !== undefined;
   return (
     <View style={styles.container}>
       <Text style={styles.brand}>KAIROS</Text>
-      <View style={styles.actions}>
-        <Pressable onPress={onSearchPress} style={styles.iconButton}>
-          <SearchIcon />
-        </Pressable>
-        <Pressable onPress={onBellPress} style={styles.iconButton}>
-          <BellIcon />
-        </Pressable>
-      </View>
+      {hasActions && (
+        <View style={styles.actions}>
+          {onSearchPress !== undefined && (
+            <Pressable onPress={onSearchPress} style={styles.iconButton}>
+              <SearchIcon />
+            </Pressable>
+          )}
+          {onBellPress !== undefined && (
+            <Pressable onPress={onBellPress} style={styles.iconButton}>
+              <BellIcon />
+            </Pressable>
+          )}
+        </View>
+      )}
     </View>
   );
 }
