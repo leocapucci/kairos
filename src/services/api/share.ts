@@ -41,7 +41,7 @@ export async function shareKairos(content: string) {
     }
 
     Alert.alert('Compartilhar', 'Não foi possível compartilhar neste dispositivo.');
-  } catch (e) {
-    console.log('[shareKairos error]', e);
+  } catch {
+    // Share dismissed or unavailable — not an actionable error
   }
 }

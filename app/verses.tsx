@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { colors } from '../theme';
+import { BASE_URL, request } from '../src/services/api/http';
 
 type VersesResponse = {
   verses: Array<{
@@ -26,17 +27,19 @@ export default function VersesScreen() {
 
   const [verses, setVerses] = useState<VersesResponse['verses']>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     const fetchVerses = async () => {
+      setIsError(false);
       try {
-        const response = await fetch(
-          `https://kairos-backend-vjdp.onrender.com/bible/chapter?book=${encodeURIComponent(book)}&chapter=${chapter}`
+        const data = await request<VersesResponse>(
+          `${BASE_URL}/bible/chapter?book=${encodeURIComponent(book)}&chapter=${chapter}`
         );
-        const data: VersesResponse = await response.json();
-        setVerses(data.verses || []);
-      } catch (error) {
-        console.error('Erro ao buscar versículos:', error);
+        setVerses(data?.verses ?? []);
+      } catch {
+        setIsError(true);
+        setVerses([]);
       } finally {
         setIsLoading(false);
       }
@@ -66,6 +69,12 @@ export default function VersesScreen() {
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           {isLoading ? (
             <Text style={styles.loadingText}>Carregando...</Text>
+          ) : isError ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>
+                Não foi possível carregar este capítulo. Verifique sua conexão e tente novamente.
+              </Text>
+            </View>
           ) : verses.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>

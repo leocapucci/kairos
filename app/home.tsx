@@ -129,8 +129,8 @@ function BellIcon() {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { data: verseData } = useVerseOfDay();
-  const { data: dailyResult } = useDaily();
+  const { data: verseData, isError: verseError } = useVerseOfDay();
+  const { data: dailyResult, isError: dailyError } = useDaily();
   const { data: profileResult } = useProfile();
   const isSavingVerse = useRef(false);
 
@@ -197,8 +197,8 @@ export default function HomeScreen() {
     isSavingVerse.current = true;
     try {
       await saveVerseAction('anon', verseRef, 'verse_save', 'save');
-    } catch (err) {
-      if (__DEV__) console.log('[home] save verse failed', err);
+    } catch {
+      // verse save failed — non-critical, no user-visible error
     } finally {
       isSavingVerse.current = false;
     }
@@ -228,7 +228,7 @@ export default function HomeScreen() {
             <Text style={styles.brandTitle}>Kairos</Text>
             <Text style={styles.brandSubtitle}>Favor sem merecimento</Text>
           </View>
-          <Pressable hitSlop={12} style={styles.bellBtn}>
+          <Pressable hitSlop={12} style={styles.bellBtn} onPress={() => router.push('/profile')}>
             <BellIcon />
           </Pressable>
         </View>
@@ -365,6 +365,10 @@ export default function HomeScreen() {
           <Text style={styles.streakChevron}>›</Text>
         </Pressable>
 
+        {(verseError || dailyError) && (
+          <Text style={styles.offlineNote}>Conteúdo offline — verifique sua conexão.</Text>
+        )}
+
       </ScrollView>
 
       <BottomNav />
@@ -380,7 +384,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    paddingBottom: 20,
+    paddingBottom: 80,
   },
 
   // ── Header — separado da imagem, fiel à referência
@@ -620,5 +624,14 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 19,
     fontStyle: 'italic',
+  },
+  offlineNote: {
+    textAlign: 'center',
+    color: colors.textTertiary,
+    fontSize: 11,
+    fontFamily: 'Inter_400Regular',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    marginTop: 4,
   },
 });

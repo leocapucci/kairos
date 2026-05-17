@@ -1,4 +1,5 @@
 import { BASE_URL, post, request } from './http';
+import { getDistinctId } from '../../analytics';
 
 export type InteractionResponse = {
   interaction_id?: string;
@@ -32,7 +33,10 @@ export const postInteraction = async (
   signal?: AbortSignal,
   context?: string,
 ): Promise<{ data: InteractionResponse }> => {
-  const body = context ? { type, message, context } : { type, message };
+  const userId = getDistinctId();
+  const body: Record<string, string> = { type, message };
+  if (userId) body.userId = userId;
+  if (context) body.context = context;
   const res = await post<InteractionResponse>(`${BASE_URL}/interaction`, body, signal);
   return { data: res ?? {} };
 };

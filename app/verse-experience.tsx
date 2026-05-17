@@ -21,8 +21,6 @@ import { normalizeBookName } from '../src/utils/normalizeBookName';
 import { E, track } from '../src/analytics';
 import { useScreenTracking } from '../src/hooks/useScreenTracking';
 
-type InteractionResponse = { response?: string; message?: string; text?: string };
-
 const REACTION_BUTTONS = [
   { id: 'peace',      emoji: '🙏',  label: 'Isso me trouxe paz',   message: 'Isso me trouxe paz.' },
   { id: 'confronted', emoji: '⚔️',  label: 'Isso me confrontou',   message: 'Isso me confrontou.' },
@@ -73,8 +71,8 @@ export default function VerseExperienceScreen() {
     track(E.VERSE_SAVED, { reference: verseRef });
     try {
       await saveVerseAction('anon', verseRef, 'verse_save', 'save');
-    } catch (err) {
-      if (__DEV__) console.log('[verse-experience] save verse failed', err);
+    } catch {
+      // verse save failed — non-critical
     } finally {
       isSavingVerse.current = false;
     }
@@ -129,7 +127,7 @@ export default function VerseExperienceScreen() {
             {REACTION_BUTTONS.map((btn) => (
               <ReactionButton
                 key={btn.id}
-                emoji={btn.emoji}
+                emoji={isSubmitting && selectedBtn === btn.id ? '⏳' : btn.emoji}
                 label={btn.label}
                 onPress={() => handleReaction(btn)}
                 selected={selectedBtn === btn.id}

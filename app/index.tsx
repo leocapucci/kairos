@@ -1,64 +1,75 @@
-import { ImageBackground, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { colors } from '../theme';
 import { Card, Button } from '../src/design-system';
 
 export default function Index() {
   return (
-    <ImageBackground
-      source={require('../assets/images/splash-bg.jpg')}
-      style={styles.bg}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={['rgba(246,241,232,0.0)', 'rgba(246,241,232,0.5)', 'rgba(246,241,232,0.93)']}
-        style={StyleSheet.absoluteFillObject}
-      />
+    <>
+      {/* Eliminates slide-in ghost on first render — this screen appears instantly */}
+      <Stack.Screen options={{ animation: 'none', headerShown: false }} />
 
-      <View style={styles.container}>
+      <View style={styles.bg}>
+        {/* Layer 1: full-screen photo — explicit absolute Image, no ImageBackground wrapper */}
+        <Image
+          source={require('../assets/images/splash-bg.jpg')}
+          style={StyleSheet.absoluteFillObject}
+          resizeMode="cover"
+        />
 
-        <View style={styles.top}>
-          <Text style={styles.brand}>KAIROS</Text>
-          <Text style={styles.tagline}>FAVOR SEM MERECIMENTO</Text>
-          <View style={styles.accentLine} />
-        </View>
+        {/* Layer 2: warm gradient fade — transparent top → cream bottom */}
+        <LinearGradient
+          colors={['rgba(246,241,232,0.0)', 'rgba(246,241,232,0.5)', 'rgba(246,241,232,0.93)']}
+          style={StyleSheet.absoluteFillObject}
+          pointerEvents="none"
+        />
 
-        <View style={styles.mid}>
-          <Text style={styles.headline}>
-            {'Sua direção\ndiária com '}
-            <Text style={styles.headlineGold}>Deus.</Text>
-          </Text>
-          <Text style={styles.sub}>
-            {'Reflexões profundas, presença e clareza\nespiritual para sua caminhada.'}
-          </Text>
+        {/* Layer 3: content */}
+        <View style={styles.container}>
 
-          <View style={styles.btnWrap}>
-            <Button
-              variant="sage"
-              label="Começar jornada →"
-              onPress={() => router.push('/onboarding')}
-            />
+          <View style={styles.top}>
+            <Text style={styles.brand}>KAIROS</Text>
+            <Text style={styles.tagline}>FAVOR SEM MERECIMENTO</Text>
+            <View style={styles.accentLine} />
           </View>
 
-          <View style={styles.linkWrap}>
-            <Button
-              variant="ghost"
-              label="Já tenho uma conta"
-              onPress={() => router.push('/home')}
-            />
+          <View style={styles.mid}>
+            <Text style={styles.headline}>
+              {'Sua direção\ndiária com '}
+              <Text style={styles.headlineGold}>Deus.</Text>
+            </Text>
+            <Text style={styles.sub}>
+              {'Reflexões profundas, presença e clareza\nespiritual para sua caminhada.'}
+            </Text>
+
+            <View style={styles.btnWrap}>
+              <Button
+                variant="sage"
+                label="Começar jornada →"
+                onPress={() => router.push('/onboarding')}
+              />
+            </View>
+
+            <View style={styles.linkWrap}>
+              <Button
+                variant="ghost"
+                label="Já tenho uma conta"
+                onPress={() => router.push('/home')}
+              />
+            </View>
           </View>
+
+          <Card variant="default" style={styles.card}>
+            <Text style={styles.cardIcon}>🌿</Text>
+            <Text style={styles.cardText}>
+              {'Antes do caos, encontre presença.\nAntes da pressa, encontre direção.'}
+            </Text>
+          </Card>
+
         </View>
-
-        <Card variant="default" style={styles.card}>
-          <Text style={styles.cardIcon}>🌿</Text>
-          <Text style={styles.cardText}>
-            {'Antes do caos, encontre presença.\nAntes da pressa, encontre direção.'}
-          </Text>
-        </Card>
-
       </View>
-    </ImageBackground>
+    </>
   );
 }
 
@@ -89,7 +100,7 @@ const styles = StyleSheet.create({
   accentLine: {
     width: 36,
     height: 2.5,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.gold,
     marginTop: 10,
   },
 

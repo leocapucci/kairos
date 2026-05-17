@@ -144,7 +144,7 @@ export default function OnboardingScreen() {
           <Button
             label="Começar →"
             onPress={() => setPhase('questions')}
-            variant="primary"
+            variant="sage"
           />
         </View>
       </SafeAreaView>
@@ -159,7 +159,7 @@ export default function OnboardingScreen() {
         <View style={styles.transitionContainer}>
           <Text style={styles.brandName}>KAIROS</Text>
           <Text style={styles.transitionText}>Sua direção está sendo preparada.</Text>
-          <ActivityIndicator color={colors.accent} size="small" style={styles.transitionLoader} />
+          <ActivityIndicator color={colors.sage} size="small" style={styles.transitionLoader} />
         </View>
       </SafeAreaView>
     );
@@ -228,7 +228,7 @@ export default function OnboardingScreen() {
           onPress={handleContinue}
           disabled={!selectedValue}
           loading={isSubmitting}
-          variant="primary"
+          variant="sage"
         />
 
       </View>
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   introAccent: {
     width: 30,
     height: 2,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.gold,
     borderRadius: 1,
     marginBottom: spacing.lg,
   },
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.softGray,
   },
   progressDotActive: {
-    backgroundColor: colors.accent,
+    backgroundColor: colors.gold,
     width: 18,
     borderRadius: 3,
   },
@@ -377,9 +377,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   optionButtonSelected: {
-    borderColor: colors.accent,
+    borderColor: colors.sage,
     borderWidth: 1.5,
-    backgroundColor: 'rgba(200,76,76,0.05)',
+    backgroundColor: 'rgba(122,158,126,0.07)',
   },
   optionButtonPressed: {
     opacity: 0.75,
@@ -396,10 +396,10 @@ const styles = StyleSheet.create({
   },
 
   errorBox: {
-    backgroundColor: 'rgba(200,76,76,0.07)',
+    backgroundColor: 'rgba(224,123,90,0.07)',
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: 'rgba(200,76,76,0.20)',
+    borderColor: 'rgba(224,123,90,0.20)',
     paddingVertical: 12,
     paddingHorizontal: 14,
     marginBottom: spacing.sm,
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   skipLinkText: {
-    color: colors.accent,
+    color: colors.sage,
     fontSize: 13,
     fontFamily: 'Inter_700Bold',
     textDecorationLine: 'underline',

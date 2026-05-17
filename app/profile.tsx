@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   },
   inlineErrorText: {
     marginTop: spacing.sm + 2,
-    color: colors.textSecondary,
+    color: colors.coral,
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
   },

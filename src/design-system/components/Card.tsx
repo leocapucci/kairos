@@ -50,9 +50,9 @@ const styles = StyleSheet.create({
     borderColor: color.borderSoft,
   },
   accent: {
-    backgroundColor: 'rgba(200,76,76,0.07)',
+    backgroundColor: 'rgba(200,164,107,0.10)',
     borderWidth: 1,
-    borderColor: 'rgba(200,76,76,0.25)',
+    borderColor: 'rgba(200,164,107,0.30)',
   },
 });
 

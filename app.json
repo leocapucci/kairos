@@ -16,9 +16,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kairos.app"
     },
     "android": {
+      "package": "com.kairos.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -34,6 +36,12 @@
       "@sentry/react-native",
       "expo-notifications"
     ],
-    "scheme": "kairos"
+    "scheme": "kairos",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c28e69ec-0e84-4f32-b24c-e4195a18407e"
+      }
+    }
   }
 }

@@ -8,13 +8,14 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { queryClient } from '../src/query/queryClient';
 import { initSentry } from '../src/utils/sentry';
 import { initAnalytics } from '../src/analytics';
 import { BASE_URL } from '../src/services/api/http';
+import { colors } from '../theme';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -33,20 +34,33 @@ export default function RootLayout() {
     Inter_700Bold,
   });
 
+  // Defensive timeout: if fonts never resolve, unblock rendering after 3s
+  // to prevent a permanent blank screen.
+  const [fontTimeout, setFontTimeout] = useState(false);
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    const timer = setTimeout(() => setFontTimeout(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (fontsLoaded || fontError || fontTimeout) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, fontTimeout]);
 
-  if (!fontsLoaded && !fontError) {
+  if (!fontsLoaded && !fontError && !fontTimeout) {
     return null;
   }
 
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.background },
+          }}
+        />
       </QueryClientProvider>
     </ErrorBoundary>
   );

@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   outline: {
     borderWidth: 1,
     borderColor: color.gold,
-    backgroundColor: 'rgba(200,76,76,0.07)',
+    backgroundColor: 'rgba(200,164,107,0.07)',
   },
   ghost: {
     backgroundColor: 'transparent',

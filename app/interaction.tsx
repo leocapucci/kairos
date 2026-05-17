@@ -108,7 +108,7 @@ export default function InteractionScreen() {
       duration: animation.normal,
       useNativeDriver: false,
     }).start();
-  }, [state.phase]);
+  }, [state.phase, replyOpacity]);
 
   // Animate deep reply in when deep phase becomes 'revealed'
   const deepPhase = isRevealed(state) ? state.deep.phase : 'idle';
@@ -120,7 +120,7 @@ export default function InteractionScreen() {
       duration: animation.normal,
       useNativeDriver: false,
     }).start();
-  }, [deepPhase]);
+  }, [deepPhase, deepOpacity]);
 
   const cardType: CardType = (() => {
     const raw = params.type ?? 'conforto';
@@ -169,7 +169,7 @@ export default function InteractionScreen() {
       dispatch({ type: 'REACT_ERROR', message: parseUnknownError(err) });
       track(E.INTERACTION_FAILED, { card_type: cardType, button_id: btn.id, error: String(err) });
     }
-  }, [cardType, cardText]);
+  }, [cardType, cardText, onboardingContext]);
 
   const handleDeep = useCallback(async (btn: typeof DEEP_BUTTONS[number]) => {
     if (!isRevealed(state)) return;
@@ -245,7 +245,7 @@ export default function InteractionScreen() {
 
             {isSubmitting(state) && (
               <View style={styles.loader}>
-                <ActivityIndicator color={colors.redAccent} />
+                <ActivityIndicator color={colors.sage} />
               </View>
             )}
             {isError(state) && (
@@ -284,7 +284,7 @@ export default function InteractionScreen() {
 
               {state.deep.phase === 'loading' && (
                 <View style={styles.loader}>
-                  <ActivityIndicator color={colors.redAccent} />
+                  <ActivityIndicator color={colors.sage} />
                 </View>
               )}
 
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    color: colors.redAccent,
+    color: colors.coral,
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
     textAlign: 'center',

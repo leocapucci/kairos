@@ -4,7 +4,7 @@
 const SLOW_MS = 1_500;  // warn threshold
 const OK_MS = 400;      // fast threshold
 
-export function startTimer(label: string): () => void {
+export function startTimer(label: string): (suffix?: string) => void {
   if (!__DEV__) return () => {};
   const t0 = Date.now();
   return (suffix?: string) => {

@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { logger } from '../utils/logger';
 
 const STORAGE_KEY = 'kairos:user_profile';
 const MAX_HISTORY = 5;
@@ -28,7 +29,7 @@ export function useUserProfile() {
         didLoad.current = true;
       })
       .catch((err) => {
-        if (__DEV__) console.warn('[kairos] useUserProfile: load failed', err);
+        logger.warn('useUserProfile: load failed', err);
         didLoad.current = true;
       });
   }, []);
@@ -47,7 +48,7 @@ export function useUserProfile() {
   useEffect(() => {
     if (!didLoad.current) return;
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(profile)).catch((err) => {
-      if (__DEV__) console.warn('[kairos] useUserProfile: save failed', err);
+      logger.warn('useUserProfile: save failed', err);
     });
   }, [profile]);
 

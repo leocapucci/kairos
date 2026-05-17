@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { logger } from '../utils/logger';
 
 const STORAGE_KEY = 'kairos:saved_verses';
 
@@ -19,7 +20,7 @@ export function useSavedVerses() {
         didLoad.current = true;
       })
       .catch((err) => {
-        if (__DEV__) console.warn('[kairos] useSavedVerses: load failed', err);
+        logger.warn('useSavedVerses: load failed', err);
         didLoad.current = true;
       });
   }, []);
@@ -41,7 +42,7 @@ export function useSavedVerses() {
   useEffect(() => {
     if (!didLoad.current) return;
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(savedVerses)).catch((err) => {
-      if (__DEV__) console.warn('[kairos] useSavedVerses: save failed', err);
+      logger.warn('useSavedVerses: save failed', err);
     });
   }, [savedVerses]);
 
