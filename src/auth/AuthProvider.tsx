@@ -13,11 +13,19 @@ import type { AuthState, AuthUser } from './types';
 
 WebBrowser.maybeCompleteAuthSession();
 
+// Only include client IDs that are actually set — passing undefined for a platform-specific
+// ID causes expo-auth-session to throw "must be defined" on that platform.
+const GOOGLE_WEB     = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB     || undefined;
+const GOOGLE_IOS     = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS     || undefined;
+const GOOGLE_ANDROID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID || undefined;
+const GOOGLE_AVAILABLE = !!(GOOGLE_WEB || GOOGLE_IOS || GOOGLE_ANDROID);
+
 type AuthContextValue = AuthState & {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   refreshUser: (user: AuthUser) => void;
   getUserId: () => string;
+  isGoogleAvailable: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue>({
@@ -28,6 +36,7 @@ const AuthContext = createContext<AuthContextValue>({
   signOut: async () => {},
   refreshUser: () => {},
   getUserId: () => '',
+  isGoogleAvailable: GOOGLE_AVAILABLE,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -38,9 +47,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB,
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
+    ...(GOOGLE_WEB     && { clientId:       GOOGLE_WEB }),
+    ...(GOOGLE_IOS     && { iosClientId:    GOOGLE_IOS }),
+    ...(GOOGLE_ANDROID && { androidClientId: GOOGLE_ANDROID }),
   });
 
   // Restore session on mount
@@ -67,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [response]);
 
   const signInWithGoogle = useCallback(async () => {
-    if (!request) return;
+    if (!request || !GOOGLE_AVAILABLE) return;
     setState((s) => ({ ...s, isLoading: true }));
     try {
       await promptAsync();
@@ -86,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...state, signInWithGoogle, signOut, refreshUser, getUserId }}>
+    <AuthContext.Provider value={{ ...state, signInWithGoogle, signOut, refreshUser, getUserId, isGoogleAvailable: GOOGLE_AVAILABLE }}>
       {children}
     </AuthContext.Provider>
   );

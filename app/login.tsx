@@ -7,7 +7,7 @@ import { useAuth } from '../src/auth';
 import { colors, radius } from '../theme';
 
 export default function LoginScreen() {
-  const { signInWithGoogle, isAuthenticated, isLoading } = useAuth();
+  const { signInWithGoogle, isAuthenticated, isLoading, isGoogleAvailable } = useAuth();
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -46,16 +46,22 @@ export default function LoginScreen() {
           <View style={s.actions}>
             {error ? <Text style={s.errorText}>{error}</Text> : null}
 
-            <Pressable
-              onPress={handleGoogle}
-              disabled={isLoading}
-              style={({ pressed }) => [s.googleBtn, pressed && { opacity: 0.85 }]}
-            >
-              {isLoading
-                ? <ActivityIndicator color="#FFFFFF" />
-                : <Text style={s.googleBtnText}>Entrar com Google</Text>
-              }
-            </Pressable>
+            {isGoogleAvailable ? (
+              <Pressable
+                onPress={handleGoogle}
+                disabled={isLoading}
+                style={({ pressed }) => [s.googleBtn, pressed && { opacity: 0.85 }]}
+              >
+                {isLoading
+                  ? <ActivityIndicator color="#FFFFFF" />
+                  : <Text style={s.googleBtnText}>Entrar com Google</Text>
+                }
+              </Pressable>
+            ) : (
+              <View style={s.googleBtnDisabled}>
+                <Text style={s.googleBtnDisabledText}>Login Google ainda não configurado</Text>
+              </View>
+            )}
 
             <Pressable
               onPress={() => router.push('/login-email')}
@@ -140,6 +146,19 @@ const s = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
     letterSpacing: 0.2,
+  },
+  googleBtnDisabled: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: radius.md,
+    paddingVertical: 16,
+    alignItems: 'center' as const,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+  },
+  googleBtnDisabledText: {
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: 15,
+    fontFamily: 'Inter_400Regular',
   },
   emailBtn: {
     borderRadius: radius.md,
