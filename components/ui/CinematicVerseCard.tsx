@@ -96,7 +96,7 @@ export default function CinematicVerseCard({
           </View>
 
           {/* Label — decoração ✦ + VERSÍCULO DO DIA */}
-          <Text style={styles.label}>✦  VERSÍCULO DO DIA</Text>
+          <Text style={styles.label}>☀️  VERSÍCULO DO DIA</Text>
 
           {/* Divisor dourado */}
           <View style={styles.goldDivider} />

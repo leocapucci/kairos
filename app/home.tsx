@@ -15,7 +15,6 @@ import Svg, { Path } from 'react-native-svg';
 import HERO from '../assets/images/kairosbackground.jpg';
 import BottomNav from '../components/BottomNav';
 import CinematicVerseCard from '../components/ui/CinematicVerseCard';
-import { colors, radius } from '../theme';
 import { useDaily, useProfile, useVerseOfDay } from '../src/hooks/useHomeData';
 import { useSavedVerses } from '../src/hooks/useSavedVerses';
 import { saveVerseAction } from '../src/services/api/action';
@@ -96,23 +95,21 @@ const FALLBACK_VERSE: VerseData = {
   verse_number: 1,
 };
 
-const BG = colors.background as string;
-
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
 function BellIcon() {
   return (
-    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
       <Path
         d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-        stroke={colors.textTertiary}
+        stroke="#2C3E1F"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M13.73 21a2 2 0 0 1-3.46 0"
-        stroke={colors.textTertiary}
+        stroke="#2C3E1F"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -231,22 +228,19 @@ export default function HomeScreen() {
             </Text>
           </View>
           <Pressable hitSlop={12} style={s.bell} onPress={() => router.push('/profile')}>
-            <BellIcon />
+            <View>
+              <BellIcon />
+              <View style={s.bellDot} />
+            </View>
           </Pressable>
         </View>
 
-        {/* ── HERO — imagem única com texto editorial sobreposto ───────────── */}
-        {/*
-          Image com absoluteFillObject preenche o container flex.
-          LinearGradient apaga o rodapé da imagem suavemente em direção ao bg.
-          Texto posicionado absolutamente no rodapé do hero.
-          Sem ImageBackground. Sem layers duplicados.
-        */}
+        {/* ── HERO ─────────────────────────────────────────────────────────── */}
         <View style={s.hero}>
           <Image source={HERO} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
           <LinearGradient
-            colors={['transparent', BG]}
-            start={{ x: 0, y: 0.42 }}
+            colors={['transparent', '#F7F5F2']}
+            start={{ x: 0, y: 0.55 }}
             end={{ x: 0, y: 1 }}
             style={StyleSheet.absoluteFillObject}
             pointerEvents="none"
@@ -258,17 +252,12 @@ export default function HomeScreen() {
             <Text style={s.heroSub}>
               {struggleLabel
                 ? `Para você que enfrenta ${struggleLabel}.`
-                : 'Ele ainda fala. Ele ainda guia.'}
+                : 'Ele ainda fala.\nEle ainda guia.'}
             </Text>
           </View>
         </View>
 
         {/* ── VERSÍCULO DO DIA ─────────────────────────────────────────────── */}
-        {/*
-          verseSection com flex:3 e justifyContent:center centraliza o card
-          verticalmente no espaço disponível.
-          overflow:hidden impede que verses longas vazem para fora.
-        */}
         <View style={s.verseSection}>
           <CinematicVerseCard
             text={activeVerse.text}
@@ -304,6 +293,7 @@ export default function HomeScreen() {
                 <View style={s.cardThumb}>
                   <Image source={HERO} style={s.cardThumbImg} resizeMode="cover" />
                   <View style={[StyleSheet.absoluteFillObject, { backgroundColor: CARD_TINTS[card.type] }]} />
+                  <View style={s.cardThumbIcon} />
                 </View>
                 <View style={s.cardBody}>
                   <Text style={s.cardLabel}>{LABELS[card.type]}</Text>
@@ -317,9 +307,11 @@ export default function HomeScreen() {
 
         {/* ── SEQUÊNCIA ESPIRITUAL ─────────────────────────────────────────── */}
         <Pressable style={s.streak} onPress={() => router.push('/profile')}>
-          <Text style={s.streakLeaf}>🌿</Text>
+          <View style={s.streakIconWrap}>
+            <Text style={s.streakIconEmoji}>💧</Text>
+          </View>
           <View style={s.streakInfo}>
-            <Text style={s.streakLabel}>SEQUÊNCIA DE HOJE</Text>
+            <Text style={s.streakLabel}>Sequência de hoje</Text>
             <Text style={s.streakValue}>
               {streak > 0 ? `${streak} dias com Deus` : 'Comece hoje'}
             </Text>
@@ -344,138 +336,137 @@ export default function HomeScreen() {
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
-//
-// Arquitetura de flex:
-//   root (flex:1) distribui espaço entre hero + verseSection + direction.
-//   Elementos fixos (header, streak, diag, BottomNav) não participam do flex.
-//
-//   Flex units:  hero=3  verse=3  direction=2  → 8 unidades
-//   iPhone 13 (706px útil - ~137px fixos = ~569px flex):
-//     hero  ≈ 213px   verse ≈ 213px   direction ≈ 142px
 
 const s = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#F7F5F2',
   },
   root: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#F7F5F2',
   },
 
-  // ── Header — altura fixa, não participa do flex
+  // ── Header
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 6,
+    paddingTop: 12,
+    paddingBottom: 8,
   },
   brand: {
-    fontSize: 40,
-    fontFamily: 'Inter_400Regular',
-    color: colors.textPrimary,
-    letterSpacing: -1,
-    lineHeight: 44,
+    fontSize: 36,
+    fontFamily: 'serif',
+    color: '#2C3E1F',
+    fontWeight: '700',
+    lineHeight: 40,
   },
   tagline: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: colors.gold,
+    color: '#C9A84C',
     letterSpacing: 0.3,
     marginTop: 2,
   },
   bell: {
-    marginTop: 10,
+    marginTop: 6,
     padding: 4,
   },
+  bellDot: {
+    position: 'absolute',
+    top: 1,
+    right: 1,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#C9A84C',
+  },
 
-  // ── Hero — flex:3, maior seção visual
-  // overflow:hidden contém a imagem absolutePosition dentro do container flex
+  // ── Hero — altura fixa; texto ancorado no topo
   hero: {
-    flex: 3,
+    height: 240,
     overflow: 'hidden',
   },
   heroOverlay: {
     position: 'absolute',
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 20,
-    paddingBottom: 12,
   },
   heroIntro: {
-    fontSize: 13,
+    fontSize: 28,
     fontFamily: 'Inter_400Regular',
-    color: colors.textPrimary,
-    opacity: 0.60,
-    letterSpacing: 0.2,
+    color: '#1C1C1C',
+    marginLeft: 20,
+    marginTop: 36,
   },
   heroTitle: {
-    fontSize: 30,
-    fontFamily: 'Inter_700Bold',
-    color: colors.textPrimary,
-    letterSpacing: -0.8,
-    lineHeight: 36,
-    marginTop: 2,
+    fontSize: 36,
+    fontFamily: 'serif',
+    fontStyle: 'italic',
+    color: '#1C1C1C',
+    lineHeight: 44,
+    marginLeft: 20,
   },
   heroLine: {
-    width: 24,
-    height: 1.5,
-    backgroundColor: colors.gold,
+    width: 48,
+    height: 2,
+    backgroundColor: '#C9A84C',
     marginTop: 8,
-    marginBottom: 6,
-    opacity: 0.8,
+    marginLeft: 20,
   },
   heroSub: {
-    fontSize: 11,
+    fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: colors.textSecondary,
-    lineHeight: 16,
+    color: '#1C1C1C',
     opacity: 0.85,
+    lineHeight: 20,
+    marginLeft: 20,
+    marginTop: 8,
   },
 
-  // ── Versículo — flex:3, card centralizado verticalmente
-  // overflow:hidden impede vazar se CinematicVerseCard exceder altura disponível
+  // ── Versículo — flutua sobre o hero com margem negativa
   verseSection: {
-    flex: 3,
-    paddingHorizontal: 20,
-    justifyContent: 'center',
-    overflow: 'hidden',
+    marginHorizontal: 16,
+    marginTop: -32,
   },
 
-  // ── Direção para hoje — flex:2
+  // ── Direção para hoje — flex:1 para preencher espaço restante
   direction: {
-    flex: 2,
-    paddingHorizontal: 20,
+    flex: 1,
     overflow: 'hidden',
   },
   dirTitle: {
-    fontSize: 13,
-    fontFamily: 'Inter_700Bold',
-    color: colors.textPrimary,
-    letterSpacing: 0.1,
-    marginBottom: 2,
+    fontSize: 20,
+    fontFamily: 'serif',
+    color: '#1C1C1C',
+    fontWeight: '600',
+    marginLeft: 20,
+    marginTop: 20,
+    lineHeight: 26,
   },
   dirSub: {
-    fontSize: 10,
+    fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: colors.textTertiary,
-    marginBottom: 7,
+    color: '#888888',
+    marginTop: 2,
+    marginLeft: 20,
   },
   cardsRow: {
     flexDirection: 'row',
     gap: 8,
+    paddingHorizontal: 20,
+    marginTop: 12,
     flex: 1,
+    marginBottom: 4,
   },
   card: {
     flex: 1,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
+    borderRadius: 12,
+    backgroundColor: '#F7F5F2',
     overflow: 'hidden',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSoft,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -484,91 +475,113 @@ const s = StyleSheet.create({
   },
   cardThumb: {
     width: '100%',
-    height: 44,
+    height: 56,
   },
   cardThumbImg: {
     width: '100%',
     height: '100%',
   },
+  cardThumbIcon: {
+    position: 'absolute',
+    bottom: 6,
+    left: 6,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#7A9E7E',
+  },
   cardBody: {
     flex: 1,
-    paddingHorizontal: 9,
-    paddingTop: 7,
-    paddingBottom: 7,
+    paddingHorizontal: 8,
   },
   cardLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: 'Inter_700Bold',
-    color: colors.textPrimary,
+    color: '#1C1C1C',
+    marginTop: 8,
     letterSpacing: 0.1,
-    marginBottom: 2,
   },
   cardSub: {
-    fontSize: 9,
+    fontSize: 11,
     fontFamily: 'Inter_400Regular',
-    color: colors.textTertiary,
-    lineHeight: 13,
+    color: '#888888',
+    lineHeight: 15,
+    marginTop: 2,
     flex: 1,
   },
   cardArrow: {
-    fontSize: 11,
-    color: colors.gold,
-    opacity: 0.9,
+    fontSize: 13,
+    color: '#C9A84C',
+    marginTop: 4,
+    marginBottom: 8,
   },
 
-  // ── Streak — altura fixa, não participa do flex
+  // ── Banner sequência
   streak: {
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 20,
-    marginTop: 6,
+    marginTop: 16,
     marginBottom: 8,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderSoft,
-    paddingVertical: 9,
-    paddingHorizontal: 14,
-    gap: 8,
+    backgroundColor: '#3D5A3E',
+    borderRadius: 16,
+    height: 64,
+    paddingHorizontal: 16,
   },
-  streakLeaf: { fontSize: 14 },
-  streakInfo: { flex: 1 },
+  streakIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#C9A84C',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  streakIconEmoji: {
+    fontSize: 18,
+  },
+  streakInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
   streakLabel: {
-    fontSize: 8,
-    fontFamily: 'Inter_700Bold',
-    color: colors.textTertiary,
-    letterSpacing: 1.5,
-    marginBottom: 1,
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#FFFFFF',
+    letterSpacing: 0.1,
   },
   streakValue: {
     fontSize: 11,
-    fontFamily: 'Inter_700Bold',
-    color: colors.textPrimary,
-    letterSpacing: -0.1,
+    fontFamily: 'Inter_400Regular',
+    color: 'rgba(255,255,255,0.65)',
+    marginTop: 2,
   },
   dots: {
     flexDirection: 'row',
-    gap: 3,
+    gap: 4,
     alignItems: 'center',
+    marginRight: 8,
   },
   dot: {
-    width: 5,
-    height: 5,
+    width: 6,
+    height: 6,
     borderRadius: 3,
-    backgroundColor: colors.borderSoft,
+    backgroundColor: 'rgba(255,255,255,0.35)',
   },
   dotOn: {
-    backgroundColor: colors.sage,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#C9A84C',
   },
   streakChev: {
-    fontSize: 18,
-    color: colors.textTertiary,
-    lineHeight: 22,
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.6)',
+    lineHeight: 20,
   },
 
   offline: {
     textAlign: 'center',
-    color: colors.textTertiary,
+    color: '#888888',
     fontSize: 11,
     fontFamily: 'Inter_400Regular',
     paddingVertical: 4,

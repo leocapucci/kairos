@@ -1,4 +1,5 @@
 import { BASE_URL, request } from './http';
+import { getUserId } from '../../auth/authService';
 
 export type ProfileResponse = {
   streak_days?: number;
@@ -10,7 +11,10 @@ export type ProfileResponse = {
 // Throws on error — useProfileQuery has throwOnError: false, so TanStack Query
 // catches the error and exposes isError: true without crashing the screen.
 export const getProfile = async (): Promise<{ data: ProfileResponse }> => {
-  const res = await request<ProfileResponse | { data?: ProfileResponse }>(`${BASE_URL}/profile`);
+  const user_id = getUserId();
+  const res = await request<ProfileResponse | { data?: ProfileResponse }>(
+    `${BASE_URL}/profile?user_id=${encodeURIComponent(user_id)}`,
+  );
   const data = (res as { data?: ProfileResponse })?.data ?? (res as ProfileResponse) ?? {};
   return { data: data as ProfileResponse };
 };

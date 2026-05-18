@@ -34,7 +34,8 @@
     "plugins": [
       "expo-router",
       "@sentry/react-native",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-web-browser"
     ],
     "scheme": "kairos",
     "extra": {

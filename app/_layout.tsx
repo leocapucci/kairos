@@ -15,6 +15,7 @@ import { queryClient } from '../src/query/queryClient';
 import { initSentry } from '../src/utils/sentry';
 import { initAnalytics } from '../src/analytics';
 import { BASE_URL } from '../src/services/api/http';
+import { AuthProvider } from '../src/auth';
 import { colors } from '../theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -54,14 +55,16 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.background },
-          }}
-        />
-      </QueryClientProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.background },
+            }}
+          />
+        </QueryClientProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }

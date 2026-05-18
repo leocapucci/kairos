@@ -1,5 +1,5 @@
 import { BASE_URL, post, request } from './http';
-import { getDistinctId } from '../../analytics';
+import { getUserId } from '../../auth/authService';
 
 export type InteractionResponse = {
   interaction_id?: string;
@@ -33,9 +33,7 @@ export const postInteraction = async (
   signal?: AbortSignal,
   context?: string,
 ): Promise<{ data: InteractionResponse }> => {
-  const userId = getDistinctId();
-  const body: Record<string, string> = { type, message };
-  if (userId) body.userId = userId;
+  const body: Record<string, string> = { type, message, user_id: getUserId() };
   if (context) body.context = context;
   const res = await post<InteractionResponse>(`${BASE_URL}/interaction`, body, signal);
   return { data: res ?? {} };
@@ -43,7 +41,7 @@ export const postInteraction = async (
 
 export const getInteractionsHistory = async (): Promise<{ data: HistoryItem[] }> => {
   const res = await request<HistoryItem[] | { interactions?: HistoryItem[]; history?: HistoryItem[] }>(
-    `${BASE_URL}/interactions/history`,
+    `${BASE_URL}/interactions/history?user_id=${encodeURIComponent(getUserId())}`,
   );
   const list = Array.isArray(res)
     ? res
