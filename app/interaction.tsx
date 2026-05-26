@@ -60,7 +60,9 @@ function stripMarkdown(text: string) {
 }
 
 function extractText(data: { response?: string; message?: string; text?: string }): string {
-  return stripMarkdown(data.response ?? data.message ?? data.text ?? 'Sem resposta no momento.');
+  const text = data.response ?? data.message ?? data.text;
+  if (!text) throw new Error('Resposta IA inválida');
+  return stripMarkdown(text);
 }
 
 export default function InteractionScreen() {
@@ -82,8 +84,8 @@ export default function InteractionScreen() {
         if (answers.life_phase) parts.push(`fase da vida: ${answers.life_phase}`);
         if (answers.faith_level) parts.push(`caminhada espiritual: ${answers.faith_level}`);
         if (parts.length > 0) setOnboardingContext(parts.join(', '));
-      } catch {}
-    }).catch(() => {});
+      } catch (e) { console.warn('[kairos] onboarding parse', e); }
+    }).catch((e) => { console.warn('[kairos] onboarding load', e); });
   }, []);
 
   // Single AbortController — cancelled on new request or unmount
@@ -154,6 +156,7 @@ export default function InteractionScreen() {
       );
       if (ctrl.signal.aborted) {
         track(E.INTERACTION_ABORTED, { card_type: cardType, button_id: btn.id });
+        dispatch({ type: 'REACT_ERROR', message: 'A interação foi cancelada. Tente novamente.' });
         return;
       }
       dispatch({ type: 'REACT_SUCCESS', text: extractText(res.data) });
@@ -165,6 +168,7 @@ export default function InteractionScreen() {
     } catch (err) {
       if (ctrl.signal.aborted) {
         track(E.INTERACTION_ABORTED, { card_type: cardType, button_id: btn.id });
+        dispatch({ type: 'REACT_ERROR', message: 'A interação foi cancelada. Tente novamente.' });
         return;
       }
       dispatch({ type: 'REACT_ERROR', message: parseUnknownError(err) });
@@ -187,14 +191,20 @@ export default function InteractionScreen() {
     try {
       const message = `${btn.prompt} Contexto: "${cardText}". Resposta anterior: "${replyText}". Sem perguntas ao usuário.`;
       const res = await postInteraction('devocional', message, ctrl.signal);
-      if (ctrl.signal.aborted) return;
+      if (ctrl.signal.aborted) {
+        dispatch({ type: 'DEEP_ERROR', message: 'A interação foi cancelada. Tente novamente.' });
+        return;
+      }
       dispatch({ type: 'DEEP_SUCCESS', text: extractText(res.data) });
       track(E.DEEP_REFLECTION_COMPLETED, {
         button_id: btn.id,
         latency_ms: Date.now() - deepStart,
       });
     } catch (err) {
-      if (ctrl.signal.aborted) return;
+      if (ctrl.signal.aborted) {
+        dispatch({ type: 'DEEP_ERROR', message: 'A interação foi cancelada. Tente novamente.' });
+        return;
+      }
       dispatch({ type: 'DEEP_ERROR', message: parseUnknownError(err) });
       track(E.DEEP_REFLECTION_FAILED, { button_id: btn.id, error: String(err) });
     }

@@ -15,9 +15,9 @@ WebBrowser.maybeCompleteAuthSession();
 
 // Only include client IDs that are actually set — passing undefined for a platform-specific
 // ID causes expo-auth-session to throw "must be defined" on that platform.
-const GOOGLE_WEB     = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB     || undefined;
-const GOOGLE_IOS     = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS     || undefined;
-const GOOGLE_ANDROID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID || undefined;
+const GOOGLE_WEB     = '952095468133-3eub9k8rr38ut8ge28veqpfbsp6k9ndg.apps.googleusercontent.com';
+const GOOGLE_IOS     = undefined as string | undefined;
+const GOOGLE_ANDROID = '952095468133-2qcrme2keha057e6tv3p40vh82p2j64l.apps.googleusercontent.com';
 const GOOGLE_AVAILABLE = !!(GOOGLE_WEB || GOOGLE_IOS || GOOGLE_ANDROID);
 
 type AuthContextValue = AuthState & {

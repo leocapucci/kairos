@@ -36,7 +36,8 @@ export const postInteraction = async (
   const body: Record<string, string> = { type, message, user_id: getUserId() };
   if (context) body.context = context;
   const res = await post<InteractionResponse>(`${BASE_URL}/interaction`, body, signal);
-  return { data: res ?? {} };
+  if (!res) throw new Error('Resposta IA inválida');
+  return { data: res };
 };
 
 export const getInteractionsHistory = async (): Promise<{ data: HistoryItem[] }> => {
@@ -63,5 +64,6 @@ export const postDeep = async (
     { interaction_id: interactionId, user_choice: userChoice },
     signal,
   );
-  return { data: res ?? {} };
+  if (!res) throw new Error('Resposta IA inválida');
+  return { data: res };
 };

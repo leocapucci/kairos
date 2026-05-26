@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { postInteraction } from '../../services/api';
+import { useAiRequest } from '../../src/hooks/useAiRequest';
 import { colors, spacing } from '../../theme';
 
 export type SectionType = 'meditacao' | 'confronto' | 'oracao';
@@ -13,7 +13,6 @@ type SectionProps = {
   type: SectionType;
 };
 
-type InteractionResponse = { response?: string; message?: string; text?: string };
 
 const PROMPTS: Record<SectionType, (ref: string, text: string) => string> = {
   meditacao: (ref, text) =>
@@ -26,47 +25,16 @@ const PROMPTS: Record<SectionType, (ref: string, text: string) => string> = {
 
 export default function Section({ title, versReference, versText, type }: SectionProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [content, setContent] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const isMountedRef = useRef(true);
-  const abortRef = useRef<AbortController | null>(null);
+  const { state: aiState, send: sendAiRequest, retry: retryAiRequest } = useAiRequest();
 
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-      abortRef.current?.abort();
-    };
-  }, []);
-
-  const handleToggle = async () => {
-    if (isOpen) { setIsOpen(false); return; }
-    setIsOpen(true);
-    if (content) return;
-
-    // Abort any in-flight request before starting a new one
-    abortRef.current?.abort();
-    const ctrl = new AbortController();
-    abortRef.current = ctrl;
-
-    setIsLoading(true);
-    try {
-      const res = await postInteraction(
-        'devocional',
-        PROMPTS[type](versReference, versText),
-        ctrl.signal,
-      );
-      if (!isMountedRef.current || ctrl.signal.aborted) return;
-      const data = (res.data ?? {}) as InteractionResponse;
-      setContent(data.response ?? data.message ?? data.text ?? 'Conteúdo não disponível.');
-    } catch {
-      if (!isMountedRef.current || ctrl.signal.aborted) return;
-      setContent('Não foi possível carregar o conteúdo.');
-    } finally {
-      if (isMountedRef.current && !ctrl.signal.aborted) {
-        setIsLoading(false);
-      }
+  const handleToggle = () => {
+    if (isOpen) {
+      setIsOpen(false);
+      return;
     }
+    setIsOpen(true);
+    if (aiState.phase === 'success') return;
+    void sendAiRequest('devocional', PROMPTS[type](versReference, versText));
   };
 
   return (
@@ -81,11 +49,18 @@ export default function Section({ title, versReference, versText, type }: Sectio
       </Pressable>
       {isOpen && (
         <View style={styles.body}>
-          {isLoading ? (
+          {aiState.phase === 'loading' ? (
             <ActivityIndicator color={colors.sage} />
-          ) : (
-            <Text style={styles.content}>{content}</Text>
-          )}
+          ) : aiState.phase === 'success' ? (
+            <Text style={styles.content}>{aiState.text}</Text>
+          ) : aiState.phase === 'error' ? (
+            <>
+              <Text style={styles.content}>{aiState.message}</Text>
+              <Pressable onPress={retryAiRequest} hitSlop={4}>
+                <Text style={styles.retryText}>Tentar novamente</Text>
+              </Pressable>
+            </>
+          ) : null}
         </View>
       )}
     </View>
@@ -126,5 +101,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 28,
     fontFamily: 'Inter_400Regular',
+  },
+  retryText: {
+    color: colors.sage,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    marginTop: spacing.sm,
   },
 });

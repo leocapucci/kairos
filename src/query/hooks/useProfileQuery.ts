@@ -3,6 +3,7 @@ import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
 import type { ProfileResponse } from '../../services/api/profile';
 import { BASE_URL, request } from '../../services/api/http';
+import { getUserId } from '../../auth/authService';
 import { startTimer } from '../../utils/perf';
 import { profilePolicy } from '../queryDefaults';
 import { queryKeys } from '../queryKeys';
@@ -19,7 +20,7 @@ export function useProfileQuery(): UseQueryResult<ProfileResponse> {
       const done = startTimer('profile');
       try {
         const raw = await request<ProfileResponse | { data?: ProfileResponse }>(
-          `${BASE_URL}/profile`,
+          `${BASE_URL}/profile?user_id=${encodeURIComponent(getUserId())}`,
           signal,
         );
         done();

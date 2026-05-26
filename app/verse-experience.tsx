@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -13,7 +13,7 @@ import ReactionButton from '../components/ui/ReactionButton';
 import SaveVerseButton from '../components/ui/SaveVerseButton';
 import Section from '../components/ui/Section';
 import { colors, radius, spacing } from '../theme';
-import { postInteraction } from '../services/api';
+import { useAiRequest } from '../src/hooks/useAiRequest';
 import { saveVerseAction } from '../src/services/api/action';
 import { shareKairos } from '../src/services/api/share';
 import { formatVerseRef } from '../src/utils/formatVerseRef';
@@ -41,9 +41,8 @@ export default function VerseExperienceScreen() {
 
   const { isVerseSaved, saveVerse, removeSavedVerse } = useSavedVerses();
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { state: aiState, send: sendAiRequest, retry: retryAiRequest } = useAiRequest();
   const [selectedBtn, setSelectedBtn] = useState('');
-  const [replyText, setReplyText] = useState('');
   const isSavingVerse = useRef(false);
 
   useScreenTracking('verse_experience');
@@ -52,20 +51,11 @@ export default function VerseExperienceScreen() {
     if (verseRef) track(E.VERSE_VIEWED, { reference: verseRef });
   }, [verseRef]);
 
-  const handleReaction = async (btn: typeof REACTION_BUTTONS[number]) => {
-    if (isSubmitting || replyText) return;
+  const handleReaction = useCallback((btn: typeof REACTION_BUTTONS[number]) => {
+    if (aiState.phase === 'loading' || aiState.phase === 'success') return;
     setSelectedBtn(btn.id);
-    setIsSubmitting(true);
-    try {
-      const res = await postInteraction('devocional', `${btn.message} Versículo ${verseRef}: "${verseText}"`);
-      const data = res.data;
-      setReplyText(data.response ?? data.message ?? data.text ?? 'Sem resposta no momento.');
-    } catch {
-      setReplyText('Não foi possível enviar agora.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    void sendAiRequest('devocional', `${btn.message} Versículo ${verseRef}: "${verseText}"`);
+  }, [aiState.phase, sendAiRequest, verseRef, verseText]);
 
   const handleSaveVerse = async () => {
     if (!verseRef.trim() || isSavingVerse.current) return;
@@ -141,28 +131,37 @@ export default function VerseExperienceScreen() {
             {REACTION_BUTTONS.map((btn) => (
               <ReactionButton
                 key={btn.id}
-                emoji={isSubmitting && selectedBtn === btn.id ? '⏳' : btn.emoji}
+                emoji={aiState.phase === 'loading' && selectedBtn === btn.id ? '⏳' : btn.emoji}
                 label={btn.label}
                 onPress={() => handleReaction(btn)}
                 selected={selectedBtn === btn.id}
-                disabled={isSubmitting || !!replyText}
+                disabled={aiState.phase === 'loading' || aiState.phase === 'success'}
               />
             ))}
           </View>
 
           {/* AI reply */}
-          {replyText ? (
+          {aiState.phase === 'success' && (
             <View style={styles.replyBox}>
               <Text style={styles.replyLabel}>KAIROS</Text>
-              <Text style={styles.replyText}>{replyText}</Text>
+              <Text style={styles.replyText}>{aiState.text}</Text>
               <Pressable
-                onPress={() => shareKairos(replyText)}
+                onPress={() => shareKairos(aiState.text)}
                 style={styles.shareBtn}
               >
                 <Text style={styles.shareBtnText}>Compartilhar</Text>
               </Pressable>
             </View>
-          ) : null}
+          )}
+          {aiState.phase === 'error' && (
+            <View style={styles.replyBox}>
+              <Text style={styles.replyLabel}>KAIROS</Text>
+              <Text style={styles.replyText}>{aiState.message}</Text>
+              <Pressable onPress={retryAiRequest} style={styles.shareBtn}>
+                <Text style={styles.shareBtnText}>Tentar novamente</Text>
+              </Pressable>
+            </View>
+          )}
 
         </ScrollView>
       </View>

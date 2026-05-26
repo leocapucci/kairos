@@ -46,8 +46,14 @@ export function useSavedVerses() {
   // Guard: prevents the persist useEffect from overwriting storage before the
   // initial load completes (avoids wipe-on-mount race condition).
   const didLoad = useRef(false);
+  // Guard: prevents concurrent loadFromStorage() calls (useEffect + useFocusEffect
+  // both fire on mount, which could cause the second read to overwrite an
+  // in-flight save).
+  const isLoadingRef = useRef(false);
 
   const loadFromStorage = useCallback(() => {
+    if (isLoadingRef.current) return;
+    isLoadingRef.current = true;
     AsyncStorage.getItem(STORAGE_KEY)
       .then(async (raw) => {
         if (raw !== null) {
@@ -62,6 +68,9 @@ export function useSavedVerses() {
       .catch((err) => {
         logger.warn('useSavedVerses: load failed', err);
         didLoad.current = true;
+      })
+      .finally(() => {
+        isLoadingRef.current = false;
       });
   }, []);
 

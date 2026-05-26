@@ -1,20 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Dimensions,
   Image,
+  ImageBackground,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 import HERO from '../assets/images/kairosbackground.jpg';
-import BottomNav from '../components/BottomNav';
-import CinematicVerseCard from '../components/ui/CinematicVerseCard';
 import { useDaily, useProfile, useVerseOfDay } from '../src/hooks/useHomeData';
 import { useSavedVerses } from '../src/hooks/useSavedVerses';
 import { saveVerseAction } from '../src/services/api/action';
@@ -26,6 +26,7 @@ import { useScreenTracking } from '../src/hooks/useScreenTracking';
 import { useTimeMark } from '../src/hooks/useTimeMark';
 import { usePushToken } from '../src/hooks/usePushToken';
 
+const SCREEN_W = Dimensions.get('window').width;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -77,9 +78,15 @@ const LABELS: Record<CardType, string> = {
 };
 
 const SUBTITLES: Record<CardType, string> = {
-  conforto: 'Para aquecer o\ncoração cansado',
-  confronto: 'Para os\npróximos passos',
-  forca: 'Para enfrentar\no que vem',
+  conforto: 'Para acalmar o coração cansado',
+  confronto: 'Para saber os próximos passos',
+  forca: 'Para enfrentar o que vier',
+};
+
+const CARD_ICONS: Record<CardType, string> = {
+  conforto: '🌿',
+  confronto: '🏔️',
+  forca: '+',
 };
 
 const CARD_TINTS: Record<CardType, string> = {
@@ -94,6 +101,11 @@ const FALLBACK_VERSE: VerseData = {
   chapter: 23,
   verse_number: 1,
 };
+
+// ─── Tab bar colors ───────────────────────────────────────────────────────────
+
+const TAB_ACTIVE   = '#7A9E7E';
+const TAB_INACTIVE = '#AAAAAA';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -118,12 +130,170 @@ function BellIcon() {
   );
 }
 
+function HeartIcon({ saved }: { saved: boolean }) {
+  return (
+    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+        fill={saved ? '#E74C3C' : 'none'}
+        stroke={saved ? '#E74C3C' : '#888888'}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+function ShareIcon() {
+  return (
+    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+      <Path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" stroke="#888888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M16 6l-4-4-4 4" stroke="#888888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M12 2v13" stroke="#888888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+// Tab bar icons
+function HomeTabIcon({ color, filled }: { color: string; filled?: boolean }) {
+  return (
+    <Svg width={23} height={23} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+        fill={filled ? color : 'none'}
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M9 22V12h6v10"
+        stroke={filled ? '#F7F5F2' : color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+function BibleTabIcon({ color }: { color: string }) {
+  return (
+    <Svg width={23} height={23} viewBox="0 0 24 24" fill="none">
+      <Path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+function DevotionalTabIcon({ color }: { color: string }) {
+  return (
+    <Svg width={23} height={23} viewBox="0 0 24 24" fill="none">
+      <Path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+function ProfileTabIcon({ color }: { color: string }) {
+  return (
+    <Svg width={23} height={23} viewBox="0 0 24 24" fill="none">
+      <Path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <Circle cx="12" cy="7" r="4" stroke={color} strokeWidth="1.5" />
+    </Svg>
+  );
+}
+
+// ─── Verse card ───────────────────────────────────────────────────────────────
+
+function VerseCard({
+  text, book, chapter, verseNumber, saved, onSave, onShare, onReadChapter,
+}: {
+  text: string; book: string; chapter: number; verseNumber: number;
+  saved: boolean; onSave: () => void; onShare: () => void; onReadChapter: () => void;
+}) {
+  return (
+    <View style={vc.card}>
+      <Text style={vc.quote} pointerEvents="none">"</Text>
+      <Text style={vc.label}>☀️  VERSÍCULO DO DIA</Text>
+      <Text style={vc.verseText}>{text}</Text>
+      <Text style={vc.reference}>{book} {chapter}:{verseNumber}</Text>
+      <View style={vc.actions}>
+        <Pressable
+          onPress={onSave}
+          style={({ pressed }: { pressed: boolean }) => [vc.iconBtn, pressed && { opacity: 0.6 }]}
+        >
+          <HeartIcon saved={saved} />
+        </Pressable>
+        <Pressable
+          onPress={onShare}
+          style={({ pressed }: { pressed: boolean }) => [vc.iconBtn, pressed && { opacity: 0.6 }]}
+        >
+          <ShareIcon />
+        </Pressable>
+        <View style={{ flex: 1 }} />
+        <Pressable
+          onPress={onReadChapter}
+          style={({ pressed }: { pressed: boolean }) => [vc.readBtn, pressed && { opacity: 0.7 }]}
+        >
+          <Text style={vc.readBtnText}>Ler versículo →</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+// ─── Tab bar ──────────────────────────────────────────────────────────────────
+
+function HomeTabBar() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const homeActive = pathname === '/home';
+  const bibleActive = pathname === '/bible';
+  const devActive = pathname === '/conversations';
+  const profActive = pathname === '/profile';
+
+  return (
+    <View style={ts.bar}>
+      <Pressable onPress={() => router.push('/home')} style={ts.tab}>
+        <HomeTabIcon color={homeActive ? TAB_ACTIVE : TAB_INACTIVE} filled={homeActive} />
+        <Text style={[ts.tabLabel, { color: homeActive ? TAB_ACTIVE : TAB_INACTIVE }]}>Início</Text>
+      </Pressable>
+
+      <Pressable onPress={() => router.push('/bible')} style={ts.tab}>
+        <BibleTabIcon color={bibleActive ? TAB_ACTIVE : TAB_INACTIVE} />
+        <Text style={[ts.tabLabel, { color: bibleActive ? TAB_ACTIVE : TAB_INACTIVE }]}>Bíblia</Text>
+      </Pressable>
+
+      <Pressable
+        onPress={() => router.push('/share')}
+        style={({ pressed }: { pressed: boolean }) => [ts.centerTab, pressed && { opacity: 0.72 }]}
+      >
+        <View style={ts.centerCircle}>
+          <Text style={ts.centerPlus}>+</Text>
+        </View>
+      </Pressable>
+
+      <Pressable onPress={() => router.push('/conversations')} style={ts.tab}>
+        <DevotionalTabIcon color={devActive ? TAB_ACTIVE : TAB_INACTIVE} />
+        <Text style={[ts.tabLabel, { color: devActive ? TAB_ACTIVE : TAB_INACTIVE }]}>Devocional</Text>
+      </Pressable>
+
+      <Pressable onPress={() => router.push('/profile')} style={ts.tab}>
+        <ProfileTabIcon color={profActive ? TAB_ACTIVE : TAB_INACTIVE} />
+        <Text style={[ts.tabLabel, { color: profActive ? TAB_ACTIVE : TAB_INACTIVE }]}>Perfil</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { data: verseData, isError: verseError } = useVerseOfDay();
-  const { data: dailyResult, isError: dailyError } = useDaily();
+  const { data: verseData } = useVerseOfDay();
+  const { data: dailyResult } = useDaily();
   const { data: profileResult } = useProfile();
   const { isVerseSaved, saveVerse, removeSavedVerse } = useSavedVerses();
   const isSavingVerse = useRef(false);
@@ -145,8 +315,8 @@ export default function HomeScreen() {
         if (d.choice === 'hoje' && d.date === yesterday) {
           setContinuityMsg('Ontem você decidiu agir. Como foi?');
         }
-      } catch {}
-    }).catch(() => {});
+      } catch (e) { console.warn('[kairos] followup parse', e); }
+    }).catch((e) => { console.warn('[kairos] followup load', e); });
 
     AsyncStorage.getItem(ONBOARDING_ANSWERS_KEY).then((raw) => {
       if (!raw) return;
@@ -154,8 +324,8 @@ export default function HomeScreen() {
         const answers = JSON.parse(raw) as Record<string, string>;
         const label = STRUGGLE_LABELS[answers.main_struggle];
         if (label) setStruggleLabel(label);
-      } catch {}
-    }).catch(() => {});
+      } catch (e) { console.warn('[kairos] onboarding parse', e); }
+    }).catch((e) => { console.warn('[kairos] onboarding load', e); });
   }, []);
 
   const activeVerse = verseData ?? FALLBACK_VERSE;
@@ -217,49 +387,33 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <View style={s.root}>
 
-        {/* ── HEADER ───────────────────────────────────────────────────────── */}
+      {/* ── HERO (header + overlay + card do versículo) ──────────────────── */}
+      <ImageBackground source={HERO} resizeMode="cover" style={s.hero}>
+        <LinearGradient
+          colors={['transparent', '#F7F5F2']}
+          start={{ x: 0, y: 0.50 }}
+          end={{ x: 0, y: 1 }}
+          style={StyleSheet.absoluteFillObject}
+          pointerEvents="none"
+        />
         <View style={s.header}>
-          <View style={{ flex: 1, marginRight: 8 }}>
-            <Text style={s.brand}>Kairos</Text>
-            <Text style={s.tagline} numberOfLines={1}>
-              {continuityMsg ?? 'Favor sem merecimento'}
-            </Text>
-          </View>
-          <Pressable hitSlop={12} style={s.bell} onPress={() => router.push('/profile')}>
-            <View>
-              <BellIcon />
-              <View style={s.bellDot} />
-            </View>
-          </Pressable>
-        </View>
-
-        {/* ── HERO ─────────────────────────────────────────────────────────── */}
-        <View style={s.hero}>
-          <Image source={HERO} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
-          <LinearGradient
-            colors={['transparent', '#F7F5F2']}
-            start={{ x: 0, y: 0.55 }}
-            end={{ x: 0, y: 1 }}
-            style={StyleSheet.absoluteFillObject}
-            pointerEvents="none"
-          />
-          <View style={s.heroOverlay} pointerEvents="none">
-            <Text style={s.heroIntro}>Hoje é dia</Text>
-            <Text style={s.heroTitle}>de ouvir Deus.</Text>
-            <View style={s.heroLine} />
-            <Text style={s.heroSub}>
-              {struggleLabel
-                ? `Para você que enfrenta ${struggleLabel}.`
-                : 'Ele ainda fala.\nEle ainda guia.'}
-            </Text>
+          <Text style={s.headerTitle}>Kairos</Text>
+          <Text style={s.headerSubtitle}>{continuityMsg ?? 'Favor sem merecimento'}</Text>
+          <View style={s.bellWrapper}>
+            <BellIcon />
+            <View style={s.bellDot} />
           </View>
         </View>
-
-        {/* ── VERSÍCULO DO DIA ─────────────────────────────────────────────── */}
+        <View style={s.heroOverlay} pointerEvents="none">
+          <Text style={s.heroTop}>Hoje é dia</Text>
+          <Text style={s.heroMain}>de ouvir Deus.</Text>
+          <View style={s.heroLine} />
+          <Text style={s.heroSub}>Ainda existe direção no silêncio.</Text>
+        </View>
+        {/* ── VERSÍCULO DO DIA — sobre a imagem, acima do gradiente ──────── */}
         <View style={s.verseSection}>
-          <CinematicVerseCard
+          <VerseCard
             text={activeVerse.text}
             book={activeVerse.book}
             chapter={activeVerse.chapter}
@@ -268,18 +422,24 @@ export default function HomeScreen() {
             onSave={handleSaveVerse}
             onShare={() => shareKairos(activeVerse.text)}
             onReadChapter={() => router.push({
-              pathname: '/verses',
-              params: { book: activeVerse.book, chapter: String(activeVerse.chapter) },
+              pathname: '/verse-experience',
+              params: {
+                book: activeVerse.book,
+                chapter: String(activeVerse.chapter),
+                verse: String(activeVerse.verse_number),
+                text: activeVerse.text,
+              },
             })}
           />
         </View>
+      </ImageBackground>
+
+      <View style={s.root}>
 
         {/* ── DIREÇÃO PARA HOJE ────────────────────────────────────────────── */}
         <View style={s.direction}>
           <Text style={s.dirTitle}>Direção para hoje</Text>
-          <Text style={s.dirSub} numberOfLines={1}>
-            {'Escolha o que o seu coração precisa.'}
-          </Text>
+          <Text style={s.dirSub}>Escolha o que o seu coração precisa.</Text>
           <View style={s.cardsRow}>
             {cards.map((card: { type: CardType; text: string }) => (
               <Pressable
@@ -293,13 +453,21 @@ export default function HomeScreen() {
                 <View style={s.cardThumb}>
                   <Image source={HERO} style={s.cardThumbImg} resizeMode="cover" />
                   <View style={[StyleSheet.absoluteFillObject, { backgroundColor: CARD_TINTS[card.type] }]} />
-                  <View style={s.cardThumbIcon} />
+                  <View style={[
+                    s.cardThumbIcon,
+                    card.type === 'forca' && { backgroundColor: '#C9A84C' },
+                  ]}>
+                    <Text style={[
+                      s.cardThumbIconText,
+                      card.type === 'forca' && { color: '#FFFFFF', fontFamily: 'Inter_700Bold' },
+                    ]}>
+                      {CARD_ICONS[card.type]}
+                    </Text>
+                  </View>
                 </View>
-                <View style={s.cardBody}>
-                  <Text style={s.cardLabel}>{LABELS[card.type]}</Text>
-                  <Text style={s.cardSub} numberOfLines={2}>{SUBTITLES[card.type]}</Text>
-                  <Text style={s.cardArrow}>→</Text>
-                </View>
+                <Text style={s.cardLabel}>{LABELS[card.type]}</Text>
+                <Text style={s.cardSub} numberOfLines={2}>{SUBTITLES[card.type]}</Text>
+                <Text style={s.cardArrow}>→</Text>
               </Pressable>
             ))}
           </View>
@@ -324,54 +492,46 @@ export default function HomeScreen() {
           <Text style={s.streakChev}>›</Text>
         </Pressable>
 
-        {(verseError || dailyError) && (
-          <Text style={s.offline}>Conteúdo offline — verifique sua conexão.</Text>
-        )}
-
       </View>
 
-      <BottomNav />
+      <HomeTabBar />
     </SafeAreaView>
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// ─── Screen styles ────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#F7F5F2',
-  },
-  root: {
-    flex: 1,
-    backgroundColor: '#F7F5F2',
-  },
+  safe: { flex: 1, backgroundColor: '#F7F5F2' },
+  root: { flex: 1, backgroundColor: '#F7F5F2' },
 
-  // ── Header
+  // ── Hero — contém header + overlay + card versículo; zIndex: 1 garante que o card fique sobre s.root
+  hero: { height: 370, zIndex: 1 },
+  heroOverlay: {},
+
+  // ── Header (dentro do ImageBackground)
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 8,
     paddingBottom: 8,
   },
-  brand: {
+  headerTitle: {
     fontSize: 36,
     fontFamily: 'serif',
     color: '#2C3E1F',
-    fontWeight: '700',
+    fontWeight: '400',
     lineHeight: 40,
   },
-  tagline: {
+  headerSubtitle: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: '#C9A84C',
-    letterSpacing: 0.3,
+    color: '#B59744',
     marginTop: 2,
   },
-  bell: {
-    marginTop: 6,
+  bellWrapper: {
+    position: 'absolute',
+    top: 8,
+    right: 20,
     padding: 4,
   },
   bellDot: {
@@ -384,30 +544,20 @@ const s = StyleSheet.create({
     backgroundColor: '#C9A84C',
   },
 
-  // ── Hero — altura fixa; texto ancorado no topo
-  hero: {
-    height: 240,
-    overflow: 'hidden',
-  },
-  heroOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-  },
-  heroIntro: {
-    fontSize: 28,
+  // ── Hero overlay — fluxo normal abaixo do header
+  heroTop: {
+    fontSize: 21,
     fontFamily: 'Inter_400Regular',
     color: '#1C1C1C',
     marginLeft: 20,
-    marginTop: 36,
+    marginTop: 16,
   },
-  heroTitle: {
-    fontSize: 36,
+  heroMain: {
+    fontSize: 29,
     fontFamily: 'serif',
     fontStyle: 'italic',
     color: '#1C1C1C',
-    lineHeight: 44,
+    lineHeight: 36,
     marginLeft: 20,
   },
   heroLine: {
@@ -420,35 +570,28 @@ const s = StyleSheet.create({
   heroSub: {
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
+    fontStyle: 'italic',
     color: '#1C1C1C',
-    opacity: 0.85,
-    lineHeight: 20,
     marginLeft: 20,
-    marginTop: 8,
+    marginTop: 10,
   },
 
-  // ── Versículo — flutua sobre o hero com margem negativa
-  verseSection: {
-    marginHorizontal: 16,
-    marginTop: -32,
-  },
+  // ── Versículo — flutua -28px sobre o hero (via root marginTop)
+  verseSection: { marginHorizontal: 16, marginTop: 12, marginBottom: 20 },
 
-  // ── Direção para hoje — flex:1 para preencher espaço restante
-  direction: {
-    flex: 1,
-    overflow: 'hidden',
-  },
+  // ── Direção para hoje
+  direction: { overflow: 'hidden' },
   dirTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: 'serif',
     color: '#1C1C1C',
     fontWeight: '600',
     marginLeft: 20,
-    marginTop: 20,
-    lineHeight: 26,
+    marginTop: 9,
+    lineHeight: 24,
   },
   dirSub: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: 'Inter_400Regular',
     color: '#888888',
     marginTop: 2,
@@ -458,12 +601,12 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     paddingHorizontal: 20,
-    marginTop: 12,
-    flex: 1,
+    marginTop: 10,
     marginBottom: 4,
   },
   card: {
     flex: 1,
+    height: 150,
     borderRadius: 12,
     backgroundColor: '#F7F5F2',
     overflow: 'hidden',
@@ -474,13 +617,12 @@ const s = StyleSheet.create({
     elevation: 2,
   },
   cardThumb: {
-    width: '100%',
-    height: 56,
+    height: 70,
+    overflow: 'hidden',
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
   },
-  cardThumbImg: {
-    width: '100%',
-    height: '100%',
-  },
+  cardThumbImg: { width: '100%', height: '100%' },
   cardThumbIcon: {
     position: 'absolute',
     bottom: 6,
@@ -489,31 +631,31 @@ const s = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     backgroundColor: '#7A9E7E',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  cardBody: {
-    flex: 1,
-    paddingHorizontal: 8,
-  },
+  cardThumbIconText: { fontSize: 12, color: '#FFFFFF', lineHeight: 15 },
   cardLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: 'Inter_700Bold',
     color: '#1C1C1C',
-    marginTop: 8,
-    letterSpacing: 0.1,
+    paddingHorizontal: 6,
+    marginTop: 6,
   },
   cardSub: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: 'Inter_400Regular',
     color: '#888888',
-    lineHeight: 15,
+    paddingHorizontal: 6,
     marginTop: 2,
-    flex: 1,
+    lineHeight: 14,
   },
   cardArrow: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#C9A84C',
-    marginTop: 4,
-    marginBottom: 8,
+    paddingHorizontal: 6,
+    marginTop: 2,
+    marginBottom: 6,
   },
 
   // ── Banner sequência
@@ -521,36 +663,30 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 20,
-    marginTop: 16,
+    marginTop: 8,
     marginBottom: 8,
     backgroundColor: '#3D5A3E',
-    borderRadius: 16,
-    height: 64,
-    paddingHorizontal: 16,
+    borderRadius: 14,
+    height: 56,
+    paddingHorizontal: 14,
   },
   streakIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#C9A84C',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  streakIconEmoji: {
-    fontSize: 18,
-  },
-  streakInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
+  streakIconEmoji: { fontSize: 16 },
+  streakInfo: { flex: 1, marginLeft: 10 },
   streakLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
     color: '#FFFFFF',
-    letterSpacing: 0.1,
   },
   streakValue: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: 'Inter_400Regular',
     color: 'rgba(255,255,255,0.65)',
     marginTop: 2,
@@ -586,5 +722,132 @@ const s = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     paddingVertical: 4,
     paddingHorizontal: 20,
+  },
+});
+
+// ─── Verse card styles ────────────────────────────────────────────────────────
+
+const vc = StyleSheet.create({
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    shadowColor: '#EDCF6A',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 18,
+    elevation: 6,
+  },
+  quote: {
+    position: 'absolute',
+    top: 4,
+    right: 12,
+    fontSize: 64,
+    color: '#C9A84C',
+    opacity: 0.15,
+    fontFamily: 'serif',
+    lineHeight: 72,
+  },
+  label: {
+    fontSize: 11,
+    color: '#C9A84C',
+    letterSpacing: 1,
+    fontFamily: 'Inter_700Bold',
+  },
+  verseText: {
+    fontSize: 16,
+    fontFamily: 'serif',
+    color: '#1C1C1C',
+    lineHeight: 24,
+    marginTop: 8,
+  },
+  reference: {
+    fontSize: 13,
+    color: '#C9A84C',
+    fontFamily: 'Inter_700Bold',
+    marginTop: 6,
+  },
+  divider: {
+    height: 0.5,
+    backgroundColor: '#E0DDD8',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 8,
+  },
+  iconBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 0.5,
+    borderColor: '#E0DDD8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  readBtn: {
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 0.5,
+    borderColor: '#C9A84C',
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  readBtnText: {
+    fontSize: 13,
+    color: '#C9A84C',
+    fontFamily: 'Inter_400Regular',
+  },
+});
+
+// ─── Tab bar styles ───────────────────────────────────────────────────────────
+
+const ts = StyleSheet.create({
+  bar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 0.5,
+    borderTopColor: '#E0DDD8',
+    paddingTop: 8,
+    paddingBottom: 22,
+    paddingHorizontal: 8,
+    height: 60,
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+  },
+  tabLabel: {
+    fontSize: 10,
+    fontFamily: 'Inter_400Regular',
+    letterSpacing: 0.1,
+  },
+  centerTab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#C9A84C',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerPlus: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    lineHeight: 24,
+    fontFamily: 'Inter_700Bold',
+    marginTop: -1,
   },
 });

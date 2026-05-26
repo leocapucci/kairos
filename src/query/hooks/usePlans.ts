@@ -12,10 +12,10 @@ import { queryKeys } from '../queryKeys';
 // ─── Device ID ───────────────────────────────────────────────────────────────
 
 async function resolveDeviceId(): Promise<string> {
-  let id = await AsyncStorage.getItem('device_id');
+  let id = await AsyncStorage.getItem('kairos_device_id_v1');
   if (!id) {
     id = `device_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    await AsyncStorage.setItem('device_id', id);
+    await AsyncStorage.setItem('kairos_device_id_v1', id);
   }
   return id;
 }

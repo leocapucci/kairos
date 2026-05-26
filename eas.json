@@ -9,7 +9,9 @@
         "buildType": "apk"
       },
       "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB": "952095468133-3eub9k8rr38ut8ge28veqpfbsp6k9ndg.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID": "952095468133-2qcrme2keha057e6tv3p40vh82p2j64l.apps.googleusercontent.com"
       }
     },
     "production": {
@@ -18,7 +20,9 @@
       },
       "ios": {},
       "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB": "952095468133-3eub9k8rr38ut8ge28veqpfbsp6k9ndg.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID": "952095468133-2qcrme2keha057e6tv3p40vh82p2j64l.apps.googleusercontent.com"
       }
     }
   }
