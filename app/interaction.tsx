@@ -136,6 +136,55 @@ export default function InteractionScreen() {
     return t || FALLBACK_BY_TYPE[cardType];
   })();
 
+  const triggerAutoQuestion = useCallback(async (questionText: string) => {
+    dispatch({ type: 'REACT', buttonId: 'direct_question' } as InteractionAction);
+    reactStartRef.current = Date.now();
+    track(E.INTERACTION_STARTED, { card_type: 'devocional', button_id: 'direct_question' });
+
+    abortRef.current?.abort();
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
+
+    try {
+      const res = await postInteraction(
+        'devocional',
+        questionText,
+        ctrl.signal,
+        onboardingContext,
+      );
+      if (ctrl.signal.aborted) {
+        dispatch({ type: 'REACT_ERROR', message: 'A interação foi cancelada. Tente novamente.' });
+        return;
+      }
+      dispatch({ type: 'REACT_SUCCESS', text: extractText(res.data) });
+      track(E.INTERACTION_COMPLETED, {
+        card_type: 'devocional',
+        button_id: 'direct_question',
+        latency_ms: Date.now() - reactStartRef.current,
+      });
+    } catch (err) {
+      if (ctrl.signal.aborted) {
+        dispatch({ type: 'REACT_ERROR', message: 'A interação foi cancelada. Tente novamente.' });
+        return;
+      }
+      dispatch({ type: 'REACT_ERROR', message: parseUnknownError(err) });
+      track(E.INTERACTION_FAILED, { card_type: 'devocional', button_id: 'direct_question', error: String(err) });
+    }
+  }, [onboardingContext]);
+
+  useEffect(() => {
+    dispatch({ type: 'RESET' });
+    if (cardType === 'devocional' && params.text) {
+      const text = params.text.trim();
+      if (text) {
+        const timer = setTimeout(() => {
+          triggerAutoQuestion(text);
+        }, 80);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [params.text, params.type, triggerAutoQuestion, cardType]);
+
   // ─── Handlers ────────────────────────────────────────────────────────────────
 
   const handleReaction = useCallback(async (btn: typeof REACTION_BUTTONS[number]) => {
@@ -262,7 +311,16 @@ export default function InteractionScreen() {
             {isError(state) && (
               <>
                 <Text style={styles.errorText}>{state.message}</Text>
-                <Pressable onPress={() => dispatch({ type: 'RETRY' })} style={styles.retryBtn}>
+                <Pressable
+                  onPress={() => {
+                    if (cardType === 'devocional') {
+                      triggerAutoQuestion(cardText);
+                    } else {
+                      dispatch({ type: 'RETRY' });
+                    }
+                  }}
+                  style={styles.retryBtn}
+                >
                   <Text style={styles.retryBtnText}>Tentar novamente</Text>
                 </Pressable>
               </>
