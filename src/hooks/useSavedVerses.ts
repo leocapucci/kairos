@@ -1,11 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
 import { logger } from '../utils/logger';
 
 const STORAGE_KEY = 'saved_verses';
 const OLD_STORAGE_KEY = 'kairos:saved_verses';
+
+export type SavedVerse = {
+  reference: string;
+  text: string;
+  book: string;
+  chapter: number;
+  verse: number;
+};
 
 async function migrateOldVerses(): Promise<SavedVerse[]> {
   try {
@@ -13,7 +20,7 @@ async function migrateOldVerses(): Promise<SavedVerse[]> {
     if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown[];
     if (!Array.isArray(parsed)) return [];
-    const migrated: SavedVerse[] = (parsed as unknown[])
+    const migrated: SavedVerse[] = parsed
       .filter((item): item is string => typeof item === 'string')
       .map((ref) => {
         const match = ref.match(/^(.+)\s+(\d+):(\d+)$/);
@@ -32,67 +39,69 @@ async function migrateOldVerses(): Promise<SavedVerse[]> {
   }
 }
 
-export type SavedVerse = {
-  reference: string;
-  text: string;
-  book: string;
-  chapter: number;
-  verse: number;
-};
+// ── Singleton store shared across every screen (single source of truth) ──
+// Saving on one screen mutates this module-level state and notifies all
+// subscribers synchronously, so other screens reflect it immediately without
+// re-reading AsyncStorage (which caused the save/load race condition).
+let verses: SavedVerse[] = [];
+let loaded = false;
+let loadPromise: Promise<void> | null = null;
+const listeners = new Set<() => void>();
+
+function emit() {
+  for (const listener of listeners) listener();
+}
+
+function persist() {
+  AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(verses)).catch((err) => {
+    logger.warn('useSavedVerses: save failed', err);
+  });
+}
+
+// Always replace the array reference (never mutate in place) so
+// useSyncExternalStore detects the change.
+function setVerses(next: SavedVerse[]) {
+  verses = next;
+  emit();
+  persist();
+}
+
+function ensureLoaded(): Promise<void> {
+  if (loaded) return Promise.resolve();
+  if (loadPromise) return loadPromise;
+  loadPromise = (async () => {
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      if (raw !== null) {
+        verses = JSON.parse(raw) as SavedVerse[];
+      } else {
+        verses = await migrateOldVerses();
+        if (verses.length) persist();
+      }
+    } catch (err) {
+      logger.warn('useSavedVerses: load failed', err);
+    } finally {
+      loaded = true;
+      emit();
+    }
+  })();
+  return loadPromise;
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  void ensureLoaded();
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function getSnapshot() {
+  return verses;
+}
 
 export function useSavedVerses() {
-  const [savedVerses, setSavedVerses] = useState<SavedVerse[]>([]);
-
-  // Guard: prevents the persist useEffect from overwriting storage before the
-  // initial load completes (avoids wipe-on-mount race condition).
-  const didLoad = useRef(false);
-  // Guard: prevents concurrent loadFromStorage() calls (useEffect + useFocusEffect
-  // both fire on mount, which could cause the second read to overwrite an
-  // in-flight save).
-  const isLoadingRef = useRef(false);
-
-  const loadFromStorage = useCallback(() => {
-    if (isLoadingRef.current) return;
-    isLoadingRef.current = true;
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then(async (raw) => {
-        if (raw !== null) {
-          setSavedVerses(JSON.parse(raw) as SavedVerse[]);
-        } else {
-          // Primeira vez com a chave nova — migrar dados da chave antiga se existirem
-          const migrated = await migrateOldVerses();
-          setSavedVerses(migrated);
-        }
-        didLoad.current = true;
-      })
-      .catch((err) => {
-        logger.warn('useSavedVerses: load failed', err);
-        didLoad.current = true;
-      })
-      .finally(() => {
-        isLoadingRef.current = false;
-      });
-  }, []);
-
-  // Load on mount
-  useEffect(() => {
-    loadFromStorage();
-  }, [loadFromStorage]);
-
-  // Re-load when screen gains focus — picks up saves made on other screens
-  useFocusEffect(
-    useCallback(() => {
-      loadFromStorage();
-    }, [loadFromStorage])
-  );
-
-  // Persist whenever the list changes (didLoad guard prevents premature writes)
-  useEffect(() => {
-    if (!didLoad.current) return;
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(savedVerses)).catch((err) => {
-      logger.warn('useSavedVerses: save failed', err);
-    });
-  }, [savedVerses]);
+  const savedVerses = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   const isVerseSaved = useCallback(
     (reference: string) => savedVerses.some((v) => v.reference === reference),
@@ -100,15 +109,12 @@ export function useSavedVerses() {
   );
 
   const saveVerse = useCallback((verse: SavedVerse) => {
-    setSavedVerses((prev) =>
-      prev.some((v) => v.reference === verse.reference)
-        ? prev
-        : [verse, ...prev]
-    );
+    if (verses.some((v) => v.reference === verse.reference)) return;
+    setVerses([verse, ...verses]);
   }, []);
 
   const removeSavedVerse = useCallback((reference: string) => {
-    setSavedVerses((prev) => prev.filter((v) => v.reference !== reference));
+    setVerses(verses.filter((v) => v.reference !== reference));
   }, []);
 
   return { savedVerses, saveVerse, removeSavedVerse, isVerseSaved };

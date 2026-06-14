@@ -67,6 +67,21 @@ const DOMINANT_INSIGHTS: Record<PatternKey, { title: string; insight: string }> 
 export default function ProfileScreen() {
   const { data: profile, isLoading, isError } = useProfileQuery();
   const [onboardingAnswers, setOnboardingAnswers] = useState<OnboardingMap>({});
+  // Fallback: if the query is still loading after 5s, stop blocking on the
+  // spinner and render with default/local data instead of an infinite loader.
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingTimedOut(false);
+      return;
+    }
+    const t = setTimeout(() => setLoadingTimedOut(true), 5000);
+    return () => clearTimeout(t);
+  }, [isLoading]);
+
+  // Degraded mode: API errored, or it timed out while still loading.
+  const degraded = isError || (isLoading && loadingTimedOut);
 
   useScreenTracking('profile');
 
@@ -102,10 +117,10 @@ export default function ProfileScreen() {
       setOnboardingAnswers(profile.onboarding_answers);
       return;
     }
-    if (isError || (profile !== undefined && !profile.onboarding_answers)) {
+    if (degraded || (profile !== undefined && !profile.onboarding_answers)) {
       loadLocalOnboardingAnswers().then(setOnboardingAnswers);
     }
-  }, [profile, isError]);
+  }, [profile, degraded]);
 
   const insight = dominantKey ? DOMINANT_INSIGHTS[dominantKey] : null;
 
@@ -113,7 +128,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.safeArea}>
       <Header />
       <View style={styles.container}>
-        {isLoading ? (
+        {isLoading && !loadingTimedOut ? (
           <View style={styles.loadingWrap}>
             <ActivityIndicator color={colors.gold} />
           </View>
@@ -166,7 +181,7 @@ export default function ProfileScreen() {
                 </View>
               )}
 
-              {isError && (
+              {degraded && (
                 <Text style={styles.inlineErrorText}>
                   Mostrando dados salvos localmente.
                 </Text>

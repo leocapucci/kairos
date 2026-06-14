@@ -1,8 +1,10 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, Stack } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ViewShot from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
 
 import { shareKairos } from '../src/services/api/share';
 import { colors, radius, spacing } from '../theme';
@@ -27,13 +29,37 @@ const PHRASES: Phrase[] = [
 export default function ShareScreen() {
   const [index, setIndex] = useState(0);
   const phrase = PHRASES[index];
+  const viewShotRef = useRef<ViewShot>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   const handleNewPhrase = () => {
     setIndex((prev) => (prev + 1) % PHRASES.length);
   };
 
   const handleShare = async () => {
-    await shareKairos(`${phrase.text}\n\n— ${phrase.source}`);
+    if (isSharing) return;
+    setIsSharing(true);
+    try {
+      if (viewShotRef.current?.capture) {
+        const uri = await viewShotRef.current.capture();
+        const isAvailable = await Sharing.isAvailableAsync();
+        if (isAvailable) {
+          await Sharing.shareAsync(uri, {
+            mimeType: 'image/png',
+            dialogTitle: 'Compartilhar nos Stories',
+          });
+          return;
+        }
+      }
+      // Fallback para texto
+      await shareKairos(`${phrase.text}\n\n— ${phrase.source}`);
+    } catch (err) {
+      console.warn('[kairos] erro ao compartilhar imagem:', err);
+      // Fallback para texto
+      await shareKairos(`${phrase.text}\n\n— ${phrase.source}`);
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -50,7 +76,7 @@ export default function ShareScreen() {
         </View>
 
         {/* Card cinematográfico */}
-        <View style={s.card}>
+        <ViewShot ref={viewShotRef} style={s.card} options={{ format: 'png', quality: 0.95 }}>
           <Image source={HERO} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
           <LinearGradient
             colors={['rgba(0,0,0,0.10)', 'rgba(0,0,0,0.62)']}
@@ -64,13 +90,14 @@ export default function ShareScreen() {
             <Text style={s.phraseText}>{phrase.text}</Text>
             <Text style={s.sourceText}>— {phrase.source}</Text>
           </View>
-        </View>
+        </ViewShot>
 
         {/* Ações */}
         <View style={s.actions}>
           <Pressable
             onPress={handleShare}
-            style={({ pressed }: { pressed: boolean }) => [s.primaryBtn, pressed && { opacity: 0.85 }]}
+            disabled={isSharing}
+            style={({ pressed }: { pressed: boolean }) => [s.primaryBtn, pressed && { opacity: 0.85 }, isSharing && { opacity: 0.6 }]}
           >
             <Text style={s.primaryBtnText}>Compartilhar nos Stories →</Text>
           </Pressable>

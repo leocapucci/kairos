@@ -340,20 +340,36 @@ export default function InteractionScreen() {
                 <Text style={styles.shareBtnText}>Compartilhar</Text>
               </Pressable>
 
-              {/* Deep follow-up buttons — hidden once a deep button is chosen */}
-              {state.deep.phase === 'idle' && (
+              {/* Deep follow-up buttons — kept visible while loading so the chosen
+                  button stays on screen (disabled, "Refletindo...") as clear feedback. */}
+              {(state.deep.phase === 'idle' || state.deep.phase === 'loading') && (
                 <View style={styles.deepBtns}>
-                  {DEEP_BUTTONS.map((btn) => (
-                    <Pressable key={btn.id} onPress={() => handleDeep(btn)} style={styles.deepBtn}>
-                      <Text style={styles.deepBtnText}>{btn.label}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
-
-              {state.deep.phase === 'loading' && (
-                <View style={styles.loader}>
-                  <ActivityIndicator color={colors.sage} />
+                  {DEEP_BUTTONS.map((btn) => {
+                    const loadingDeep = state.deep.phase === 'loading';
+                    const isChosen =
+                      state.deep.phase === 'loading' && state.deep.buttonId === btn.id;
+                    return (
+                      <Pressable
+                        key={btn.id}
+                        onPress={() => handleDeep(btn)}
+                        disabled={loadingDeep}
+                        style={[
+                          styles.deepBtn,
+                          isChosen && styles.deepBtnChosen,
+                          loadingDeep && !isChosen && styles.deepBtnDimmed,
+                        ]}
+                      >
+                        {isChosen ? (
+                          <View style={styles.deepBtnLoadingRow}>
+                            <ActivityIndicator color={colors.sage} size="small" />
+                            <Text style={styles.deepBtnChosenText}>Refletindo...</Text>
+                          </View>
+                        ) : (
+                          <Text style={styles.deepBtnText}>{btn.label}</Text>
+                        )}
+                      </Pressable>
+                    );
+                  })}
                 </View>
               )}
 
@@ -561,6 +577,24 @@ const styles = StyleSheet.create({
     color: dark.textWeak,
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
+  },
+  deepBtnChosen: {
+    borderColor: colors.sage,
+    backgroundColor: dark.sageSurface,
+  },
+  deepBtnDimmed: {
+    opacity: 0.4,
+  },
+  deepBtnLoadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+  },
+  deepBtnChosenText: {
+    color: colors.sage,
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
   },
   deepReplyText: {
     color: dark.textMid,

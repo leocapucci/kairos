@@ -2,7 +2,7 @@ import { logger } from '../../utils/logger';
 
 export const BASE_URL = 'https://kairos-backend-vjdp.onrender.com';
 
-const TIMEOUT_MS = 20_000;
+const TIMEOUT_MS = 35_000;
 const MAX_RETRIES = 2;
 const RETRY_BASE_MS = 800;
 

@@ -44,6 +44,18 @@ export default function VerseExperienceScreen() {
   const { state: aiState, send: sendAiRequest, retry: retryAiRequest } = useAiRequest();
   const [selectedBtn, setSelectedBtn] = useState('');
   const isSavingVerse = useRef(false);
+  const [isSharing, setIsSharing] = useState(false);
+
+  const handleShare = useCallback(async (content: string, reference?: string) => {
+    if (isSharing) return;
+    setIsSharing(true);
+    try {
+      if (reference) track(E.VERSE_SHARED, { reference });
+      await shareKairos(content);
+    } finally {
+      setIsSharing(false);
+    }
+  }, [isSharing]);
 
   useScreenTracking('verse_experience');
 
@@ -106,11 +118,9 @@ export default function VerseExperienceScreen() {
             <Text style={styles.verseText}>{verseText}</Text>
             {verseText ? (
               <Pressable
-                onPress={() => {
-                  track(E.VERSE_SHARED, { reference: verseRef });
-                  shareKairos(verseText);
-                }}
-                style={styles.shareBtn}
+                onPress={() => handleShare(verseText, verseRef)}
+                disabled={isSharing}
+                style={[styles.shareBtn, isSharing && { opacity: 0.5 }]}
               >
                 <Text style={styles.shareBtnText}>Compartilhar</Text>
               </Pressable>
@@ -146,8 +156,9 @@ export default function VerseExperienceScreen() {
               <Text style={styles.replyLabel}>KAIROS</Text>
               <Text style={styles.replyText}>{aiState.text}</Text>
               <Pressable
-                onPress={() => shareKairos(aiState.text)}
-                style={styles.shareBtn}
+                onPress={() => handleShare(aiState.text)}
+                disabled={isSharing}
+                style={[styles.shareBtn, isSharing && { opacity: 0.5 }]}
               >
                 <Text style={styles.shareBtnText}>Compartilhar</Text>
               </Pressable>
