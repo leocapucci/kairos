@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import * as Google from 'expo-auth-session/providers/google';
+import { makeRedirectUri } from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 
 import { identify } from '../analytics';
@@ -19,6 +20,13 @@ const GOOGLE_WEB     = '952095468133-3eub9k8rr38ut8ge28veqpfbsp6k9ndg.apps.googl
 const GOOGLE_IOS     = undefined as string | undefined;
 const GOOGLE_ANDROID = '952095468133-2qcrme2keha057e6tv3p40vh82p2j64l.apps.googleusercontent.com';
 const GOOGLE_AVAILABLE = !!(GOOGLE_WEB || GOOGLE_IOS || GOOGLE_ANDROID);
+
+// Android OAuth clients identify the app by package + SHA-1 and expect the redirect
+// on the reversed client-ID scheme. Make it explicit so the APK build doesn't fall
+// back to an exp:// proxy URI, which Google rejects with 400 invalid_request.
+const redirectUri = makeRedirectUri({
+  native: 'com.googleusercontent.apps.952095468133-2qcrme2keha057e6tv3p40vh82p2j64l:/oauth2redirect',
+});
 
 type AuthContextValue = AuthState & {
   signInWithGoogle: () => Promise<void>;
@@ -50,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ...(GOOGLE_WEB     && { clientId:       GOOGLE_WEB }),
     ...(GOOGLE_IOS     && { iosClientId:    GOOGLE_IOS }),
     ...(GOOGLE_ANDROID && { androidClientId: GOOGLE_ANDROID }),
+    redirectUri,
   });
 
   // Restore session on mount
