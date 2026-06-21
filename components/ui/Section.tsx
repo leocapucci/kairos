@@ -8,9 +8,15 @@ export type SectionType = 'meditacao' | 'confronto' | 'oracao';
 
 type SectionProps = {
   title: string;
-  versReference: string;
-  versText: string;
-  type: SectionType;
+  // — Modo IA (devocional): dispara requisição ao abrir —
+  versReference?: string;
+  versText?: string;
+  type?: SectionType;
+  // — Modo estático (conteúdo já carregado): renderiza children —
+  children?: React.ReactNode;
+  // — Accordion controlado pelo pai (ex.: apenas um aberto por vez) —
+  open?: boolean;
+  onToggle?: () => void;
 };
 
 
@@ -23,18 +29,36 @@ const PROMPTS: Record<SectionType, (ref: string, text: string) => string> = {
     `Escreva uma oração breve (máximo 80 palavras) baseada em ${ref}: "${text}". Pessoal, do coração, em primeira pessoa.`,
 };
 
-export default function Section({ title, versReference, versText, type }: SectionProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function Section({
+  title,
+  versReference,
+  versText,
+  type,
+  children,
+  open,
+  onToggle,
+}: SectionProps) {
+  const isStatic = children !== undefined;
+  const isControlled = open !== undefined && onToggle !== undefined;
+
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = isControlled ? open! : internalOpen;
+
   const { state: aiState, send: sendAiRequest, retry: retryAiRequest } = useAiRequest();
 
   const handleToggle = () => {
-    if (isOpen) {
-      setIsOpen(false);
-      return;
+    const willOpen = !isOpen;
+
+    if (isControlled) {
+      onToggle!();
+    } else {
+      setInternalOpen(willOpen);
     }
-    setIsOpen(true);
-    if (aiState.phase === 'success') return;
-    void sendAiRequest('devocional', PROMPTS[type](versReference, versText));
+
+    // Modo IA: dispara a requisição apenas ao abrir e se ainda não houve sucesso.
+    if (!isStatic && willOpen && type && aiState.phase !== 'success') {
+      void sendAiRequest('devocional', PROMPTS[type](versReference ?? '', versText ?? ''));
+    }
   };
 
   return (
@@ -49,7 +73,9 @@ export default function Section({ title, versReference, versText, type }: Sectio
       </Pressable>
       {isOpen && (
         <View style={styles.body}>
-          {aiState.phase === 'loading' ? (
+          {isStatic ? (
+            children
+          ) : aiState.phase === 'loading' ? (
             <ActivityIndicator color={colors.sage} />
           ) : aiState.phase === 'success' ? (
             <Text style={styles.content}>{aiState.text}</Text>
