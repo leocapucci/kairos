@@ -13,14 +13,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAuth } from '../src/auth';
-import { requestEmailOtp, verifyEmailOtp } from '../src/auth/authService';
-import { identify } from '../src/analytics';
 import { colors, radius } from '../theme';
 
 type Phase = 'email' | 'otp';
 
 export default function LoginEmailScreen() {
-  const { refreshUser } = useAuth();
+  const { sendEmailOtp, verifyEmailOtp } = useAuth();
   const [phase, setPhase] = useState<Phase>('email');
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -36,7 +34,7 @@ export default function LoginEmailScreen() {
     setError('');
     setLoading(true);
     try {
-      await requestEmailOtp(trimmed);
+      await sendEmailOtp(trimmed);
       setPhase('otp');
     } catch {
       setError('Não foi possível enviar o código. Tente novamente.');
@@ -51,9 +49,7 @@ export default function LoginEmailScreen() {
     setError('');
     setLoading(true);
     try {
-      const user = await verifyEmailOtp(email.trim().toLowerCase(), trimmed);
-      refreshUser(user);
-      identify(user.user_id, { email: user.email, provider: 'email' });
+      const user = await verifyEmailOtp(otp.trim());
       router.replace('/home');
     } catch {
       setError('Código inválido ou expirado. Tente novamente.');

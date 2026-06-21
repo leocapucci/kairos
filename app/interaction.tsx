@@ -42,6 +42,14 @@ const FALLBACK_BY_TYPE: Record<CardType, string> = {
   forca: 'Você tem força para o que está diante de você hoje.',
 };
 
+const TYPE_LABELS: Record<CardType, string> = {
+  conforto: 'CONFORTO',
+  confronto: 'DIREÇÃO',
+  crescimento: 'CRESCIMENTO',
+  devocional: 'DEVOCIONAL',
+  forca: 'FORÇA',
+};
+
 const DEEP_BUTTONS = [
   { id: 'direct',  label: 'Seja mais direto 🎯',      prompt: 'Seja mais direto e objetivo.' },
   { id: 'step',    label: 'Me dê um passo claro 👣',  prompt: 'Me dê um único passo prático que posso fazer hoje.' },
@@ -281,11 +289,15 @@ export default function InteractionScreen() {
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Text style={styles.backIcon}>‹</Text>
           </Pressable>
-          <Text style={styles.typeTag}>{cardType.toUpperCase()}</Text>
+          <Text style={styles.typeTag}>{TYPE_LABELS[cardType]}</Text>
         </View>
 
         {showReactions ? (
-          <>
+          <ScrollView
+            style={styles.initialScroll}
+            contentContainerStyle={styles.initialScrollContent}
+            showsVerticalScrollIndicator={false}
+          >
             <Text style={styles.cardText}>{cardText}</Text>
 
             <View style={styles.reactionsContainer}>
@@ -298,6 +310,7 @@ export default function InteractionScreen() {
                     selected={isSubmitting(state) || isError(state) ? state.buttonId === btn.id : false}
                     disabled={isSubmitting(state)}
                     dark
+                    style={styles.reactionFill}
                   />
                 </View>
               ))}
@@ -325,7 +338,7 @@ export default function InteractionScreen() {
                 </Pressable>
               </>
             )}
-          </>
+          </ScrollView>
         ) : isRevealed(state) ? (
           <Animated.View style={[styles.replyContainer, { opacity: replyOpacity }]}>
             <ScrollView
@@ -458,6 +471,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
   },
+  initialScroll: {
+    flex: 1,
+  },
+  initialScrollContent: {
+    paddingBottom: 120,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -505,6 +524,12 @@ const styles = StyleSheet.create({
   },
   reactionWrapper: {
     width: '48%',
+  },
+  // Fills the grid cell so all four reaction buttons share the same height,
+  // even when a label (e.g. "Preciso de direção") wraps to two lines.
+  reactionFill: {
+    flex: 1,
+    minHeight: 72,
   },
   loader: {
     paddingVertical: spacing.lg,

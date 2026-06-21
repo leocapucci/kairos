@@ -16,6 +16,8 @@ import { initSentry } from '../src/utils/sentry';
 import { initAnalytics } from '../src/analytics';
 import { BASE_URL } from '../src/services/api/http';
 import { AuthProvider } from '../src/auth';
+import { ClerkProvider } from '../src/auth/clerkConfig';
+import { tokenCache } from '../src/auth/clerkConfig';
 import { colors } from '../theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -54,17 +56,22 @@ export default function RootLayout() {
   }
 
   return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.background },
-            }}
-          />
-        </QueryClientProvider>
-      </AuthProvider>
-    </ErrorBoundary>
+    <ClerkProvider
+      publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? ''}
+      tokenCache={tokenCache}
+    >
+      <ErrorBoundary>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: colors.background },
+              }}
+            />
+          </QueryClientProvider>
+        </AuthProvider>
+      </ErrorBoundary>
+    </ClerkProvider>
   );
 }

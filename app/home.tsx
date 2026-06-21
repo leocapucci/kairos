@@ -7,6 +7,7 @@ import {
   Image,
   ImageBackground,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -387,6 +388,11 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={s.safe}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
 
       {/* ── HERO (header + overlay + card do versículo) ──────────────────── */}
       <ImageBackground source={HERO} resizeMode="cover" style={s.hero}>
@@ -493,6 +499,7 @@ export default function HomeScreen() {
         </Pressable>
 
       </View>
+      </ScrollView>
 
       <HomeTabBar />
     </SafeAreaView>
@@ -506,7 +513,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#F7F5F2' },
 
   // ── Hero — contém header + overlay + card versículo; zIndex: 1 garante que o card fique sobre s.root
-  hero: { height: 370, zIndex: 1 },
+  hero: { width: '100%', zIndex: 1 },
   heroOverlay: {},
 
   // ── Header (dentro do ImageBackground)
@@ -814,10 +821,9 @@ const ts = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopWidth: 0.5,
     borderTopColor: '#E0DDD8',
-    paddingTop: 8,
-    paddingBottom: 22,
+    paddingTop: 10,
+    paddingBottom: 10,
     paddingHorizontal: 8,
-    height: 60,
   },
   tab: {
     flex: 1,

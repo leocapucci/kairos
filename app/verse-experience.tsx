@@ -122,7 +122,7 @@ export default function VerseExperienceScreen() {
                 disabled={isSharing}
                 style={[styles.shareBtn, isSharing && { opacity: 0.5 }]}
               >
-                <Text style={styles.shareBtnText}>Compartilhar</Text>
+                <Text style={styles.shareBtnText}>↗  Compartilhar</Text>
               </Pressable>
             ) : null}
           </View>
@@ -160,7 +160,7 @@ export default function VerseExperienceScreen() {
                 disabled={isSharing}
                 style={[styles.shareBtn, isSharing && { opacity: 0.5 }]}
               >
-                <Text style={styles.shareBtnText}>Compartilhar</Text>
+                <Text style={styles.shareBtnText}>↗  Compartilhar</Text>
               </Pressable>
             </View>
           )}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, Text, ViewStyle } from 'react-native';
 
 import { colors, radius, spacing } from '../../theme';
 
@@ -10,9 +10,10 @@ type ReactionButtonProps = {
   selected?: boolean;
   disabled?: boolean;
   dark?: boolean;
+  style?: StyleProp<ViewStyle>;
 };
 
-export default function ReactionButton({ emoji, label, onPress, selected, disabled, dark }: ReactionButtonProps) {
+export default function ReactionButton({ emoji, label, onPress, selected, disabled, dark, style }: ReactionButtonProps) {
   const buttonStyle = dark
     ? [styles.button, styles.buttonDark, selected && styles.selectedDark, disabled && !selected && styles.dimmed]
     : [styles.button, styles.buttonLight, selected && styles.selectedLight, disabled && !selected && styles.dimmed];
@@ -22,7 +23,7 @@ export default function ReactionButton({ emoji, label, onPress, selected, disabl
     : [styles.label, styles.labelLight, selected && styles.labelSelectedLight];
 
   return (
-    <Pressable onPress={onPress} disabled={disabled} style={buttonStyle}>
+    <Pressable onPress={onPress} disabled={disabled} style={[buttonStyle, style]}>
       <Text style={styles.emoji}>{emoji}</Text>
       <Text style={labelStyle}>{label}</Text>
     </Pressable>

@@ -2,6 +2,7 @@ import Constants from 'expo-constants';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,6 +18,7 @@ import {
 } from '../src/query/hooks/useProfileQuery';
 import { colors, radius, spacing } from '../theme';
 import { useScreenTracking } from '../src/hooks/useScreenTracking';
+import { useAuth } from '../src/auth';
 
 type PatternKey = 'conforto' | 'confronto' | 'direcao' | 'duvida';
 type OnboardingMap = Record<string, string>;
@@ -26,6 +28,35 @@ const QUESTION_LABELS = [
   { key: 'main_struggle', label: 'Maior luta' },
   { key: 'faith_level', label: 'Caminhada espiritual' },
 ];
+
+// Raw onboarding values → readable PT-BR labels (see app/onboarding.tsx).
+const ANSWER_LABELS: Record<string, string> = {
+  // life_phase
+  adolescente: 'Adolescente',
+  jovem_adulto: 'Jovem adulto',
+  adulto: 'Adulto',
+  maduro: 'Maduro',
+  // main_struggle
+  ansiedade: 'Ansiedade',
+  relacionamento: 'Relacionamentos',
+  proposito: 'Propósito',
+  fe: 'Fé',
+  financeiro: 'Financeiro',
+  luto: 'Luto',
+  // faith_level
+  iniciando: 'Iniciando',
+  retomando: 'Retomando',
+  crescendo: 'Crescendo',
+  firme: 'Firme',
+};
+
+// Generic fallback for unknown values: replace "_" with spaces and capitalize.
+function formatAnswer(raw?: string): string {
+  if (!raw) return 'Ainda não respondido';
+  if (ANSWER_LABELS[raw]) return ANSWER_LABELS[raw];
+  const spaced = raw.replace(/_/g, ' ');
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
 
 const DEFAULT_PATTERNS: Record<PatternKey, number> = {
   conforto: 0,
@@ -66,6 +97,7 @@ const DOMINANT_INSIGHTS: Record<PatternKey, { title: string; insight: string }> 
 
 export default function ProfileScreen() {
   const { data: profile, isLoading, isError } = useProfileQuery();
+  const { signOut } = useAuth();
   const [onboardingAnswers, setOnboardingAnswers] = useState<OnboardingMap>({});
   // Fallback: if the query is still loading after 5s, stop blocking on the
   // spinner and render with default/local data instead of an infinite loader.
@@ -203,12 +235,19 @@ export default function ProfileScreen() {
                   <View key={item.key} style={styles.answerItem}>
                     <Text style={styles.answerQuestion}>{item.label}</Text>
                     <Text style={styles.answerValue}>
-                      {onboardingAnswers[item.key] ?? 'Ainda não respondido'}
+                      {formatAnswer(onboardingAnswers[item.key])}
                     </Text>
                   </View>
                 ))}
               </View>
             </View>
+
+            <Pressable
+              onPress={signOut}
+              style={({ pressed }) => [styles.signOutBtn, pressed && { opacity: 0.7 }]}
+            >
+              <Text style={styles.signOutText}>Sair da conta</Text>
+            </Pressable>
           </ScrollView>
         )}
 
@@ -359,5 +398,20 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     textAlign: 'center',
     marginTop: spacing.xs + 2,
+  },
+  signOutBtn: {
+    marginTop: 32,
+    marginHorizontal: 24,
+    marginBottom: 16,
+    paddingVertical: 14,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(200,76,76,0.3)',
+    alignItems: 'center' as const,
+  },
+  signOutText: {
+    color: colors.coral ?? '#C84C4C',
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
   },
 });

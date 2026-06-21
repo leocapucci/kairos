@@ -9,7 +9,18 @@ import * as Sharing from 'expo-sharing';
 import { shareKairos } from '../src/services/api/share';
 import { colors, radius, spacing } from '../theme';
 
-const HERO = require('../assets/images/kairosbackground.jpg');
+const BACKGROUNDS = [
+  { image: require('../assets/images/kairosbackground.jpg'),  gradient: ['rgba(0,0,0,0.05)', 'rgba(42,42,74,0.75)'] as const },
+  { image: require('../assets/images/kairosbackground2.png'), gradient: ['rgba(0,0,0,0.05)', 'rgba(21,71,52,0.72)'] as const },
+  { image: require('../assets/images/splash-bg.jpg'),         gradient: ['rgba(0,0,0,0.05)', 'rgba(74,42,42,0.70)'] as const },
+  { image: require('../assets/images/kairosbackground.jpg'),  gradient: ['rgba(10,10,40,0.15)', 'rgba(90,60,20,0.68)'] as const },
+  { image: require('../assets/images/kairosbackground2.png'), gradient: ['rgba(0,0,0,0.08)', 'rgba(60,30,80,0.72)'] as const },
+  { image: require('../assets/images/splash-bg.jpg'),         gradient: ['rgba(0,0,0,0.05)', 'rgba(20,50,80,0.70)'] as const },
+  { image: require('../assets/images/kairosbackground.jpg'),  gradient: ['rgba(20,20,20,0.10)', 'rgba(0,0,0,0.62)'] as const },
+  { image: require('../assets/images/kairosbackground2.png'), gradient: ['rgba(0,0,0,0.05)', 'rgba(80,50,30,0.68)'] as const },
+  { image: require('../assets/images/splash-bg.jpg'),         gradient: ['rgba(10,10,30,0.10)', 'rgba(40,60,40,0.72)'] as const },
+  { image: require('../assets/images/kairosbackground.jpg'),  gradient: ['rgba(0,0,0,0.08)', 'rgba(50,20,60,0.70)'] as const },
+];
 
 type Phrase = { text: string; source: string };
 
@@ -77,9 +88,9 @@ export default function ShareScreen() {
 
         {/* Card cinematográfico */}
         <ViewShot ref={viewShotRef} style={s.card} options={{ format: 'png', quality: 0.95 }}>
-          <Image source={HERO} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+          <Image source={BACKGROUNDS[index].image} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
           <LinearGradient
-            colors={['rgba(0,0,0,0.10)', 'rgba(0,0,0,0.62)']}
+            colors={BACKGROUNDS[index].gradient}
             style={StyleSheet.absoluteFillObject}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}

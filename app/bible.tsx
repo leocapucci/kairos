@@ -2,6 +2,8 @@ import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -73,6 +75,10 @@ export default function BibleScreen() {
         ))}
       </View>
 
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
@@ -206,6 +212,7 @@ export default function BibleScreen() {
           )
         )}
       </ScrollView>
+      </KeyboardAvoidingView>
 
       <BottomNav />
     </SafeAreaView>
