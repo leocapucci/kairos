@@ -12,8 +12,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import ReactionButton from '../components/ui/ReactionButton';
 import SaveVerseButton from '../components/ui/SaveVerseButton';
 import Section from '../components/ui/Section';
-import StudyBibleSection from '../components/ui/StudyBibleSection';
-import { PREMIUM_ENABLED } from '../src/config/premium';
 import { colors, radius, spacing } from '../theme';
 import { useAiRequest } from '../src/hooks/useAiRequest';
 import { saveVerseAction } from '../src/services/api/action';
@@ -128,11 +126,6 @@ export default function VerseExperienceScreen() {
               </Pressable>
             ) : null}
           </View>
-
-          {/* Bíblia de Estudo Kairos — experiência premium */}
-          {PREMIUM_ENABLED && book && chapter && verse ? (
-            <StudyBibleSection book={book} chapter={chapter} verse={verse} />
-          ) : null}
 
           {/* AI sections */}
           {verseRef && verseText ? (

@@ -21,9 +21,10 @@ type VersesResponse = {
 
 export default function VersesScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ book?: string; chapter?: string }>();
+  const params = useLocalSearchParams<{ book?: string; chapter?: string; mode?: string }>();
   const book = params.book || '';
   const chapter = params.chapter || '';
+  const mode = params.mode || '';
 
   const [verses, setVerses] = useState<VersesResponse['verses']>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,8 +52,9 @@ export default function VersesScreen() {
   }, [book, chapter]);
 
   const handleVersePress = (verseNum: number, verseText: string) => {
+    const dest = mode === 'estudo' ? 'study-experience' : 'verse-experience';
     router.push(
-      `/verse-experience?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verseNum}&text=${encodeURIComponent(verseText)}`
+      `/${dest}?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verseNum}&text=${encodeURIComponent(verseText)}`
     );
   };
 

@@ -30,8 +30,9 @@ const CHAPTER_COUNTS: Record<string, number> = {
 
 export default function ChaptersScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ book?: string }>();
-  
+  const params = useLocalSearchParams<{ book?: string; mode?: string }>();
+  const mode = params.mode || '';
+
   const normalizeBookName = (name: string): string => {
     const corrections: Record<string, string> = {
       'Genesis': 'Gênesis',
@@ -111,7 +112,8 @@ export default function ChaptersScreen() {
   const chapters = useMemo(() => Array.from({ length: chapterCount }, (_, i) => i + 1), [chapterCount]);
 
   const handleChapterPress = (chapter: number) => {
-    router.push(`/verses?book=${encodeURIComponent(book)}&chapter=${chapter}`);
+    const modeParam = mode ? `&mode=${encodeURIComponent(mode)}` : '';
+    router.push(`/verses?book=${encodeURIComponent(book)}&chapter=${chapter}${modeParam}`);
   };
 
   return (
