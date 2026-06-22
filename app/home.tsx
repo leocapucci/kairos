@@ -268,7 +268,7 @@ function HomeTabBar() {
       </Pressable>
 
       <Pressable
-        onPress={() => router.push('/share')}
+        onPress={() => router.push('/kairos-edition')}
         style={({ pressed }: { pressed: boolean }) => [ts.centerTab, pressed && { opacity: 0.72 }]}
       >
         <View style={ts.centerCircle}>
