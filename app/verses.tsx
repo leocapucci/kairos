@@ -68,6 +68,10 @@ export default function VersesScreen() {
           <Text style={styles.title}>{book} {chapter}</Text>
         </View>
 
+        <Text style={styles.orientationHint}>
+          🙏 Toque em qualquer versículo para receber uma reflexão personalizada.
+        </Text>
+
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           {isLoading ? (
             <Text style={styles.loadingText}>Carregando...</Text>
@@ -134,6 +138,16 @@ const styles = StyleSheet.create({
     color: colors.gold,
     fontSize: 14,
     fontWeight: '600',
+  },
+  orientationHint: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+    lineHeight: 20,
   },
   versesContainer: { paddingTop: 16 },
   verseItem: { flexDirection: 'row', marginBottom: 16, paddingHorizontal: 8 },

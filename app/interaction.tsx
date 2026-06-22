@@ -51,9 +51,7 @@ const TYPE_LABELS: Record<CardType, string> = {
 };
 
 const DEEP_BUTTONS = [
-  { id: 'direct',  label: 'Seja mais direto 🎯',      prompt: 'Seja mais direto e objetivo.' },
-  { id: 'step',    label: 'Me dê um passo claro 👣',  prompt: 'Me dê um único passo prático que posso fazer hoje.' },
-  { id: 'explain', label: 'Quero entender melhor 🧠', prompt: 'Explique de forma mais simples e clara.' },
+  { id: 'explain', label: 'Entender melhor 🧠', prompt: 'Explique de forma mais simples e clara.' },
 ] as const;
 
 const REACTION_BUTTONS = [
@@ -67,10 +65,28 @@ function stripMarkdown(text: string) {
   return text.replace(/^#{1,6}\s*/gm, '').replace(/\*\*/g, '').trim();
 }
 
+const GREETING_PATTERNS = [
+  'Querido irmão', 'Querida irmã',
+  'Meu irmão', 'Minha irmã',
+  'Meu amigo', 'Minha amiga',
+  'Irmão', 'Irmã', 'Amigo', 'Amiga',
+];
+
+function stripGreetings(text: string): string {
+  for (const g of GREETING_PATTERNS) {
+    const re = new RegExp(`^${g}[,!.]?\\s+`, 'i');
+    if (re.test(text)) {
+      const stripped = text.replace(re, '');
+      return stripped.charAt(0).toUpperCase() + stripped.slice(1);
+    }
+  }
+  return text;
+}
+
 function extractText(data: { response?: string; message?: string; text?: string }): string {
   const text = data.response ?? data.message ?? data.text;
   if (!text) throw new Error('Resposta IA inválida');
-  return stripMarkdown(text);
+  return stripGreetings(stripMarkdown(text));
 }
 
 export default function InteractionScreen() {
@@ -398,53 +414,27 @@ export default function InteractionScreen() {
 
               {/* Follow-up commitment */}
               {!state.followUp && (
-                <View style={styles.followUpContainer}>
-                  <Text style={styles.followUpLabel}>O que você quer fazer com isso?</Text>
-                  <Pressable
-                    onPress={() => {
-                      dispatch({ type: 'FOLLOW_UP', choice: 'hoje' });
-                      track(E.FOLLOW_UP_CHOSEN, { choice: 'hoje', card_type: cardType });
-                      const today = new Date().toISOString().slice(0, 10);
-                      AsyncStorage.setItem(
-                        LAST_FOLLOWUP_KEY,
-                        JSON.stringify({ choice: 'hoje', date: today, cardType })
-                      ).catch(() => {});
-                    }}
-                    style={({ pressed }) => [
-                      styles.followUpBtnHoje,
-                      pressed && { opacity: 0.85 },
-                    ]}
-                  >
-                    <Text style={styles.followUpTextHoje}>Hoje 🔥</Text>
-                    <Text style={styles.followUpHojeSubtitle}>Vou colocar em prática agora</Text>
-                  </Pressable>
-                  <View style={styles.followUpRow}>
-                    <Pressable
-                      onPress={() => {
-                        dispatch({ type: 'FOLLOW_UP', choice: 'depois' });
-                        track(E.FOLLOW_UP_CHOSEN, { choice: 'depois', card_type: cardType });
-                      }}
-                      style={styles.followUpBtn}
-                    >
-                      <Text style={styles.followUpText}>Depois ⏰</Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={() => router.back()}
-                      style={[styles.followUpBtn, styles.followUpIgnore]}
-                    >
-                      <Text style={[styles.followUpText, styles.followUpIgnoreText]}>Ignorar</Text>
-                    </Pressable>
-                  </View>
-                </View>
+                <Pressable
+                  onPress={() => {
+                    dispatch({ type: 'FOLLOW_UP', choice: 'hoje' });
+                    track(E.FOLLOW_UP_CHOSEN, { choice: 'hoje', card_type: cardType });
+                    const today = new Date().toISOString().slice(0, 10);
+                    AsyncStorage.setItem(
+                      LAST_FOLLOWUP_KEY,
+                      JSON.stringify({ choice: 'hoje', date: today, cardType })
+                    ).catch(() => {});
+                  }}
+                  style={({ pressed }) => [
+                    styles.followUpBtnHoje,
+                    pressed && { opacity: 0.85 },
+                  ]}
+                >
+                  <Text style={styles.followUpTextHoje}>Vou praticar hoje 🔥</Text>
+                </Pressable>
               )}
               {state.followUp === 'hoje' && (
                 <Text style={styles.followUpFeedback}>
                   🔥 Você decidiu agir — que isso se torne realidade hoje.
-                </Text>
-              )}
-              {state.followUp === 'depois' && (
-                <Text style={styles.followUpFeedback}>
-                  Combinado. Volte quando estiver pronto.
                 </Text>
               )}
 
@@ -630,17 +620,6 @@ const styles = StyleSheet.create({
     borderTopColor: dark.borderSoft,
     paddingTop: spacing.md,
   },
-  followUpContainer: {
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-  },
-  followUpLabel: {
-    color: dark.textWeak,
-    fontSize: 11,
-    fontFamily: 'Inter_400Regular',
-    letterSpacing: 0.3,
-    textAlign: 'center',
-  },
   followUpBtnHoje: {
     borderRadius: radius.sm,
     borderWidth: 1.5,
@@ -648,44 +627,12 @@ const styles = StyleSheet.create({
     backgroundColor: dark.sageSurface,
     paddingVertical: spacing.md,
     alignItems: 'center',
-    gap: 2,
   },
   followUpTextHoje: {
     color: colors.sage,
     fontSize: 17,
     fontFamily: 'Inter_700Bold',
     letterSpacing: -0.2,
-  },
-  followUpHojeSubtitle: {
-    color: colors.sage,
-    fontSize: 11,
-    fontFamily: 'Inter_400Regular',
-    opacity: 0.7,
-  },
-  followUpRow: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-  },
-  followUpBtn: {
-    flex: 1,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: dark.border,
-    backgroundColor: dark.surface,
-    paddingVertical: spacing.sm,
-    alignItems: 'center',
-  },
-  followUpText: {
-    color: dark.textWeak,
-    fontSize: 13,
-    fontFamily: 'Inter_400Regular',
-  },
-  followUpIgnore: {
-    borderColor: dark.borderSoft,
-    backgroundColor: 'transparent',
-  },
-  followUpIgnoreText: {
-    color: dark.textFaint,
   },
   followUpFeedback: {
     color: colors.sage,

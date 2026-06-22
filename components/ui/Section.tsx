@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
   },
   title: {
-    color: colors.blackSoft,
+    color: '#1A1A1A',
     fontSize: 17,
     fontFamily: 'Inter_700Bold',
     letterSpacing: -0.2,
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
   },
   content: {
-    color: colors.grayOrganic,
+    color: '#333333',
     fontSize: 16,
     lineHeight: 28,
     fontFamily: 'Inter_400Regular',

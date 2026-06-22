@@ -347,13 +347,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm + 2,
   },
   streakCard: {
-    backgroundColor: colors.surfaceDeep,
+    backgroundColor: '#E6EFE6',
     borderRadius: radius.sm + 4,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: '#D2DDD2',
   },
   streakValue: {
     color: colors.gold,
@@ -369,10 +369,12 @@ const styles = StyleSheet.create({
   },
   answersList: { gap: spacing.sm + 2 },
   answerItem: {
-    backgroundColor: colors.surfaceDeep,
+    backgroundColor: '#E6EFE6',
     borderRadius: radius.sm + 2,
     paddingVertical: spacing.sm + 2,
     paddingHorizontal: spacing.sm + 2,
+    borderWidth: 1,
+    borderColor: '#D2DDD2',
   },
   answerQuestion: {
     color: colors.textTertiary,

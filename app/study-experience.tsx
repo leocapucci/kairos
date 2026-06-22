@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   verseRef: {
-    color: colors.sage,
+    color: '#2E5E3A',
     fontSize: 10,
     fontFamily: 'Inter_700Bold',
     letterSpacing: 2,
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   verseText: {
-    color: colors.blackSoft,
+    color: '#1A1A1A',
     fontSize: 20,
     lineHeight: 32,
     fontFamily: 'Inter_700Bold',
