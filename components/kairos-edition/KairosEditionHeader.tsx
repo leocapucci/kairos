@@ -4,9 +4,10 @@ import { colors } from '../../theme';
 
 type Props = {
   onBack: () => void;
+  currentTheme: string;
 };
 
-export default function KairosEditionHeader({ onBack }: Props) {
+export default function KairosEditionHeader({ onBack, currentTheme }: Props) {
   return (
     <View style={styles.header}>
       <Pressable
@@ -16,10 +17,12 @@ export default function KairosEditionHeader({ onBack }: Props) {
       >
         <Text style={styles.backIcon}>‹</Text>
       </Pressable>
+
       <View style={styles.center}>
         <Text style={styles.title}>KAIROS EDITION</Text>
-        <Text style={styles.subtitle}>Coleção Exclusiva</Text>
+        <Text style={styles.theme} numberOfLines={1}>{currentTheme}</Text>
       </View>
+
       <View style={styles.placeholder} />
     </View>
   );
@@ -30,7 +33,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSoft,
     backgroundColor: colors.background,
@@ -49,20 +52,21 @@ const styles = StyleSheet.create({
   center: {
     flex: 1,
     alignItems: 'center',
+    gap: 2,
   },
   title: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: 'Inter_700Bold',
     color: colors.gold,
     letterSpacing: 2.5,
     textTransform: 'uppercase',
   },
-  subtitle: {
-    fontSize: 10,
-    fontFamily: 'Inter_400Regular',
-    color: colors.textTertiary,
-    letterSpacing: 0.5,
-    marginTop: 2,
+  theme: {
+    fontSize: 13,
+    fontFamily: 'Inter_700Bold',
+    color: colors.textPrimary,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
   placeholder: {
     width: 36,

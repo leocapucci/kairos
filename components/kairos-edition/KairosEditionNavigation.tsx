@@ -1,24 +1,51 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '../../theme';
 
 type Props = {
-  total: number;
   current: number;
+  total: number;
+  onPrev: () => void;
+  onNext: () => void;
 };
 
-export default function KairosEditionNavigation({ total, current }: Props) {
+export default function KairosEditionNavigation({ current, total, onPrev, onNext }: Props) {
+  const isFirst = current === 0;
+  const isLast = current === total - 1;
+
   return (
     <View style={styles.container}>
-      {Array.from({ length: total }).map((_, i) => (
-        <View
-          key={i}
-          style={[
-            styles.dot,
-            i === current ? styles.dotActive : styles.dotInactive,
-          ]}
-        />
-      ))}
+      <Pressable
+        onPress={onPrev}
+        disabled={isFirst}
+        hitSlop={12}
+        style={({ pressed }) => [
+          styles.arrowBtn,
+          isFirst && styles.arrowDisabled,
+          pressed && !isFirst && { opacity: 0.6 },
+        ]}
+      >
+        <Text style={[styles.arrow, isFirst && styles.arrowTextDisabled]}>◀</Text>
+      </Pressable>
+
+      <Text style={styles.counter}>
+        <Text style={styles.counterCurrent}>{current + 1}</Text>
+        <Text style={styles.counterSep}> de </Text>
+        <Text style={styles.counterTotal}>{total}</Text>
+      </Text>
+
+      <Pressable
+        onPress={onNext}
+        disabled={isLast}
+        hitSlop={12}
+        style={({ pressed }) => [
+          styles.arrowBtn,
+          isLast && styles.arrowDisabled,
+          pressed && !isLast && { opacity: 0.6 },
+        ]}
+      >
+        <Text style={[styles.arrow, isLast && styles.arrowTextDisabled]}>▶</Text>
+      </Pressable>
     </View>
   );
 }
@@ -26,22 +53,45 @@ export default function KairosEditionNavigation({ total, current }: Props) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 14,
-    paddingBottom: 8,
+    justifyContent: 'center',
+    gap: 28,
+    paddingVertical: 12,
+    backgroundColor: colors.background,
   },
-  dot: {
-    borderRadius: 99,
-    height: 6,
+  arrowBtn: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  dotActive: {
-    width: 20,
-    backgroundColor: colors.gold,
+  arrowDisabled: {
+    opacity: 0.25,
   },
-  dotInactive: {
-    width: 6,
-    backgroundColor: colors.borderSoft,
+  arrow: {
+    color: colors.textPrimary,
+    fontSize: 15,
+  },
+  arrowTextDisabled: {
+    color: colors.textTertiary,
+  },
+  counter: {
+    minWidth: 80,
+    textAlign: 'center',
+  },
+  counterCurrent: {
+    color: colors.textPrimary,
+    fontSize: 15,
+    fontFamily: 'Inter_700Bold',
+  },
+  counterSep: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+  },
+  counterTotal: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
   },
 });
