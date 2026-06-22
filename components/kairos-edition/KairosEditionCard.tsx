@@ -1,14 +1,21 @@
 import React from 'react';
 import {
   Image,
+  ImageSourcePropType,
   Pressable,
   Share,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import { KairosEditionCard as CardType } from '../../data/kairosEdition';
+import { KairosEditionCard as CardType, KairosImageKey } from '../../data/kairosEdition';
 import { colors, radius } from '../../theme';
+
+// Requires estáticos — Metro precisa de paths literais em tempo de bundle
+const IMAGES: Record<KairosImageKey, ImageSourcePropType> = {
+  bg1: require('../../assets/images/kairosbackground.jpg'),
+  bg2: require('../../assets/images/kairosbackground2.png'),
+};
 
 type Props = {
   card: CardType;
@@ -19,12 +26,10 @@ type Props = {
 };
 
 export default function KairosEditionCard({ card, index, total, cardWidth, cardHeight }: Props) {
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: `"${card.phrase}"\n— ${card.reference}\n\nKairos Edition`,
-      });
-    } catch (_) {}
+  const handleShare = () => {
+    Share.share({
+      message: `"${card.phrase}"\n— ${card.reference}\n\nKairos Edition`,
+    }).catch(Boolean);
   };
 
   const counterText = `${String(index + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
@@ -32,7 +37,7 @@ export default function KairosEditionCard({ card, index, total, cardWidth, cardH
   return (
     <View style={[styles.container, { width: cardWidth, height: cardHeight }]}>
       <View style={[styles.card, { marginHorizontal: 20 }]}>
-        <Image source={card.image} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+        <Image source={IMAGES[card.imageKey]} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
         <View style={[StyleSheet.absoluteFillObject, { backgroundColor: card.overlayColor }]} />
 
         <View style={styles.content}>
