@@ -114,7 +114,7 @@ export default function BottomNav() {
 
       {/* Center action button */}
       <Pressable
-        onPress={() => router.push('/share')}
+        onPress={() => router.push('/kairos-edition')}
         style={({ pressed }: { pressed: boolean }) => [styles.centerTab, pressed && { opacity: 0.72 }]}
       >
         <View style={styles.centerCircle}>
