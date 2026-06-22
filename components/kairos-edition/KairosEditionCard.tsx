@@ -1,32 +1,32 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { Image, ImageSourcePropType, StyleSheet, Text, View } from 'react-native';
-import { KairosCard, KairosImageKey } from '../../data/kairosEdition';
+import { KairosCard, KairosImageKey, KairosCategory } from '../../data/kairosEdition';
 import { colors, radius } from '../../theme';
 
-// Requires estáticos — Metro precisa de paths literais em tempo de bundle
-// Chaves semânticas mapeadas para os assets disponíveis (placeholder até novas imagens chegarem)
-const IMAGES: Record<KairosImageKey, ImageSourcePropType> = {
-  aurora_manha:   require('../../assets/images/kairosbackground.jpg'),
-  ceu_dourado:    require('../../assets/images/kairosbackground.jpg'),
-  montanhas:      require('../../assets/images/kairosbackground.jpg'),
-  estrada:        require('../../assets/images/kairosbackground.jpg'),
-  campo_aberto:   require('../../assets/images/kairosbackground.jpg'),
-  floresta:       require('../../assets/images/kairosbackground.jpg'),
-  luz_arvores:    require('../../assets/images/kairosbackground.jpg'),
-  pedra_firme:    require('../../assets/images/kairosbackground.jpg'),
-  janela_luz:     require('../../assets/images/kairosbackground.jpg'),
-  nuvens_luz:     require('../../assets/images/kairosbackground2.png'),
-  ceu_noite:      require('../../assets/images/kairosbackground2.png'),
-  lago_sereno:    require('../../assets/images/kairosbackground2.png'),
-  vale_verde:     require('../../assets/images/kairosbackground2.png'),
-  horizonte_mar:  require('../../assets/images/kairosbackground2.png'),
-  chuva_suave:    require('../../assets/images/kairosbackground2.png'),
-  deserto_arido:  require('../../assets/images/kairosbackground2.png'),
-  caminho_sombra: require('../../assets/images/kairosbackground2.png'),
-  jardim_verde:   require('../../assets/images/kairosbackground2.png'),
-  cidade_manha:   require('../../assets/images/kairosbackground2.png'),
-  por_do_sol:     require('../../assets/images/kairosbackground2.png'),
+// Mapeamento das imagens oficiais do Kairos Edition por Categoria
+const IMAGES: Record<KairosCategory, ImageSourcePropType> = {
+  fe:           require('../../assets/images/kairos-edition/faith_master_v1.jpg'),
+  esperanca:    require('../../assets/images/kairos-edition/hope_master_v1.jpg'),
+  direcao:      require('../../assets/images/kairos-edition/direction_master_v1.jpg'),
+  forca:        require('../../assets/images/kairos-edition/strength_master_v1.jpg'),
+  gratidao:     require('../../assets/images/kairos-edition/gratitude_master_v1.jpg'),
+  descanso:     require('../../assets/images/kairos-edition/rest_master_v1.jpg'),
+  confianca:    require('../../assets/images/kairos-edition/trust_master_v1.jpg'),
+  coragem:      require('../../assets/images/kairos-edition/courage_master_v1.jpg'),
+  proposito:    require('../../assets/images/kairos-edition/purpose_master_v1.jpg'),
+  recomeço:     require('../../assets/images/kairos-edition/new_beginning_master_v1.jpg'),
+
+  // Fallbacks temporários para categorias sazonais/secundárias
+  amor:         require('../../assets/images/kairosbackground.jpg'),
+  paz:          require('../../assets/images/kairosbackground2.png'),
+  perseveranca: require('../../assets/images/kairosbackground.jpg'),
+  graca:        require('../../assets/images/kairosbackground2.png'),
+  renovacao:    require('../../assets/images/kairosbackground.jpg'),
+  cura:         require('../../assets/images/kairosbackground2.png'),
+  vitoria:      require('../../assets/images/kairosbackground.jpg'),
+  alegria:      require('../../assets/images/kairosbackground2.png'),
+  especial:     require('../../assets/images/kairosbackground.jpg'),
 };
 
 type Props = {
@@ -41,7 +41,7 @@ export default function KairosEditionCard({ card, cardWidth, cardHeight }: Props
       <View style={[styles.card, { height: cardHeight - 24 }]}>
         {/* Imagem de fundo */}
         <Image
-          source={IMAGES[card.imageKey]}
+          source={IMAGES[card.category]}
           style={StyleSheet.absoluteFillObject}
           resizeMode="cover"
         />
