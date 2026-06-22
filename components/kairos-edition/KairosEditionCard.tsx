@@ -1,21 +1,32 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import {
-  Image,
-  ImageSourcePropType,
-  Pressable,
-  Share,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Image, ImageSourcePropType, StyleSheet, Text, View } from 'react-native';
 import { KairosCard, KairosImageKey } from '../../data/kairosEdition';
 import { colors, radius } from '../../theme';
 
 // Requires estáticos — Metro precisa de paths literais em tempo de bundle
+// Chaves semânticas mapeadas para os assets disponíveis (placeholder até novas imagens chegarem)
 const IMAGES: Record<KairosImageKey, ImageSourcePropType> = {
-  bg1: require('../../assets/images/kairosbackground.jpg'),
-  bg2: require('../../assets/images/kairosbackground2.png'),
+  aurora_manha:   require('../../assets/images/kairosbackground.jpg'),
+  ceu_dourado:    require('../../assets/images/kairosbackground.jpg'),
+  montanhas:      require('../../assets/images/kairosbackground.jpg'),
+  estrada:        require('../../assets/images/kairosbackground.jpg'),
+  campo_aberto:   require('../../assets/images/kairosbackground.jpg'),
+  floresta:       require('../../assets/images/kairosbackground.jpg'),
+  luz_arvores:    require('../../assets/images/kairosbackground.jpg'),
+  pedra_firme:    require('../../assets/images/kairosbackground.jpg'),
+  janela_luz:     require('../../assets/images/kairosbackground.jpg'),
+  nuvens_luz:     require('../../assets/images/kairosbackground2.png'),
+  ceu_noite:      require('../../assets/images/kairosbackground2.png'),
+  lago_sereno:    require('../../assets/images/kairosbackground2.png'),
+  vale_verde:     require('../../assets/images/kairosbackground2.png'),
+  horizonte_mar:  require('../../assets/images/kairosbackground2.png'),
+  chuva_suave:    require('../../assets/images/kairosbackground2.png'),
+  deserto_arido:  require('../../assets/images/kairosbackground2.png'),
+  caminho_sombra: require('../../assets/images/kairosbackground2.png'),
+  jardim_verde:   require('../../assets/images/kairosbackground2.png'),
+  cidade_manha:   require('../../assets/images/kairosbackground2.png'),
+  por_do_sol:     require('../../assets/images/kairosbackground2.png'),
 };
 
 type Props = {
@@ -25,12 +36,6 @@ type Props = {
 };
 
 export default function KairosEditionCard({ card, cardWidth, cardHeight }: Props) {
-  const handleShare = () => {
-    Share.share({
-      message: `"${card.phrase}"\n— ${card.reference}\n\nKairos · Favor sem merecimento`,
-    }).catch(Boolean);
-  };
-
   return (
     <View style={[styles.wrapper, { width: cardWidth }]}>
       <View style={[styles.card, { height: cardHeight - 24 }]}>
@@ -56,33 +61,16 @@ export default function KairosEditionCard({ card, cardWidth, cardHeight }: Props
 
         {/* Conteúdo */}
         <View style={styles.content}>
-          {/* Marca Kairos — topo esquerdo */}
+          {/* Marca Kairos — topo */}
           <View style={styles.brandArea}>
             <Text style={styles.brandName}>✦ KAIROS</Text>
             <Text style={styles.brandTagline}>Favor sem merecimento</Text>
           </View>
 
-          {/* Área principal — base do card */}
+          {/* Frase + referência — base do card */}
           <View style={styles.mainArea}>
-            {/* Tag do tema */}
-            <View style={styles.themePill}>
-              <Text style={styles.themeLabel}>{card.theme}</Text>
-            </View>
-
-            {/* Frase */}
             <Text style={styles.phrase}>"{card.phrase}"</Text>
-
-            {/* Referência bíblica */}
             <Text style={styles.reference}>{card.reference}</Text>
-
-            {/* Botão compartilhar */}
-            <Pressable
-              onPress={handleShare}
-              style={({ pressed }) => [styles.shareBtn, pressed && { opacity: 0.7 }]}
-            >
-              <Text style={styles.shareIcon}>↗</Text>
-              <Text style={styles.shareText}>Compartilhar nos Stories</Text>
-            </Pressable>
           </View>
         </View>
       </View>
@@ -127,21 +115,7 @@ const styles = StyleSheet.create({
 
   // ─── Conteúdo principal ─────────────────────────────────────────────────────
   mainArea: {
-    gap: 16,
-  },
-  themePill: {
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: colors.goldBorder,
-    borderRadius: 99,
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-  },
-  themeLabel: {
-    color: colors.gold,
-    fontSize: 10,
-    fontFamily: 'Inter_700Bold',
-    letterSpacing: 2.5,
+    gap: 12,
   },
   phrase: {
     color: 'rgba(255,255,255,0.96)',
@@ -155,30 +129,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
     letterSpacing: 0.6,
-  },
-
-  // ─── Botão ──────────────────────────────────────────────────────────────────
-  shareBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.28)',
-    borderRadius: 99,
-    paddingHorizontal: 18,
-    paddingVertical: 11,
-    marginTop: 4,
-  },
-  shareIcon: {
-    color: 'rgba(255,255,255,0.80)',
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  shareText: {
-    color: 'rgba(255,255,255,0.80)',
-    fontSize: 13,
-    fontFamily: 'Inter_400Regular',
-    letterSpacing: 0.2,
   },
 });

@@ -112,14 +112,15 @@ export default function BottomNav() {
         );
       })}
 
-      {/* Center action button */}
+      {/* Center action button — Kairos Edition */}
       <Pressable
         onPress={() => router.push('/kairos-edition')}
         style={({ pressed }: { pressed: boolean }) => [styles.centerTab, pressed && { opacity: 0.72 }]}
       >
         <View style={styles.centerCircle}>
-          <Text style={styles.centerPlus}>+</Text>
+          <Text style={styles.centerSymbol}>✦</Text>
         </View>
+        <Text style={styles.centerLabel}>Edition</Text>
       </Pressable>
 
       {RIGHT_TABS.map((tab) => {
@@ -165,11 +166,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
   },
 
-  // Center + button
+  // Center action button — Kairos Edition
   centerTab: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 3,
     paddingVertical: 2,
   },
   centerCircle: {
@@ -185,11 +187,16 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
-  centerPlus: {
-    color: colors.white,
-    fontSize: 26,
-    lineHeight: 30,
+  centerSymbol: {
+    color: colors.gold,
+    fontSize: 18,
+    lineHeight: 22,
     fontFamily: 'Inter_700Bold',
-    marginTop: -1,
+  },
+  centerLabel: {
+    fontSize: 10,
+    fontFamily: 'Inter_400Regular',
+    color: colors.textSecondary,
+    letterSpacing: 0.1,
   },
 });
