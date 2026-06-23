@@ -37,6 +37,8 @@ export type KairosCard = {
 };
 
 // ─── Pool de cards (40 cartas para rotação diária) ───────────────────────────
+// overlayColor calibrado para cada imagem real (0.15–0.24).
+// Categorias com placeholder mantêm opacidade original (0.40–0.42).
 
 const CARD_POOL: KairosCard[] = [
   {
@@ -46,7 +48,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Hebreus 11:1',
     imageKey: 'aurora_manha',
     category: 'fe',
-    overlayColor: 'rgba(55, 40, 10, 0.40)',
+    overlayColor: 'rgba(5, 12, 25, 0.22)',
   },
   {
     id: 'fe_02',
@@ -55,7 +57,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Marcos 9:23',
     imageKey: 'ceu_dourado',
     category: 'fe',
-    overlayColor: 'rgba(45, 30, 5, 0.42)',
+    overlayColor: 'rgba(5, 10, 22, 0.24)',
   },
   {
     id: 'esperanca_01',
@@ -64,7 +66,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Jeremias 29:11',
     imageKey: 'horizonte_mar',
     category: 'esperanca',
-    overlayColor: 'rgba(20, 40, 55, 0.40)',
+    overlayColor: 'rgba(10, 16, 40, 0.22)',
   },
   {
     id: 'esperanca_02',
@@ -73,7 +75,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Romanos 5:5',
     imageKey: 'nuvens_luz',
     category: 'esperanca',
-    overlayColor: 'rgba(15, 35, 50, 0.42)',
+    overlayColor: 'rgba(8, 14, 36, 0.24)',
   },
   {
     id: 'perseveranca_01',
@@ -100,7 +102,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Filipenses 4:13',
     imageKey: 'pedra_firme',
     category: 'forca',
-    overlayColor: 'rgba(75, 20, 10, 0.40)',
+    overlayColor: 'rgba(4, 8, 20, 0.18)',
   },
   {
     id: 'forca_02',
@@ -109,7 +111,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Isaías 41:10',
     imageKey: 'estrada',
     category: 'forca',
-    overlayColor: 'rgba(65, 15, 8, 0.42)',
+    overlayColor: 'rgba(3, 6, 18, 0.20)',
   },
   {
     id: 'coragem_01',
@@ -118,7 +120,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Josué 1:9',
     imageKey: 'montanhas',
     category: 'coragem',
-    overlayColor: 'rgba(70, 25, 15, 0.40)',
+    overlayColor: 'rgba(6, 10, 18, 0.15)',
   },
   {
     id: 'coragem_02',
@@ -127,7 +129,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'João 16:33',
     imageKey: 'aurora_manha',
     category: 'coragem',
-    overlayColor: 'rgba(60, 20, 12, 0.42)',
+    overlayColor: 'rgba(5, 8, 15, 0.18)',
   },
   {
     id: 'paz_01',
@@ -154,7 +156,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Mateus 11:28',
     imageKey: 'campo_aberto',
     category: 'descanso',
-    overlayColor: 'rgba(15, 40, 45, 0.40)',
+    overlayColor: 'rgba(10, 25, 15, 0.18)',
   },
   {
     id: 'descanso_02',
@@ -163,7 +165,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Salmos 23:2',
     imageKey: 'jardim_verde',
     category: 'descanso',
-    overlayColor: 'rgba(12, 38, 42, 0.42)',
+    overlayColor: 'rgba(8, 22, 12, 0.20)',
   },
   {
     id: 'direcao_01',
@@ -172,7 +174,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Provérbios 3:5-6',
     imageKey: 'caminho_sombra',
     category: 'direcao',
-    overlayColor: 'rgba(20, 15, 55, 0.40)',
+    overlayColor: 'rgba(35, 20, 6, 0.18)',
   },
   {
     id: 'direcao_02',
@@ -181,7 +183,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Salmos 119:105',
     imageKey: 'luz_arvores',
     category: 'direcao',
-    overlayColor: 'rgba(18, 12, 50, 0.42)',
+    overlayColor: 'rgba(32, 18, 5, 0.20)',
   },
   {
     id: 'proposito_01',
@@ -190,7 +192,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Jeremias 1:5',
     imageKey: 'ceu_noite',
     category: 'proposito',
-    overlayColor: 'rgba(15, 20, 50, 0.40)',
+    overlayColor: 'rgba(3, 5, 15, 0.15)',
   },
   {
     id: 'proposito_02',
@@ -199,7 +201,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Efésios 2:10',
     imageKey: 'janela_luz',
     category: 'proposito',
-    overlayColor: 'rgba(12, 18, 45, 0.42)',
+    overlayColor: 'rgba(3, 5, 14, 0.18)',
   },
   {
     id: 'gratidao_01',
@@ -208,7 +210,7 @@ const CARD_POOL: KairosCard[] = [
     reference: '1 Tessalonicenses 5:18',
     imageKey: 'floresta',
     category: 'gratidao',
-    overlayColor: 'rgba(55, 35, 5, 0.40)',
+    overlayColor: 'rgba(42, 25, 4, 0.18)',
   },
   {
     id: 'gratidao_02',
@@ -217,7 +219,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Salmos 147:7',
     imageKey: 'ceu_dourado',
     category: 'gratidao',
-    overlayColor: 'rgba(50, 30, 5, 0.42)',
+    overlayColor: 'rgba(38, 22, 3, 0.20)',
   },
   {
     id: 'recomeço_01',
@@ -226,7 +228,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Apocalipse 21:5',
     imageKey: 'jardim_verde',
     category: 'recomeço',
-    overlayColor: 'rgba(10, 45, 30, 0.40)',
+    overlayColor: 'rgba(8, 18, 10, 0.20)',
   },
   {
     id: 'recomeço_02',
@@ -235,7 +237,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Lamentações 3:22-23',
     imageKey: 'aurora_manha',
     category: 'recomeço',
-    overlayColor: 'rgba(8, 40, 25, 0.42)',
+    overlayColor: 'rgba(6, 15, 8, 0.22)',
   },
   {
     id: 'amor_01',
@@ -334,7 +336,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Salmos 27:1',
     imageKey: 'horizonte_mar',
     category: 'confianca',
-    overlayColor: 'rgba(12, 28, 55, 0.40)',
+    overlayColor: 'rgba(6, 15, 25, 0.20)',
   },
   {
     id: 'confianca_02',
@@ -343,7 +345,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Salmos 37:5',
     imageKey: 'lago_sereno',
     category: 'confianca',
-    overlayColor: 'rgba(10, 25, 50, 0.42)',
+    overlayColor: 'rgba(5, 13, 22, 0.22)',
   },
   {
     id: 'alegria_01',
@@ -370,7 +372,7 @@ const CARD_POOL: KairosCard[] = [
     reference: '1 Pedro 2:9',
     imageKey: 'ceu_noite',
     category: 'proposito',
-    overlayColor: 'rgba(18, 22, 52, 0.40)',
+    overlayColor: 'rgba(3, 5, 15, 0.15)',
   },
   {
     id: 'provisao_01',
@@ -379,7 +381,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Filipenses 4:19',
     imageKey: 'janela_luz',
     category: 'fe',
-    overlayColor: 'rgba(50, 32, 8, 0.40)',
+    overlayColor: 'rgba(5, 12, 25, 0.22)',
   },
   {
     id: 'presenca_01',
@@ -388,7 +390,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Mateus 28:20',
     imageKey: 'horizonte_mar',
     category: 'confianca',
-    overlayColor: 'rgba(10, 30, 48, 0.40)',
+    overlayColor: 'rgba(6, 15, 25, 0.20)',
   },
   {
     id: 'sabedoria_01',
@@ -397,7 +399,7 @@ const CARD_POOL: KairosCard[] = [
     reference: 'Tiago 1:5',
     imageKey: 'caminho_sombra',
     category: 'direcao',
-    overlayColor: 'rgba(15, 18, 48, 0.40)',
+    overlayColor: 'rgba(35, 20, 6, 0.18)',
   },
 ];
 

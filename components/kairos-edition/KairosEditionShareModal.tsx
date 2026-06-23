@@ -46,7 +46,10 @@ export default function KairosEditionShareModal({ visible, onClose, onSelect }: 
           {OPTIONS.map((opt) => (
             <Pressable
               key={opt.dest}
-              onPress={() => onSelect(opt.dest)}
+              onPress={() => {
+                // ANALYTICS: share_destination_tapped { destination: opt.dest }
+                onSelect(opt.dest);
+              }}
               style={({ pressed }) => [styles.option, pressed && { opacity: 0.7 }]}
             >
               <View style={[styles.iconBox, { backgroundColor: opt.bg }]}>

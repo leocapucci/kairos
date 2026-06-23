@@ -2,9 +2,11 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   Pressable,
+  ScrollView,
   Share,
   StyleSheet,
   Text,
+  View,
   ViewToken,
   useWindowDimensions,
 } from 'react-native';
@@ -19,12 +21,37 @@ import KairosEditionNavigation from '../components/kairos-edition/KairosEditionN
 import KairosEditionShareModal, {
   ShareDestination,
 } from '../components/kairos-edition/KairosEditionShareModal';
-import { getDailyCollection, KairosCard } from '../data/kairosEdition';
+import { getDailyCollection, KairosCard, KairosCategory } from '../data/kairosEdition';
 import { colors } from '../theme';
 
 const HEADER_HEIGHT = 62;
 const NAV_HEIGHT = 60;
 const SHARE_AREA_HEIGHT = 66;
+
+// ─── Mapa de auditoria (DEV only) ────────────────────────────────────────────
+// Relaciona categoria → nome do arquivo de imagem real ou placeholder.
+const AUDIT_IMAGE_MAP: Record<KairosCategory, string> = {
+  fe:           'faith_master_v1.jpg',
+  esperanca:    'hope_master_v1.jpg',
+  direcao:      'direction_master_v1.jpg',
+  forca:        'strength_master_v1.jpg',
+  gratidao:     'gratitude_master_v1.jpg',
+  descanso:     'rest_master_v1.jpg',
+  confianca:    'trust_master_v1.jpg',
+  coragem:      'courage_master_v1.jpg',
+  proposito:    'purpose_master_v1.jpg',
+  'recomeço':   'new_beginning_master_v1.jpg',
+  // Placeholders (Fase 2 do lote de produção)
+  amor:         '[placeholder] kairosbackground.jpg',
+  paz:          '[placeholder] kairosbackground2.png',
+  perseveranca: '[placeholder] kairosbackground.jpg',
+  graca:        '[placeholder] kairosbackground2.png',
+  renovacao:    '[placeholder] kairosbackground.jpg',
+  cura:         '[placeholder] kairosbackground2.png',
+  vitoria:      '[placeholder] kairosbackground.jpg',
+  alegria:      '[placeholder] kairosbackground2.png',
+  especial:     '[placeholder] kairosbackground.jpg',
+};
 
 export default function KairosEditionScreen() {
   const router = useRouter();
@@ -34,6 +61,7 @@ export default function KairosEditionScreen() {
   const [shareModalVisible, setShareModalVisible] = useState(false);
   const [shareUri, setShareUri] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [auditMode, setAuditMode] = useState(false);
 
   const cards: KairosCard[] = useMemo(() => getDailyCollection(), []);
 
@@ -55,7 +83,9 @@ export default function KairosEditionScreen() {
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       if (viewableItems.length > 0 && viewableItems[0].index != null) {
-        setCurrentIndex(viewableItems[0].index);
+        const newIndex = viewableItems[0].index;
+        setCurrentIndex(newIndex);
+        // ANALYTICS: card_viewed { cardId: cards[newIndex].id, category: cards[newIndex].category, position: newIndex, date: new Date().toISOString() }
       }
     },
     [],
@@ -64,6 +94,7 @@ export default function KairosEditionScreen() {
   const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 50 });
 
   const handleSharePress = useCallback(async () => {
+    // ANALYTICS: share_initiated { cardId: cards[currentIndex].id, category: cards[currentIndex].category }
     setIsCapturing(true);
     try {
       const uri = await captureRef.current?.capture?.();
@@ -87,6 +118,7 @@ export default function KairosEditionScreen() {
     async (dest: ShareDestination) => {
       setShareModalVisible(false);
       if (!shareUri) return;
+      // ANALYTICS: share_completed { cardId: cards[currentIndex].id, category: cards[currentIndex].category, destination: dest, date: new Date().toISOString() }
       try {
         const isAvailable = await Sharing.isAvailableAsync();
         if (isAvailable) {
@@ -111,11 +143,13 @@ export default function KairosEditionScreen() {
     [shareUri, cards, currentIndex],
   );
 
+  const currentCard = cards[currentIndex];
+
   return (
     <SafeAreaView style={styles.safe}>
       <KairosEditionHeader
         onBack={() => router.back()}
-        currentTheme={cards[currentIndex]?.theme ?? ''}
+        currentTheme={currentCard?.theme ?? ''}
       />
 
       <ViewShot ref={captureRef} style={styles.listContainer}>
@@ -147,6 +181,7 @@ export default function KairosEditionScreen() {
 
       <Pressable
         onPress={handleSharePress}
+        onLongPress={__DEV__ ? () => setAuditMode((v) => !v) : undefined}
         disabled={isCapturing}
         style={({ pressed }) => [styles.shareBtn, pressed && { opacity: 0.78 }]}
       >
@@ -168,6 +203,54 @@ export default function KairosEditionScreen() {
         onClose={() => setShareModalVisible(false)}
         onSelect={handleShareSelect}
       />
+
+      {/* ─── Audit Mode (DEV only) ─────────────────────────────────────────── */}
+      {__DEV__ && auditMode && currentCard && (
+        <View style={styles.auditOverlay}>
+          <View style={styles.auditPanel}>
+            <View style={styles.auditHeader}>
+              <Text style={styles.auditTitle}>⚙ AUDIT — card {currentIndex + 1}/{cards.length}</Text>
+              <Pressable onPress={() => setAuditMode(false)}>
+                <Text style={styles.auditClose}>✕</Text>
+              </Pressable>
+            </View>
+            <ScrollView style={styles.auditScroll} showsVerticalScrollIndicator={false}>
+              <Text style={styles.auditLabel}>ID</Text>
+              <Text style={styles.auditValue}>{currentCard.id}</Text>
+
+              <Text style={styles.auditLabel}>THEME</Text>
+              <Text style={styles.auditValue}>{currentCard.theme}</Text>
+
+              <Text style={styles.auditLabel}>CATEGORY</Text>
+              <Text style={styles.auditValue}>{currentCard.category}</Text>
+
+              <Text style={styles.auditLabel}>IMAGE FILE</Text>
+              <Text style={[
+                styles.auditValue,
+                AUDIT_IMAGE_MAP[currentCard.category].startsWith('[placeholder]')
+                  ? styles.auditWarn
+                  : styles.auditOk,
+              ]}>
+                {AUDIT_IMAGE_MAP[currentCard.category]}
+              </Text>
+
+              <Text style={styles.auditLabel}>OVERLAY</Text>
+              <Text style={styles.auditValue}>{currentCard.overlayColor}</Text>
+
+              <Text style={styles.auditLabel}>FRASE</Text>
+              <Text style={styles.auditValue}>{currentCard.phrase}</Text>
+
+              <Text style={styles.auditLabel}>REFERÊNCIA</Text>
+              <Text style={styles.auditValue}>{currentCard.reference}</Text>
+
+              <View style={styles.auditDivider} />
+              <Text style={styles.auditMeta}>
+                Long press no botão de compartilhar para fechar
+              </Text>
+            </ScrollView>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -204,5 +287,74 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
     letterSpacing: 0.3,
+  },
+
+  // ─── Audit panel (DEV only) ────────────────────────────────────────────────
+  auditOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
+    pointerEvents: 'box-none',
+  },
+  auditPanel: {
+    backgroundColor: 'rgba(8, 10, 18, 0.96)',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 200, 50, 0.30)',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 24,
+    maxHeight: 340,
+  },
+  auditHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  auditTitle: {
+    color: colors.gold,
+    fontSize: 11,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1.2,
+  },
+  auditClose: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    paddingHorizontal: 4,
+  },
+  auditScroll: {
+    flex: 1,
+  },
+  auditLabel: {
+    color: 'rgba(255, 200, 50, 0.60)',
+    fontSize: 9,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1.5,
+    marginTop: 8,
+    marginBottom: 2,
+  },
+  auditValue: {
+    color: 'rgba(255,255,255,0.88)',
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 18,
+  },
+  auditOk: {
+    color: '#4ADE80',
+  },
+  auditWarn: {
+    color: '#FBBF24',
+  },
+  auditDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    marginVertical: 10,
+  },
+  auditMeta: {
+    color: 'rgba(255,255,255,0.30)',
+    fontSize: 10,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
   },
 });
